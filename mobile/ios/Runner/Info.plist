@@ -5,15 +5,15 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>YôBus</string>
+    <string>TamBour</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
-    <string>ci.yobus.app</string>
+    <string>ci.tambour.app</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>yobus</string>
+    <string>tambour</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -49,9 +49,9 @@
     </dict>
     <!-- Permission localisation GPS -->
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>YôBus utilise votre position pour trouver les gares proches de vous.</string>
+    <string>TamBour utilise votre position pour trouver les gares proches de vous.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>YôBus utilise votre position pour trouver les gares proches de vous.</string>
+    <string>TamBour utilise votre position pour trouver les gares proches de vous.</string>
     <!-- Deep links -->
     <key>CFBundleURLTypes</key>
     <array>
@@ -60,7 +60,7 @@
             <string>Editor</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>yobus</string>
+                <string>tambour</string>
             </array>
         </dict>
     </array>

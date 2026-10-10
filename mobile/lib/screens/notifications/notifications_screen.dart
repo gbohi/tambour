@@ -36,7 +36,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(
         children: [
           _Header(nbNonLues: _nbNonLues, onToutLire: _marquerToutesLues),
@@ -74,7 +74,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -103,7 +103,7 @@ class _Header extends StatelessWidget {
                       Container(
                         width: 22, height: 22,
                         decoration: const BoxDecoration(
-                          color: YoBusColors.gold,
+                          color: TamBourColors.gold,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -158,19 +158,19 @@ class _NotifCard extends StatelessWidget {
   const _NotifCard({required this.notif, required this.index, required this.onTap});
 
   Color get _iconBg => switch (notif.type) {
-    TypeNotification.confirmation => YoBusColors.primaryLight,
+    TypeNotification.confirmation => TamBourColors.primaryLight,
     TypeNotification.rappel => const Color(0xFFF0F8FF),
     TypeNotification.retard => const Color(0xFFFFF3CD),
     TypeNotification.promotion => const Color(0xFFFFF8EC),
-    TypeNotification.info => YoBusColors.surfaceVariant,
+    TypeNotification.info => TamBourColors.surfaceVariant,
   };
 
   Color get _iconColor => switch (notif.type) {
-    TypeNotification.confirmation => YoBusColors.primary,
+    TypeNotification.confirmation => TamBourColors.primary,
     TypeNotification.rappel => const Color(0xFF0066CC),
-    TypeNotification.retard => YoBusColors.warning,
-    TypeNotification.promotion => YoBusColors.gold,
-    TypeNotification.info => YoBusColors.textSecondary,
+    TypeNotification.retard => TamBourColors.warning,
+    TypeNotification.promotion => TamBourColors.gold,
+    TypeNotification.info => TamBourColors.textSecondary,
   };
 
   IconData get _icon => switch (notif.type) {
@@ -197,10 +197,10 @@ class _NotifCard extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: notif.lue ? YoBusColors.surface : YoBusColors.primaryLight,
+          color: notif.lue ? TamBourColors.surface : TamBourColors.primaryLight,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: notif.lue ? YoBusColors.border : YoBusColors.primary.withOpacity(0.2),
+            color: notif.lue ? TamBourColors.border : TamBourColors.primary.withOpacity(0.2),
             width: notif.lue ? 0.5 : 1,
           ),
         ),
@@ -229,7 +229,7 @@ class _NotifCard extends StatelessWidget {
                             fontFamily: 'Outfit',
                             fontSize: 14,
                             fontWeight: notif.lue ? FontWeight.w600 : FontWeight.w800,
-                            color: YoBusColors.textPrimary,
+                            color: TamBourColors.textPrimary,
                           ),
                         ),
                       ),
@@ -237,7 +237,7 @@ class _NotifCard extends StatelessWidget {
                         Container(
                           width: 8, height: 8,
                           decoration: const BoxDecoration(
-                            color: YoBusColors.primary,
+                            color: TamBourColors.primary,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -249,7 +249,7 @@ class _NotifCard extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 12,
-                      color: YoBusColors.textSecondary,
+                      color: TamBourColors.textSecondary,
                       height: 1.5,
                     ),
                     maxLines: 2,
@@ -261,7 +261,7 @@ class _NotifCard extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 11,
-                      color: YoBusColors.textHint,
+                      color: TamBourColors.textHint,
                     ),
                   ),
                 ],
@@ -287,11 +287,11 @@ class _Vide extends StatelessWidget {
           Container(
             width: 80, height: 80,
             decoration: BoxDecoration(
-              color: YoBusColors.primaryLight,
+              color: TamBourColors.primaryLight,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.notifications_off_rounded,
-                color: YoBusColors.primary, size: 38),
+                color: TamBourColors.primary, size: 38),
           ),
           const SizedBox(height: 20),
           const Text(
@@ -300,7 +300,7 @@ class _Vide extends StatelessWidget {
               fontFamily: 'Outfit',
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: YoBusColors.textPrimary,
+              color: TamBourColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -310,7 +310,7 @@ class _Vide extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Outfit',
               fontSize: 13,
-              color: YoBusColors.textSecondary,
+              color: TamBourColors.textSecondary,
               height: 1.5,
             ),
           ),

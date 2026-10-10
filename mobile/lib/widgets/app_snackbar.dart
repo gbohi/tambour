@@ -3,15 +3,15 @@ import '../core/theme.dart';
 
 class AppSnackbar {
   static void succes(BuildContext context, String message) {
-    _show(context, message, YoBusColors.primary, Icons.check_circle_rounded);
+    _show(context, message, TamBourColors.primary, Icons.check_circle_rounded);
   }
 
   static void erreur(BuildContext context, String message) {
-    _show(context, message, YoBusColors.error, Icons.error_outline_rounded);
+    _show(context, message, TamBourColors.error, Icons.error_outline_rounded);
   }
 
   static void info(BuildContext context, String message) {
-    _show(context, message, YoBusColors.textSecondary, Icons.info_outline_rounded);
+    _show(context, message, TamBourColors.textSecondary, Icons.info_outline_rounded);
   }
 
   static void _show(BuildContext context, String message, Color color, IconData icon) {

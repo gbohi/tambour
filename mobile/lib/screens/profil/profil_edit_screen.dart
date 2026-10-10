@@ -65,7 +65,7 @@ class _ProfilEditScreenState extends ConsumerState<ProfilEditScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Profil mis à jour avec succès',
             style: TextStyle(fontFamily: 'Outfit')),
-        backgroundColor: YoBusColors.primary,
+        backgroundColor: TamBourColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ));
@@ -78,7 +78,7 @@ class _ProfilEditScreenState extends ConsumerState<ProfilEditScreen> {
     final user = authState.user;
 
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(
         children: [
           _Header(
@@ -102,13 +102,13 @@ class _ProfilEditScreenState extends ConsumerState<ProfilEditScreen> {
                           Container(
                             width: 88, height: 88,
                             decoration: BoxDecoration(
-                              color: YoBusColors.gold,
+                              color: TamBourColors.gold,
                               shape: BoxShape.circle,
-                              border: Border.all(color: YoBusColors.primary.withOpacity(0.2), width: 3),
+                              border: Border.all(color: TamBourColors.primary.withOpacity(0.2), width: 3),
                             ),
                             child: Center(
                               child: Text(
-                                user?.initiales ?? 'YB',
+                                user?.initiales ?? 'TB',
                                 style: const TextStyle(fontFamily: 'Outfit', fontSize: 30, fontWeight: FontWeight.w900, color: Colors.white),
                               ),
                             ),
@@ -119,7 +119,7 @@ class _ProfilEditScreenState extends ConsumerState<ProfilEditScreen> {
                               onTap: () {},
                               child: Container(
                                 width: 28, height: 28,
-                                decoration: BoxDecoration(color: YoBusColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                                decoration: BoxDecoration(color: TamBourColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
                                 child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
                               ),
                             ),
@@ -164,8 +164,8 @@ class _ProfilEditScreenState extends ConsumerState<ProfilEditScreen> {
                     _BoutonAction(icon: Icons.phone_android_rounded, label: 'Vérification en deux étapes',
                       trailing: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(6)),
-                        child: const Text('Activé', style: TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w700, color: YoBusColors.primary)),
+                        decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(6)),
+                        child: const Text('Activé', style: TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w700, color: TamBourColors.primary)),
                       ),
                       onTap: () {}).animate().fadeIn(delay: 240.ms),
 
@@ -212,7 +212,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -229,7 +229,7 @@ class _Header extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: aModifications ? YoBusColors.gold : Colors.white.withOpacity(0.2),
+                      color: aModifications ? TamBourColors.gold : Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: estChargement
@@ -253,9 +253,9 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Container(width: 30, height: 30, decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: YoBusColors.primary, size: 16)),
+      Container(width: 30, height: 30, decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: TamBourColors.primary, size: 16)),
       const SizedBox(width: 10),
-      Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+      Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
     ]);
   }
 }
@@ -273,22 +273,22 @@ class _ProfilField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: YoBusColors.textSecondary)),
+      Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
       const SizedBox(height: 6),
       TextFormField(
         controller: controller, validator: validator, keyboardType: keyboardType, textCapitalization: textCapitalization,
-        style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, color: YoBusColors.textPrimary, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, color: TamBourColors.textPrimary, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          prefixIcon: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Icon(icone, size: 18, color: YoBusColors.textHint)),
+          prefixIcon: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Icon(icone, size: 18, color: TamBourColors.textHint)),
           prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-          filled: true, fillColor: YoBusColors.surfaceVariant,
+          filled: true, fillColor: TamBourColors.surfaceVariant,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.primary, width: 2)),
-          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 1.5)),
-          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 2)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 1.5)),
+          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 2)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.error))),
+          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error))),
     ]);
   }
 }
@@ -299,24 +299,24 @@ class _TelField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Téléphone', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: YoBusColors.textSecondary)),
+      const Text('Téléphone', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
       const SizedBox(height: 6),
       TextFormField(
         controller: controller, keyboardType: TextInputType.phone,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-        style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, color: YoBusColors.textPrimary, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, color: TamBourColors.textPrimary, fontWeight: FontWeight.w500),
         validator: (v) { if (v == null || v.trim().isEmpty) return 'Téléphone requis'; if (v.trim().length < 10) return 'Numéro à 10 chiffres'; return null; },
         decoration: InputDecoration(
-          prefixIcon: Container(margin: const EdgeInsets.fromLTRB(12,8,0,8), padding: const EdgeInsets.symmetric(horizontal: 10), decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(8)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Text('🇨🇮', style: TextStyle(fontSize: 16)), SizedBox(width: 5), Text('+225', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: YoBusColors.primary))])),
+          prefixIcon: Container(margin: const EdgeInsets.fromLTRB(12,8,0,8), padding: const EdgeInsets.symmetric(horizontal: 10), decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(8)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Text('🇨🇮', style: TextStyle(fontSize: 16)), SizedBox(width: 5), Text('+225', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: TamBourColors.primary))])),
           prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-          filled: true, fillColor: YoBusColors.surfaceVariant,
+          filled: true, fillColor: TamBourColors.surfaceVariant,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.primary, width: 2)),
-          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 1.5)),
-          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 2)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 1.5)),
+          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 2)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.error))),
+          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error))),
     ]);
   }
 }
@@ -330,13 +330,13 @@ class _BoutonAction extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(color: YoBusColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: YoBusColors.border, width: 0.5)),
+        decoration: BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: TamBourColors.border, width: 0.5)),
         child: Row(children: [
-          Container(width: 34, height: 34, decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(9)), child: Icon(icon, color: YoBusColors.primary, size: 17)),
+          Container(width: 34, height: 34, decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(9)), child: Icon(icon, color: TamBourColors.primary, size: 17)),
           const SizedBox(width: 12),
-          Expanded(child: Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w500, color: YoBusColors.textPrimary))),
+          Expanded(child: Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w500, color: TamBourColors.textPrimary))),
           if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
-          const Icon(Icons.chevron_right_rounded, color: YoBusColors.textHint, size: 20),
+          const Icon(Icons.chevron_right_rounded, color: TamBourColors.textHint, size: 20),
         ]),
       ),
     );
@@ -358,12 +358,12 @@ class _ToggleState extends State<_Toggle> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: YoBusColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: YoBusColors.border, width: 0.5)),
+      decoration: BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: TamBourColors.border, width: 0.5)),
       child: Row(children: [
-        Container(width: 34, height: 34, decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(9)), child: Icon(widget.icon, color: YoBusColors.primary, size: 17)),
+        Container(width: 34, height: 34, decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(9)), child: Icon(widget.icon, color: TamBourColors.primary, size: 17)),
         const SizedBox(width: 12),
-        Expanded(child: Text(widget.label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w500, color: YoBusColors.textPrimary))),
-        Switch(value: _val, onChanged: (v) { setState(() => _val = v); widget.onChanged(v); }, activeColor: YoBusColors.primary, activeTrackColor: YoBusColors.primary.withOpacity(0.3)),
+        Expanded(child: Text(widget.label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w500, color: TamBourColors.textPrimary))),
+        Switch(value: _val, onChanged: (v) { setState(() => _val = v); widget.onChanged(v); }, activeColor: TamBourColors.primary, activeTrackColor: TamBourColors.primary.withOpacity(0.3)),
       ]),
     );
   }
@@ -374,28 +374,28 @@ class _ZoneDanger extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: YoBusColors.error.withOpacity(0.04), borderRadius: BorderRadius.circular(14), border: Border.all(color: YoBusColors.error.withOpacity(0.2), width: 0.5)),
+      decoration: BoxDecoration(color: TamBourColors.error.withOpacity(0.04), borderRadius: BorderRadius.circular(14), border: Border.all(color: TamBourColors.error.withOpacity(0.2), width: 0.5)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Zone de danger', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: YoBusColors.error)),
+        const Text('Zone de danger', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: TamBourColors.error)),
         const SizedBox(height: 10),
         GestureDetector(
           onTap: () => showDialog(context: context, builder: (_) => AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: const Text('Supprimer le compte ?', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w800)),
-            content: const Text('Cette action est irréversible. Tous vos billets seront supprimés.', style: TextStyle(fontFamily: 'Outfit', color: YoBusColors.textSecondary)),
+            content: const Text('Cette action est irréversible. Tous vos billets seront supprimés.', style: TextStyle(fontFamily: 'Outfit', color: TamBourColors.textSecondary)),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler', style: TextStyle(fontFamily: 'Outfit', color: YoBusColors.textSecondary))),
-              ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: YoBusColors.error, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))), child: const Text('Supprimer', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w700))),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler', style: TextStyle(fontFamily: 'Outfit', color: TamBourColors.textSecondary))),
+              ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: TamBourColors.error, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))), child: const Text('Supprimer', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w700))),
             ],
           )),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(color: YoBusColors.error.withOpacity(0.08), borderRadius: BorderRadius.circular(10), border: Border.all(color: YoBusColors.error.withOpacity(0.3), width: 0.5)),
+            decoration: BoxDecoration(color: TamBourColors.error.withOpacity(0.08), borderRadius: BorderRadius.circular(10), border: Border.all(color: TamBourColors.error.withOpacity(0.3), width: 0.5)),
             child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.delete_outline_rounded, color: YoBusColors.error, size: 18),
+              Icon(Icons.delete_outline_rounded, color: TamBourColors.error, size: 18),
               SizedBox(width: 8),
-              Text('Supprimer mon compte', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.error)),
+              Text('Supprimer mon compte', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.error)),
             ]),
           ),
         ),
@@ -424,14 +424,14 @@ class _ChangeMdpSheetState extends State<_ChangeMdpSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
-        decoration: const BoxDecoration(color: YoBusColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        decoration: const BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         child: Form(
           key: _formKey,
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: YoBusColors.border, borderRadius: BorderRadius.circular(2)))),
+            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: TamBourColors.border, borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 20),
-            const Text('Changer le mot de passe', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: YoBusColors.textPrimary)),
+            const Text('Changer le mot de passe', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: TamBourColors.textPrimary)),
             const SizedBox(height: 20),
             _MdpField(controller: _actuelCtrl, label: 'Mot de passe actuel', visible: _visible, onToggle: () => setState(() => _visible = !_visible), validator: (v) => v == null || v.isEmpty ? 'Requis' : null),
             const SizedBox(height: 12),
@@ -441,7 +441,7 @@ class _ChangeMdpSheetState extends State<_ChangeMdpSheet> {
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, height: 52, child: ElevatedButton(
               onPressed: () { if (_formKey.currentState!.validate()) Navigator.pop(context); },
-              style: ElevatedButton.styleFrom(backgroundColor: YoBusColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0, textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700)),
+              style: ElevatedButton.styleFrom(backgroundColor: TamBourColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0, textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700)),
               child: const Text('Modifier le mot de passe'))),
           ]),
         ),
@@ -457,18 +457,18 @@ class _MdpField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller, obscureText: !visible, validator: validator,
-      style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, color: YoBusColors.textPrimary),
+      style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, color: TamBourColors.textPrimary),
       decoration: InputDecoration(
-        labelText: label, labelStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, color: YoBusColors.textSecondary),
-        suffixIcon: IconButton(icon: Icon(visible ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: YoBusColors.textHint, size: 20), onPressed: onToggle),
-        filled: true, fillColor: YoBusColors.surfaceVariant,
+        labelText: label, labelStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.textSecondary),
+        suffixIcon: IconButton(icon: Icon(visible ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: TamBourColors.textHint, size: 20), onPressed: onToggle),
+        filled: true, fillColor: TamBourColors.surfaceVariant,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.primary, width: 2)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 1.5)),
-        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 2)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 1.5)),
+        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 2)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.error)),
+        errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error)),
     );
   }
 }

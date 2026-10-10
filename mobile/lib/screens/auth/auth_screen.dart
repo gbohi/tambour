@@ -19,11 +19,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(
         children: [
           Container(
-            color: YoBusColors.primary,
+            color: TamBourColors.primary,
             child: SafeArea(
               bottom: false,
               child: Column(children: [
@@ -31,8 +31,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: Column(children: [
                     RichText(text: const TextSpan(children: [
-                      TextSpan(text: 'Yô', style: TextStyle(fontFamily: 'Outfit', fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white)),
-                      TextSpan(text: 'Bus', style: TextStyle(fontFamily: 'Outfit', fontSize: 36, fontWeight: FontWeight.w900, color: YoBusColors.gold)),
+                      TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit', fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white)),
+                      TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit', fontSize: 36, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
                     ])).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
                     const SizedBox(height: 6),
                     Text("Voyagez serein à travers la Côte d'Ivoire",
@@ -42,7 +42,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   ])),
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: YoBusColors.gold, indicatorWeight: 3,
+                  indicatorColor: TamBourColors.gold, indicatorWeight: 3,
                   labelColor: Colors.white, unselectedLabelColor: Colors.white54,
                   labelStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700),
                   unselectedLabelStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 15),

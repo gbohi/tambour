@@ -9,9 +9,9 @@ import { ApiResponse } from '../models/api.model';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly API = environment.apiUrl;
-  private readonly ACCESS_KEY  = 'yobus_access';
-  private readonly REFRESH_KEY = 'yobus_refresh';
-  private readonly USER_KEY    = 'yobus_user';
+  private readonly ACCESS_KEY  = 'tambour_access';
+  private readonly REFRESH_KEY = 'tambour_refresh';
+  private readonly USER_KEY    = 'tambour_user';
 
   private _user    = signal<User | null>(this.loadUser());
   private _loading = signal(false);

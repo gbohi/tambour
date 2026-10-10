@@ -60,7 +60,7 @@ export class TopbarComponent {
   private router = inject(Router);
   menuOpen = signal(false);
   nbNotifs = signal(0);
-  pageTitle = signal('YôBus Admin');
+  pageTitle = signal('TamBour Admin');
 
   private readonly TITLES: Record<string, string> = {
     '/dashboard': 'Tableau de bord', '/voyageurs': 'Voyageurs',
@@ -74,7 +74,7 @@ export class TopbarComponent {
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: unknown) => {
       const nav = e as NavigationEnd;
       const seg = '/' + (nav.urlAfterRedirects.split('/')[1] ?? '');
-      this.pageTitle.set(this.TITLES[seg] ?? 'YôBus Admin');
+      this.pageTitle.set(this.TITLES[seg] ?? 'TamBour Admin');
       this.menuOpen.set(false);
     });
     this.loadNotifs();

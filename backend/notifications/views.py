@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from .models import Notification, TokenPush
 from .serializers import NotificationSerializer, MarquerLueSerializer, TokenPushSerializer
 from authentication.permissions import EstAdminOuSupport
-from yobus_backend.utils import success_response, error_response
+from tambour_backend.utils import success_response, error_response
 
 
 class NotificationsView(APIView):

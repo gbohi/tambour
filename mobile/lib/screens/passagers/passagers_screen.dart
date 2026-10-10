@@ -8,7 +8,7 @@ import '../../models/passager.dart';
 import '../../models/trajet.dart';
 import '../../providers/passager_provider.dart';
 import '../../providers/recherche_provider.dart';
-import '../../providers/siege_provider.dart';
+import '../../models/siege.dart';
 import '../paiement/paiement_screen.dart';
 
 class PassagersScreen extends ConsumerStatefulWidget {
@@ -21,17 +21,19 @@ class PassagersScreen extends ConsumerStatefulWidget {
 
 class _PassagersScreenState extends ConsumerState<PassagersScreen> {
   late final List<PassagerForm> _forms;
+  late final List<String> _sieges;
   late final PageController _pageController;
   int _pageActuelle = 0;
 
   @override
   void initState() {
     super.initState();
-    final sieges = ref.read(siegeProvider).selection;
-    _forms = List.generate(sieges.length, (_) => PassagerForm());
+    // Sièges attribués automatiquement parmi les places disponibles
+    _sieges = Siege.attribuerAuto(widget.params.nbPassagers, siegesOccupes: Siege.mockOccupes());
+    _forms = List.generate(_sieges.length, (_) => PassagerForm());
     _pageController = PageController();
     Future.microtask(
-      () => ref.read(passagerProvider.notifier).initialiser(sieges));
+      () => ref.read(passagerProvider.notifier).initialiser(_sieges));
   }
 
   @override
@@ -58,7 +60,7 @@ class _PassagersScreenState extends ConsumerState<PassagersScreen> {
 
   void _sauvegarder(int index) {
     final f = _forms[index];
-    final sieges = ref.read(siegeProvider).selection;
+    final sieges = _sieges;
     ref.read(passagerProvider.notifier).mettreAJour(index, Passager(
       prenom:    f.prenomCtrl.text.trim(),
       nom:       f.nomCtrl.text.trim(),
@@ -74,9 +76,9 @@ class _PassagersScreenState extends ConsumerState<PassagersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sieges = ref.watch(siegeProvider).selection;
+    final sieges = _sieges;
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(children: [
         _Header(
           nbPassagers: sieges.length,
@@ -97,7 +99,7 @@ class _PassagersScreenState extends ConsumerState<PassagersScreen> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: sieges.length,
           itemBuilder: (_, i) => _FormPage(
-            index: i, siegeId: sieges[i],
+            index: i,
             form: _forms[i], nbTotal: sieges.length,
             estPremier: i == 0,
           ))),
@@ -118,7 +120,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: SafeArea(bottom: false, child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 8, 20, 20),
         child: Row(children: [
@@ -150,14 +152,14 @@ class _StepBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.surface,
+      color: TamBourColors.surface,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: List.generate(total, (i) => Expanded(child: Row(children: [
           Expanded(child: AnimatedContainer(
             duration: const Duration(milliseconds: 300), height: 4,
             decoration: BoxDecoration(
-              color: i <= actif ? YoBusColors.primary : YoBusColors.border,
+              color: i <= actif ? TamBourColors.primary : TamBourColors.border,
               borderRadius: BorderRadius.circular(2)))),
           if (i < total - 1) const SizedBox(width: 4),
           AnimatedContainer(
@@ -165,9 +167,9 @@ class _StepBar extends StatelessWidget {
             width: i == actif ? 26 : 20,
             height: i == actif ? 26 : 20,
             decoration: BoxDecoration(
-              color: i < actif ? YoBusColors.primary
-                : i == actif ? YoBusColors.primary
-                : YoBusColors.border,
+              color: i < actif ? TamBourColors.primary
+                : i == actif ? TamBourColors.primary
+                : TamBourColors.border,
               shape: BoxShape.circle),
             child: Center(child: i < actif
               ? const Icon(Icons.check_rounded, color: Colors.white, size: 12)
@@ -175,7 +177,7 @@ class _StepBar extends StatelessWidget {
                   fontFamily: 'Outfit',
                   fontSize: i == actif ? 11 : 9,
                   fontWeight: FontWeight.w700,
-                  color: i == actif ? Colors.white : YoBusColors.textHint)))),
+                  color: i == actif ? Colors.white : TamBourColors.textHint)))),
           if (i < total - 1) const SizedBox(width: 4),
         ]))),
       ),
@@ -195,28 +197,28 @@ class _RecapTrajet extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: YoBusColors.primaryLight,
+        color: TamBourColors.primaryLight,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: YoBusColors.primary.withOpacity(0.2))),
+        border: Border.all(color: TamBourColors.primary.withOpacity(0.2))),
       child: Row(children: [
         Container(width: 36, height: 36,
           decoration: BoxDecoration(
-            color: YoBusColors.primary, borderRadius: BorderRadius.circular(10)),
+            color: TamBourColors.primary, borderRadius: BorderRadius.circular(10)),
           child: const Icon(Icons.directions_bus_rounded, color: Colors.white, size: 20)),
         const SizedBox(width: 10),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Text(trajet.depart.nom, style: const TextStyle(
               fontFamily: 'Outfit', fontSize: 13,
-              fontWeight: FontWeight.w700, color: YoBusColors.primaryDark)),
+              fontWeight: FontWeight.w700, color: TamBourColors.primaryDark)),
             const Padding(padding: EdgeInsets.symmetric(horizontal: 4),
-              child: Icon(Icons.arrow_forward_rounded, size: 12, color: YoBusColors.primary)),
+              child: Icon(Icons.arrow_forward_rounded, size: 12, color: TamBourColors.primary)),
             Text(trajet.arrivee.nom, style: const TextStyle(
               fontFamily: 'Outfit', fontSize: 13,
-              fontWeight: FontWeight.w700, color: YoBusColors.primaryDark)),
+              fontWeight: FontWeight.w700, color: TamBourColors.primaryDark)),
           ]),
           Text('${DateFormat('HH:mm').format(trajet.heureDepart)} · ${trajet.compagnie}',
-            style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.primary)),
+            style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.primary)),
         ]),
       ]),
     );
@@ -227,10 +229,9 @@ class _RecapTrajet extends StatelessWidget {
 
 class _FormPage extends StatefulWidget {
   final int index, nbTotal;
-  final String siegeId;
   final PassagerForm form;
   final bool estPremier;  // Premier passager = le payeur, reçoit tous les billets
-  const _FormPage({required this.index, required this.siegeId,
+  const _FormPage({required this.index,
     required this.form, required this.nbTotal, required this.estPremier});
   @override
   State<_FormPage> createState() => _FormPageState();
@@ -250,7 +251,7 @@ class _FormPageState extends State<_FormPage> {
           Row(children: [
             Container(width: 44, height: 44,
               decoration: const BoxDecoration(
-                color: YoBusColors.primary, shape: BoxShape.circle),
+                color: TamBourColors.primary, shape: BoxShape.circle),
               child: Center(child: Text('${widget.index + 1}', style: const TextStyle(
                 fontFamily: 'Outfit', fontSize: 18,
                 fontWeight: FontWeight.w800, color: Colors.white)))),
@@ -261,19 +262,12 @@ class _FormPageState extends State<_FormPage> {
                   ? 'Passager ${widget.index + 1} sur ${widget.nbTotal}'
                   : 'Informations du passager',
                 style: const TextStyle(fontFamily: 'Outfit', fontSize: 15,
-                  fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+                  fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
               const SizedBox(height: 3),
-              Text('Siège ${widget.siegeId} assigné', style: const TextStyle(
+              const Text('Siège attribué automatiquement', style: TextStyle(
                 fontFamily: 'Outfit', fontSize: 12,
-                color: YoBusColors.primary, fontWeight: FontWeight.w500)),
+                color: TamBourColors.primary, fontWeight: FontWeight.w500)),
             ])),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(20)),
-              child: Text('Siège ${widget.siegeId}', style: const TextStyle(
-                fontFamily: 'Outfit', fontSize: 12,
-                fontWeight: FontWeight.w700, color: YoBusColors.primary))),
           ]).animate().fadeIn(duration: 300.ms),
 
           const SizedBox(height: 20),
@@ -303,12 +297,12 @@ class _FormPageState extends State<_FormPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: YoBusColors.goldLight,
+                color: TamBourColors.goldLight,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: YoBusColors.gold.withOpacity(0.3))),
+                border: Border.all(color: TamBourColors.gold.withOpacity(0.3))),
               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 const Icon(Icons.info_outline_rounded,
-                  size: 16, color: YoBusColors.gold),
+                  size: 16, color: TamBourColors.gold),
                 const SizedBox(width: 8),
                 Expanded(child: Text(
                   'En tant que 1er passager, vous recevrez tous les billets '
@@ -324,15 +318,15 @@ class _FormPageState extends State<_FormPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: YoBusColors.surfaceVariant,
+              color: TamBourColors.surfaceVariant,
               borderRadius: BorderRadius.circular(10)),
             child: const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(Icons.lock_outline_rounded, size: 14, color: YoBusColors.textHint),
+              Icon(Icons.lock_outline_rounded, size: 14, color: TamBourColors.textHint),
               SizedBox(width: 8),
               Expanded(child: Text(
                 'Vos informations sont protégées et utilisées uniquement pour ce voyage.',
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 12,
-                  color: YoBusColors.textSecondary, height: 1.4))),
+                  color: TamBourColors.textSecondary, height: 1.4))),
             ])),
         ]),
       ),
@@ -346,13 +340,13 @@ class _FormPageState extends State<_FormPage> {
     TextCapitalization cap, [List<TextInputFormatter>? formatters]) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13,
-        fontWeight: FontWeight.w600, color: YoBusColors.textSecondary)),
+        fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
       const SizedBox(height: 6),
       TextFormField(
         controller: ctrl, validator: validator,
         textCapitalization: cap, inputFormatters: formatters,
         style: const TextStyle(fontFamily: 'Outfit', fontSize: 15,
-          color: YoBusColors.textPrimary, fontWeight: FontWeight.w500),
+          color: TamBourColors.textPrimary, fontWeight: FontWeight.w500),
         decoration: _deco(hint, icon)),
     ]);
   }
@@ -361,7 +355,7 @@ class _FormPageState extends State<_FormPage> {
   Widget _telField() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Téléphone *', style: TextStyle(fontFamily: 'Outfit', fontSize: 13,
-        fontWeight: FontWeight.w600, color: YoBusColors.textSecondary)),
+        fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
       const SizedBox(height: 6),
       TextFormField(
         controller: widget.form.telephoneCtrl,
@@ -370,7 +364,7 @@ class _FormPageState extends State<_FormPage> {
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(10)],
         style: const TextStyle(fontFamily: 'Outfit', fontSize: 15,
-          color: YoBusColors.textPrimary, fontWeight: FontWeight.w500),
+          color: TamBourColors.textPrimary, fontWeight: FontWeight.w500),
         validator: (v) {
           if (v == null || v.trim().isEmpty) return 'Téléphone requis';
           if (v.trim().length < 10) return 'Numéro à 10 chiffres';
@@ -381,25 +375,25 @@ class _FormPageState extends State<_FormPage> {
             margin: const EdgeInsets.fromLTRB(12, 8, 0, 8),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: YoBusColors.primaryLight,
+              color: TamBourColors.primaryLight,
               borderRadius: BorderRadius.circular(7)),
             child: const Row(mainAxisSize: MainAxisSize.min, children: [
               Text('🇨🇮', style: TextStyle(fontSize: 14)),
               SizedBox(width: 4),
               Text('+225', style: TextStyle(fontFamily: 'Outfit', fontSize: 12,
-                fontWeight: FontWeight.w700, color: YoBusColors.primary)),
+                fontWeight: FontWeight.w700, color: TamBourColors.primary)),
             ])),
           prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
           hintText: '07 00 00 00 00',
-          filled: true, fillColor: YoBusColors.surfaceVariant,
+          filled: true, fillColor: TamBourColors.surfaceVariant,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.primary, width: 2)),
-          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 1.5)),
-          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 2)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 1.5)),
+          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 2)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textHint),
-          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.error))),
+          hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textHint),
+          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error))),
     ]);
   }
 
@@ -408,23 +402,23 @@ class _FormPageState extends State<_FormPage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         const Text('Email', style: TextStyle(fontFamily: 'Outfit', fontSize: 13,
-          fontWeight: FontWeight.w600, color: YoBusColors.textSecondary)),
+          fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
         const SizedBox(width: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
           decoration: BoxDecoration(
-            color: YoBusColors.surfaceVariant,
+            color: TamBourColors.surfaceVariant,
             borderRadius: BorderRadius.circular(6)),
           child: const Text('Facultatif', style: TextStyle(
             fontFamily: 'Outfit', fontSize: 10,
-            fontWeight: FontWeight.w600, color: YoBusColors.textHint))),
+            fontWeight: FontWeight.w600, color: TamBourColors.textHint))),
       ]),
       const SizedBox(height: 6),
       TextFormField(
         controller: widget.form.emailCtrl,
         keyboardType: TextInputType.emailAddress,
         style: const TextStyle(fontFamily: 'Outfit', fontSize: 15,
-          color: YoBusColors.textPrimary, fontWeight: FontWeight.w500),
+          color: TamBourColors.textPrimary, fontWeight: FontWeight.w500),
         validator: (v) {
           if (v == null || v.trim().isEmpty) return null; // facultatif
           if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(v.trim()))
@@ -435,17 +429,17 @@ class _FormPageState extends State<_FormPage> {
           hintText: 'ex: kouassi@email.com (envoi du billet)',
           prefixIcon: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Icon(Icons.email_outlined, size: 16, color: YoBusColors.textHint)),
+            child: Icon(Icons.email_outlined, size: 16, color: TamBourColors.textHint)),
           prefixIconConstraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-          filled: true, fillColor: YoBusColors.surfaceVariant,
+          filled: true, fillColor: TamBourColors.surfaceVariant,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.primary, width: 2)),
-          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 1.5)),
-          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 2)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 1.5)),
+          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 2)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, color: YoBusColors.textHint),
-          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.error))),
+          hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.textHint),
+          errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error))),
     ]);
   }
 
@@ -453,17 +447,17 @@ class _FormPageState extends State<_FormPage> {
     hintText: hint,
     prefixIcon: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Icon(icon, size: 16, color: YoBusColors.textHint)),
+      child: Icon(icon, size: 16, color: TamBourColors.textHint)),
     prefixIconConstraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-    filled: true, fillColor: YoBusColors.surfaceVariant,
+    filled: true, fillColor: TamBourColors.surfaceVariant,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.primary, width: 2)),
-    errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 1.5)),
-    focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: YoBusColors.error, width: 2)),
+    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+    errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 1.5)),
+    focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: TamBourColors.error, width: 2)),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textHint),
-    errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.error));
+    hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textHint),
+    errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error));
 }
 
 // ── Bouton bas ────────────────────────────────────────────────────────────────
@@ -478,8 +472,8 @@ class _Bottom extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: YoBusColors.surface,
-        border: Border(top: BorderSide(color: YoBusColors.border, width: 0.5))),
+        color: TamBourColors.surface,
+        border: Border(top: BorderSide(color: TamBourColors.border, width: 0.5))),
       child: SafeArea(top: false, child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
         child: SizedBox(width: double.infinity, height: 54,
@@ -492,7 +486,7 @@ class _Bottom extends StatelessWidget {
               ? 'Continuer vers le paiement'
               : 'Passager suivant'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: YoBusColors.primary,
+              backgroundColor: TamBourColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               elevation: 0,

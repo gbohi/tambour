@@ -24,22 +24,22 @@ class MarqueurGare extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           width: taille, height: taille,
           decoration: BoxDecoration(
-            color: estSelectionne || gare.estPrincipale ? YoBusColors.primary : YoBusColors.surface,
+            color: estSelectionne || gare.estPrincipale ? TamBourColors.primary : TamBourColors.surface,
             shape: BoxShape.circle,
-            border: Border.all(color: YoBusColors.primary, width: estSelectionne ? 3 : 2),
+            border: Border.all(color: TamBourColors.primary, width: estSelectionne ? 3 : 2),
             boxShadow: [BoxShadow(
-              color: YoBusColors.primary.withOpacity(estSelectionne ? 0.4 : 0.2),
+              color: TamBourColors.primary.withOpacity(estSelectionne ? 0.4 : 0.2),
               blurRadius: estSelectionne ? 12 : 6, offset: const Offset(0, 3))]),
           child: Center(child: Icon(Icons.directions_bus_rounded,
             size: estSelectionne ? 22 : 18,
-            color: estSelectionne || gare.estPrincipale ? Colors.white : YoBusColors.primary))),
-        Container(width: 2.5, height: 8, color: YoBusColors.primary),
-        Container(width: 7, height: 7, decoration: const BoxDecoration(color: YoBusColors.primary, shape: BoxShape.circle)),
+            color: estSelectionne || gare.estPrincipale ? Colors.white : TamBourColors.primary))),
+        Container(width: 2.5, height: 8, color: TamBourColors.primary),
+        Container(width: 7, height: 7, decoration: const BoxDecoration(color: TamBourColors.primary, shape: BoxShape.circle)),
         if (estSelectionne)
           Container(
             margin: const EdgeInsets.only(top: 2),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: YoBusColors.primary, borderRadius: BorderRadius.circular(5)),
+            decoration: BoxDecoration(color: TamBourColors.primary, borderRadius: BorderRadius.circular(5)),
             child: Text(gare.ville, style: const TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white))),
       ]),
     );

@@ -4,8 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../models/ligne_populaire.dart';
 import '../../models/ville.dart';
+import '../../providers/ligne_provider.dart';
 import '../../providers/recherche_provider.dart';
+import '../../widgets/ligne_card.dart';
+import '../../widgets/section_header.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +23,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
@@ -76,7 +80,7 @@ class _GreenBackground extends StatelessWidget {
         Container(
           height: 340,
           decoration: const BoxDecoration(
-            color: YoBusColors.primary,
+            color: TamBourColors.primary,
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(36),
               bottomRight: Radius.circular(36),
@@ -85,9 +89,9 @@ class _GreenBackground extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(top: -40, right: -40, child: Container(width: 180, height: 180,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: YoBusColors.primaryDark.withOpacity(0.5)))),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: TamBourColors.primaryDark.withOpacity(0.5)))),
               Positioned(top: 60, right: 20, child: Container(width: 80, height: 80,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: YoBusColors.gold.withOpacity(0.15)))),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: TamBourColors.gold.withOpacity(0.15)))),
             ],
           ),
         ),
@@ -107,8 +111,8 @@ class _TopBar extends StatelessWidget {
         children: [
           RichText(
             text: const TextSpan(children: [
-              TextSpan(text: 'Yô', style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
-              TextSpan(text: 'Bus', style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w900, color: YoBusColors.gold)),
+              TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
+              TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
             ]),
           ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.2, end: 0),
           const Spacer(),
@@ -186,7 +190,7 @@ class _SearchCardState extends ConsumerState<_SearchCard> {
       context: context, initialDate: _date,
       firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)),
       builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: YoBusColors.primary, onPrimary: Colors.white)),
+        data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: TamBourColors.primary, onPrimary: Colors.white)),
         child: child!));
     if (picked != null) setState(() => _date = picked);
   }
@@ -204,14 +208,14 @@ class _SearchCardState extends ConsumerState<_SearchCard> {
     if (_villeDepart == null || _villeArrivee == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Veuillez choisir votre départ et arrivée'),
-        backgroundColor: YoBusColors.primary, behavior: SnackBarBehavior.floating,
+        backgroundColor: TamBourColors.primary, behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
       return;
     }
     if (_villeDepart!.id == _villeArrivee!.id) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Départ et arrivée doivent être différents'),
-        backgroundColor: YoBusColors.error, behavior: SnackBarBehavior.floating,
+        backgroundColor: TamBourColors.error, behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
       return;
     }
@@ -226,7 +230,7 @@ class _SearchCardState extends ConsumerState<_SearchCard> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: YoBusColors.surface, borderRadius: BorderRadius.circular(24),
+          color: TamBourColors.surface, borderRadius: BorderRadius.circular(24),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.10), blurRadius: 24, offset: const Offset(0, 8))]),
         child: Column(
           children: [
@@ -236,9 +240,9 @@ class _SearchCardState extends ConsumerState<_SearchCard> {
                 children: [
                   Column(
                     children: [
-                      _VilleField(label: 'Départ', icon: Icons.radio_button_checked_rounded, iconColor: YoBusColors.primary, ville: _villeDepart, onTap: () => _pickVille(true)),
+                      _VilleField(label: 'Départ', icon: Icons.radio_button_checked_rounded, iconColor: TamBourColors.primary, ville: _villeDepart, onTap: () => _pickVille(true)),
                       _RouteLine(),
-                      _VilleField(label: 'Arrivée', icon: Icons.location_on_rounded, iconColor: YoBusColors.gold, ville: _villeArrivee, onTap: () => _pickVille(false)),
+                      _VilleField(label: 'Arrivée', icon: Icons.location_on_rounded, iconColor: TamBourColors.gold, ville: _villeArrivee, onTap: () => _pickVille(false)),
                     ],
                   ),
                   Positioned(right: 0, top: 0, bottom: 0, child: Center(child: _SwapButton(onTap: _swap))),
@@ -265,7 +269,7 @@ class _SearchCardState extends ConsumerState<_SearchCard> {
                 icon: const Icon(Icons.search_rounded, size: 20),
                 label: const Text('Rechercher un trajet'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: YoBusColors.primary, foregroundColor: Colors.white,
+                  backgroundColor: TamBourColors.primary, foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 54),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0, textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700))),
@@ -290,7 +294,7 @@ class _VilleField extends StatelessWidget {
       onTap: onTap, borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 64, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(color: YoBusColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
         child: Row(
           children: [
             Container(width: 36, height: 36,
@@ -298,16 +302,16 @@ class _VilleField extends StatelessWidget {
               child: Icon(icon, color: iconColor, size: 18)),
             const SizedBox(width: 12),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textHint, fontWeight: FontWeight.w500)),
+              Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
               const SizedBox(height: 2),
               Text(ville?.nom ?? 'Choisir une ville', style: TextStyle(fontFamily: 'Outfit', fontSize: 15,
                 fontWeight: ville != null ? FontWeight.w700 : FontWeight.w400,
-                color: ville != null ? YoBusColors.textPrimary : YoBusColors.textHint)),
+                color: ville != null ? TamBourColors.textPrimary : TamBourColors.textHint)),
             ])),
             if (ville != null) Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(6)),
-              child: Text(ville!.region.split(' ').first, style: const TextStyle(fontFamily: 'Outfit', fontSize: 10, color: YoBusColors.primary, fontWeight: FontWeight.w600))),
+              decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(6)),
+              child: Text(ville!.region.split(' ').first, style: const TextStyle(fontFamily: 'Outfit', fontSize: 10, color: TamBourColors.primary, fontWeight: FontWeight.w600))),
           ],
         ),
       ),
@@ -318,7 +322,7 @@ class _VilleField extends StatelessWidget {
 class _RouteLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(height: 8, child: Row(children: [const SizedBox(width: 29), Container(width: 2, height: 8, color: YoBusColors.border)]));
+    return SizedBox(height: 8, child: Row(children: [const SizedBox(width: 29), Container(width: 2, height: 8, color: TamBourColors.border)]));
   }
 }
 
@@ -349,8 +353,8 @@ class _SwapButtonState extends State<_SwapButton> with SingleTickerProviderState
         animation: _rotation,
         builder: (_, child) => Transform.rotate(angle: _rotation.value * 3.14159, child: child),
         child: Container(width: 40, height: 40,
-          decoration: BoxDecoration(color: YoBusColors.primary, shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: YoBusColors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]),
+          decoration: BoxDecoration(color: TamBourColors.primary, shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: TamBourColors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]),
           child: const Icon(Icons.swap_vert_rounded, color: Colors.white, size: 20)),
       ),
     );
@@ -369,13 +373,13 @@ class _InfoChip extends StatelessWidget {
       onTap: onTap, borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 56, padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(color: YoBusColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
         child: Row(children: [
-          Icon(icon, size: 18, color: YoBusColors.primary),
+          Icon(icon, size: 18, color: TamBourColors.primary),
           const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textHint, fontWeight: FontWeight.w500)),
-            Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+            Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
+            Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
           ]),
         ]),
       ),
@@ -392,13 +396,13 @@ class _PassagersChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56, padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(color: YoBusColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
       child: Row(children: [
-        const Icon(Icons.person_outline_rounded, size: 18, color: YoBusColors.primary),
+        const Icon(Icons.person_outline_rounded, size: 18, color: TamBourColors.primary),
         const SizedBox(width: 6),
         Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Text('Passagers', style: TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textHint, fontWeight: FontWeight.w500)),
-          Text('$count passager${count > 1 ? 's' : ''}', style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+          const Text('Passagers', style: TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
+          Text('$count', style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
         ]),
         const Spacer(),
         _CounterBtn(icon: Icons.remove, onTap: onDecrement),
@@ -418,8 +422,8 @@ class _CounterBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(width: 26, height: 26,
-        decoration: BoxDecoration(color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, size: 16, color: YoBusColors.primary)),
+        decoration: BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, size: 16, color: TamBourColors.primary)),
     );
   }
 }
@@ -448,29 +452,29 @@ class _VillePickerSheetState extends State<_VillePickerSheet> {
     return DraggableScrollableSheet(
       initialChildSize: 0.75, maxChildSize: 0.92, minChildSize: 0.5,
       builder: (context, scrollController) => Container(
-        decoration: const BoxDecoration(color: YoBusColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        decoration: const BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         child: Column(children: [
-          Container(margin: const EdgeInsets.only(top: 12), width: 40, height: 4, decoration: BoxDecoration(color: YoBusColors.border, borderRadius: BorderRadius.circular(2))),
+          Container(margin: const EdgeInsets.only(top: 12), width: 40, height: 4, decoration: BoxDecoration(color: TamBourColors.border, borderRadius: BorderRadius.circular(2))),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(widget.titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+              Text(widget.titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
               const SizedBox(height: 16),
               TextField(
                 onChanged: _filter, autofocus: true,
                 style: const TextStyle(fontFamily: 'Outfit', fontSize: 15),
                 decoration: InputDecoration(
-                  hintText: 'Rechercher une ville...', prefixIcon: const Icon(Icons.search_rounded, color: YoBusColors.textHint, size: 20),
-                  filled: true, fillColor: YoBusColors.surfaceVariant,
+                  hintText: 'Rechercher une ville...', prefixIcon: const Icon(Icons.search_rounded, color: TamBourColors.textHint, size: 20),
+                  filled: true, fillColor: TamBourColors.surfaceVariant,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16))),
               const SizedBox(height: 16),
             ])),
           Expanded(child: _filtered.isEmpty
             ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.search_off_rounded, size: 48, color: YoBusColors.textHint),
+                Icon(Icons.search_off_rounded, size: 48, color: TamBourColors.textHint),
                 const SizedBox(height: 12),
-                const Text('Aucune ville trouvée', style: TextStyle(fontFamily: 'Outfit', color: YoBusColors.textHint, fontSize: 15))]))
+                const Text('Aucune ville trouvée', style: TextStyle(fontFamily: 'Outfit', color: TamBourColors.textHint, fontSize: 15))]))
             : ListView.separated(
                 controller: scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -482,11 +486,11 @@ class _VillePickerSheetState extends State<_VillePickerSheet> {
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     leading: Container(width: 42, height: 42,
-                      decoration: BoxDecoration(color: isSel ? YoBusColors.primary : YoBusColors.primaryLight, borderRadius: BorderRadius.circular(12)),
-                      child: Icon(Icons.location_city_rounded, color: isSel ? Colors.white : YoBusColors.primary, size: 20)),
-                    title: Text(v.nom, style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: isSel ? FontWeight.w700 : FontWeight.w500, color: YoBusColors.textPrimary)),
-                    subtitle: Text(v.region, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.textSecondary)),
-                    trailing: isSel ? const Icon(Icons.check_circle_rounded, color: YoBusColors.primary, size: 20) : null,
+                      decoration: BoxDecoration(color: isSel ? TamBourColors.primary : TamBourColors.primaryLight, borderRadius: BorderRadius.circular(12)),
+                      child: Icon(Icons.location_city_rounded, color: isSel ? Colors.white : TamBourColors.primary, size: 20)),
+                    title: Text(v.nom, style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: isSel ? FontWeight.w700 : FontWeight.w500, color: TamBourColors.textPrimary)),
+                    subtitle: Text(v.region, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
+                    trailing: isSel ? const Icon(Icons.check_circle_rounded, color: TamBourColors.primary, size: 20) : null,
                     onTap: () => widget.onSelected(v));
                 })),
         ]),
@@ -503,17 +507,17 @@ class _PromoBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         height: 100,
-        decoration: BoxDecoration(color: YoBusColors.goldLight, borderRadius: BorderRadius.circular(20), border: Border.all(color: YoBusColors.gold.withOpacity(0.3))),
+        decoration: BoxDecoration(color: TamBourColors.goldLight, borderRadius: BorderRadius.circular(20), border: Border.all(color: TamBourColors.gold.withOpacity(0.3))),
         child: Row(children: [
           const SizedBox(width: 20),
           Container(width: 52, height: 52,
-            decoration: BoxDecoration(color: YoBusColors.gold.withOpacity(0.2), shape: BoxShape.circle),
-            child: const Icon(Icons.local_offer_rounded, color: YoBusColors.gold, size: 26)),
+            decoration: BoxDecoration(color: TamBourColors.gold.withOpacity(0.2), shape: BoxShape.circle),
+            child: const Icon(Icons.local_offer_rounded, color: TamBourColors.gold, size: 26)),
           const SizedBox(width: 16),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
             const Text('Offre de lancement', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF7A4F00))),
             const SizedBox(height: 4),
-            Text('-15% sur votre 1er trajet avec le code YOBUS15', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.gold.withOpacity(0.8))),
+            Text('-15% sur votre 1er trajet avec le code TAMBOUR15', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.gold.withOpacity(0.8))),
           ])),
           const SizedBox(width: 16),
         ]),
@@ -522,60 +526,25 @@ class _PromoBanner extends StatelessWidget {
   }
 }
 
-class _LignesPopulaires extends StatelessWidget {
+class _LignesPopulaires extends ConsumerWidget {
   const _LignesPopulaires();
-  static const List<Map<String, dynamic>> _lignes = [
-    {'depart': 'Abidjan', 'arrivee': 'Bouaké', 'duree': '3h30', 'prix': '3 500', 'trajets': 8},
-    {'depart': 'Abidjan', 'arrivee': 'Yamoussoukro', 'duree': '2h45', 'prix': '2 800', 'trajets': 6},
-    {'depart': 'Abidjan', 'arrivee': 'San-Pédro', 'duree': '4h15', 'prix': '4 200', 'trajets': 4},
-    {'depart': 'Abidjan', 'arrivee': 'Daloa', 'duree': '4h00', 'prix': '4 000', 'trajets': 5},
-    {'depart': 'Bouaké', 'arrivee': 'Korhogo', 'duree': '3h00', 'prix': '2 500', 'trajets': 3},
-  ];
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lignes = ref.watch(lignesPopulairesProvider).valueOrNull ?? LignePopulaire.parDefaut;
+    final apercu = lignes.take(5).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(children: [
-          const Text('Lignes populaires', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
-          const Spacer(),
-          const Text('Voir tout', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: YoBusColors.primary)),
-        ])),
+      SectionHeader(titre: 'Lignes populaires', actionLabel: 'Voir tout',
+        onAction: () => context.push('/lignes-populaires')),
       const SizedBox(height: 16),
       SizedBox(
         height: 130,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: _lignes.length,
+          itemCount: apercu.length,
           separatorBuilder: (_, __) => const SizedBox(width: 10),
-          itemBuilder: (context, i) {
-            final l = _lignes[i];
-            return Container(
-              width: 190, padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: YoBusColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: YoBusColors.border, width: 0.5)),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [
-                  Text(l['depart'] as String, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
-                  const SizedBox(width: 6), const Icon(Icons.arrow_forward_rounded, size: 14, color: YoBusColors.textHint), const SizedBox(width: 6),
-                  Expanded(child: Text(l['arrivee'] as String, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary))),
-                ]),
-                const SizedBox(height: 8),
-                Row(children: [
-                  const Icon(Icons.access_time_rounded, size: 13, color: YoBusColors.textHint), const SizedBox(width: 4),
-                  Text(l['duree'] as String, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.textSecondary)),
-                  const SizedBox(width: 10),
-                  const Icon(Icons.directions_bus_rounded, size: 13, color: YoBusColors.textHint), const SizedBox(width: 4),
-                  Text('${l['trajets']}/jour', style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.textSecondary)),
-                ]),
-                const Spacer(),
-                RichText(text: TextSpan(children: [
-                  const TextSpan(text: 'Dès ', style: TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textHint)),
-                  TextSpan(text: '${l['prix']} F', style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w800, color: YoBusColors.primary)),
-                ])),
-              ]),
-            ).animate().fadeIn(delay: Duration(milliseconds: 600 + i * 80)).slideX(begin: 0.1, end: 0);
-          }),
+          itemBuilder: (context, i) => LigneCard(ligne: apercu[i])
+            .animate().fadeIn(delay: Duration(milliseconds: 600 + i * 80)).slideX(begin: 0.1, end: 0)),
       ),
     ]);
   }
@@ -589,15 +558,15 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: YoBusColors.surface,
-        border: const Border(top: BorderSide(color: YoBusColors.border, width: 0.5)),
+        color: TamBourColors.surface,
+        border: const Border(top: BorderSide(color: TamBourColors.border, width: 0.5)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, -4))]),
       child: SafeArea(
         top: false,
         child: BottomNavigationBar(
           currentIndex: currentIndex, onTap: onTap, elevation: 0,
           backgroundColor: Colors.transparent,
-          selectedItemColor: YoBusColors.primary, unselectedItemColor: YoBusColors.textHint,
+          selectedItemColor: TamBourColors.primary, unselectedItemColor: TamBourColors.textHint,
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Recherche'),

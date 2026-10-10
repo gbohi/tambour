@@ -22,6 +22,7 @@ LOCAL_APPS = [
     'paiements', 'notifications',
     'dashboard',   # KPI temps réel
     'rapports',    # Exports CSV admin
+    'support',     # Centre d'aide, contact, réclamations, avis sur l'app
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -36,8 +37,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF     = 'yobus_backend.urls'
-WSGI_APPLICATION = 'yobus_backend.wsgi.application'
+ROOT_URLCONF     = 'tambour_backend.urls'
+WSGI_APPLICATION = 'tambour_backend.wsgi.application'
 AUTH_USER_MODEL  = 'authentication.User'
 
 TEMPLATES = [{
@@ -92,7 +93,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'EXCEPTION_HANDLER': 'yobus_backend.utils.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'tambour_backend.utils.custom_exception_handler',
 }
 
 SIMPLE_JWT = {
@@ -138,6 +139,17 @@ CINETPAY_BASE_URL  = config('CINETPAY_BASE_URL', default='https://api-checkout.c
 AT_USERNAME  = config('AT_USERNAME', default='sandbox')
 AT_API_KEY   = config('AT_API_KEY', default='')
 AT_SENDER_ID = config('AT_SENDER_ID', default='TamBour')
+
+# Parrainage : points offerts au parrain et au nouvel inscrit (filleul)
+POINTS_PARRAIN = config('POINTS_PARRAIN', default=500, cast=int)
+POINTS_FILLEUL = config('POINTS_FILLEUL', default=200, cast=int)
+LIEN_TELECHARGEMENT_APP = config('LIEN_TELECHARGEMENT_APP', default='https://tambour.ci/app')
+
+# Support client (affiché dans l'application)
+SUPPORT_TELEPHONE = config('SUPPORT_TELEPHONE', default='+225 07 00 00 00 00')
+SUPPORT_WHATSAPP  = config('SUPPORT_WHATSAPP', default='+2250700000000')
+SUPPORT_EMAIL     = config('SUPPORT_EMAIL', default='support@tambour.ci')
+SUPPORT_HORAIRES  = config('SUPPORT_HORAIRES', default='Tous les jours, 6h – 22h')
 
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:4200')
 

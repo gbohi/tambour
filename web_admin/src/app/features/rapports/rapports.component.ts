@@ -244,7 +244,7 @@ export class RapportsComponent implements OnInit {
     this.api.exportCsv(e.type, this.dateDebut, this.dateFin).subscribe({
       next: (blob: Blob) => {
         const url  = URL.createObjectURL(blob);
-        const name = `yobus_${e.type}_${this.dateDebut}_${this.dateFin}.csv`;
+        const name = `tambour_${e.type}_${this.dateDebut}_${this.dateFin}.csv`;
         Object.assign(document.createElement('a'), { href: url, download: name }).click();
         URL.revokeObjectURL(url);
         this.toast.success('Export "' + e.label + '" téléchargé.');

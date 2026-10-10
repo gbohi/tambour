@@ -13,11 +13,11 @@ from .serializers import (
     WebhookCinetPaySerializer, VersementSerializer,
 )
 from .services import CinetPayService, CinetPayException
-from reservations.models import Reservation, Billet
+from reservations.models import Reservation
 from transport.models import Siege
 from authentication.permissions import EstAdmin
 from authentication.views import StandardPagination
-from yobus_backend.utils import success_response, error_response
+from tambour_backend.utils import success_response, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +31,9 @@ def _confirmer_paiement(paiement):
         reservation.confirmer()
         Siege.objects.filter(passager__reservation=reservation).update(
             statut=Siege.Statut.OCCUPE, reserve_jusqu=None)
-        Billet.objects.get_or_create(reservation=reservation)
         points = reservation.montant_total // 1000
-        paiement.user.ajouter_points(points)
+        paiement.user.ajouter_points(
+            points, motif='voyage', description=f'Voyage {reservation.trajet.ligne} ({reservation.reference})')
         paiement.user.incrementer_voyages()
         logger.info(f'Paiement {paiement.reference} confirme - {reservation.reference}')
 
@@ -71,7 +71,7 @@ class InitierPaiementView(APIView):
         try:
             result = service.initier_paiement(
                 reference=paiement.reference, montant=paiement.montant,
-                description=f'YoBus - {reservation.trajet.ligne} - {reservation.reference}',
+                description=f'TamBour - {reservation.trajet.ligne} - {reservation.reference}',
                 telephone=data['telephone'], methode=data['methode'],
                 metadata={'reservation_id': str(reservation.id), 'user_id': str(request.user.id)})
             paiement.statut = Paiement.Statut.EN_ATTENTE

@@ -11,7 +11,7 @@ from .serializers import (
 )
 from transport.models import Siege
 from authentication.views import StandardPagination
-from yobus_backend.utils import success_response, error_response
+from tambour_backend.utils import success_response, error_response
 
 
 class ReservationViewSet(viewsets.GenericViewSet):
@@ -44,12 +44,13 @@ class ReservationViewSet(viewsets.GenericViewSet):
         serializer = CreerReservationSerializer(
             data=request.data, context={'request': request})
         if not serializer.is_valid():
-            return error_response('Données invalides.',
-                                  serializer.errors, status.HTTP_400_BAD_REQUEST)
+            places = serializer.errors.get('passagers')
+            message = str(places[0]) if isinstance(places, list) and places and isinstance(places[0], str) \
+                else 'Données invalides.'
+            return error_response(message, serializer.errors, status.HTTP_400_BAD_REQUEST)
 
         trajet        = serializer.validated_data['trajet_id']
         passagers_data = serializer.validated_data['passagers']
-        sieges_map    = serializer.validated_data['sieges_qs']
         email_payeur  = serializer.validated_data.get('email_payeur', '')
 
         # Si email_payeur non fourni, prendre l'email du 1er passager
@@ -57,6 +58,10 @@ class ReservationViewSet(viewsets.GenericViewSet):
             email_payeur = passagers_data[0].get('email', '')
 
         with transaction.atomic():
+            sieges = Siege.attribuer(trajet, len(passagers_data))
+            if sieges is None:
+                return error_response('Plus assez de places disponibles sur ce trajet.',
+                                      status_code=status.HTTP_409_CONFLICT)
             montant = trajet.prix_actuel * len(passagers_data)
             reservation = Reservation.objects.create(
                 user=request.user, trajet=trajet,
@@ -64,14 +69,10 @@ class ReservationViewSet(viewsets.GenericViewSet):
                 nb_passagers=len(passagers_data),
                 email_payeur=email_payeur)
 
-            for ordre, p_data in enumerate(passagers_data, start=1):
-                siege = sieges_map[p_data['siege_id']]
-                # Bloquer le siège
-                Siege.objects.filter(
-                    id=siege.id,
-                    statut__in=[Siege.Statut.LIBRE, Siege.Statut.RESERVE]
-                ).update(statut=Siege.Statut.RESERVE, reserve_jusqu=reservation.expire_at)
+            Siege.objects.filter(id__in=[s.id for s in sieges]).update(
+                statut=Siege.Statut.RESERVE, reserve_jusqu=reservation.expire_at)
 
+            for ordre, (p_data, siege) in enumerate(zip(passagers_data, sieges), start=1):
                 # Créer le passager (sans pièce d'identité)
                 passager = Passager.objects.create(
                     reservation=reservation,

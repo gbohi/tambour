@@ -11,7 +11,9 @@ urlpatterns = [
     path('token/refresh/',   TokenRefreshView.as_view(),                     name='token_refresh'),
     path('forgot-password/', views.ReinitialisationMotDePasseView.as_view(), name='forgot_password'),
     path('reset-password/',  views.NouveauMotDePasseView.as_view(),          name='reset_password'),
+    path('parrainage/verifier/', views.VerifierCodeParrainageView.as_view(), name='parrainage_verifier'),
     # Authentifié
+    path('fidelite/',        views.FideliteView.as_view(),                   name='fidelite'),
     path('logout/',          views.DeconnexionView.as_view(),                name='logout'),
     path('me/',              views.ProfilView.as_view(),                     name='profil'),
     path('change-password/', views.ChangementMotDePasseView.as_view(),       name='change_password'),

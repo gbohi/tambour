@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "yobus-admin": {
+    "tambour-admin": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,7 +18,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/yobus-admin",
+            "outputPath": "dist/tambour-admin",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -46,8 +46,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": {"buildTarget": "yobus-admin:build:production"},
-            "development": {"buildTarget": "yobus-admin:build:development"}
+            "production": {"buildTarget": "tambour-admin:build:production"},
+            "development": {"buildTarget": "tambour-admin:build:development"}
           },
           "defaultConfiguration": "development"
         }

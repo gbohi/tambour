@@ -12,7 +12,7 @@ interface NavItem { label: string; icon: string; path: string; roles?: string[];
   template: `
     <aside class="sidebar">
       <div class="sb-logo">
-        <div class="logo-mark"><span class="ly">Yô</span><span class="lb">Bus</span></div>
+        <div class="logo-mark"><span class="ly">Tam</span><span class="lb">Bour</span></div>
         <div class="logo-sub">Administration</div>
       </div>
       <div class="sb-role">

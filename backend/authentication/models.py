@@ -6,6 +6,16 @@ from django.utils.translation import gettext_lazy as _
 from .managers import UserManager
 
 
+def generer_code_parrainage():
+    """Code court, lisible et unique (ex. TB7K2QX9)."""
+    import secrets
+    alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    while True:
+        code = 'TB' + ''.join(secrets.choice(alphabet) for _ in range(6))
+        if not User.objects.filter(code_parrainage=code).exists():
+            return code
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         VOYAGEUR = 'voyageur', 'Voyageur'
@@ -29,6 +39,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     notif_promotions = models.BooleanField(default=True)
     points_fidelite = models.PositiveIntegerField(default=0)
     nb_voyages = models.PositiveIntegerField(default=0)
+    code_parrainage = models.CharField(_('code de parrainage'), max_length=12, unique=True, null=True, blank=True)
+    parrain = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='filleuls')
     date_joined = models.DateTimeField(default=timezone.now)
     last_login = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -56,13 +68,46 @@ class User(AbstractBaseUser, PermissionsMixin):
         n = self.nom[0].upper() if self.nom else ''
         return f'{p}{n}'
 
-    def ajouter_points(self, points):
-        self.points_fidelite += points
-        self.save(update_fields=['points_fidelite'])
+    def save(self, *args, **kwargs):
+        if not self.code_parrainage:
+            self.code_parrainage = generer_code_parrainage()
+        super().save(*args, **kwargs)
+
+    def ajouter_points(self, points, motif='ajustement', description=''):
+        if not points:
+            return
+        MouvementPoints.objects.create(user=self, points=points, motif=motif, description=description)
+        User.objects.filter(pk=self.pk).update(points_fidelite=models.F('points_fidelite') + points)
+        self.refresh_from_db(fields=['points_fidelite'])
 
     def incrementer_voyages(self):
         self.nb_voyages += 1
         self.save(update_fields=['nb_voyages'])
+
+
+class MouvementPoints(models.Model):
+    """Historique des points de fidélité gagnés ou dépensés."""
+    class Motif(models.TextChoices):
+        VOYAGE = 'voyage', 'Voyage'
+        PARRAINAGE = 'parrainage', 'Parrainage d\'un ami'
+        BIENVENUE = 'bienvenue', 'Bonus de bienvenue (parrainé)'
+        UTILISATION = 'utilisation', 'Utilisation de points'
+        AJUSTEMENT = 'ajustement', 'Ajustement'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mouvements_points')
+    points = models.IntegerField()
+    motif = models.CharField(max_length=20, choices=Motif.choices, default=Motif.AJUSTEMENT)
+    description = models.CharField(max_length=255, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('mouvement de points')
+        verbose_name_plural = _('mouvements de points')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.email} {self.points:+d} ({self.motif})'
 
 
 class CodeVerification(models.Model):

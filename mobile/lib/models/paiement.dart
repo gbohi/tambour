@@ -3,18 +3,17 @@ enum StatutPaiement { attente, enCours, succes, echec, expire }
 
 class PaiementRequest {
   final String trajetId;
-  final List<String> siegeIds;
   final int montantFcfa;
   final MethodePaiement methode;
   final String telephone;
 
   const PaiementRequest({
-    required this.trajetId, required this.siegeIds,
+    required this.trajetId,
     required this.montantFcfa, required this.methode, required this.telephone,
   });
 
   Map<String, dynamic> toJson() => {
-    'trajet_id': trajetId, 'siege_ids': siegeIds,
+    'trajet_id': trajetId,
     'montant_fcfa': montantFcfa, 'methode': methode.name, 'telephone': telephone,
   };
 }

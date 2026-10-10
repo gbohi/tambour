@@ -1,4 +1,5 @@
-from django.db.models import Q, Prefetch
+from datetime import timedelta
+from django.db.models import Q, Prefetch, Min, Count
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -15,7 +16,7 @@ from .serializers import (
 from .filters import TrajetFilter
 from authentication.permissions import EstAdminOuSupport
 from authentication.views import StandardPagination
-from yobus_backend.utils import success_response, error_response
+from tambour_backend.utils import success_response, error_response
 
 
 # ── Villes (public) ─────────────────────────────────────────────────────────
@@ -283,6 +284,36 @@ class TrajetViewSet(viewsets.ModelViewSet):
         return success_response(
             data={'siege_ids': siege_ids, 'expire_at': expire.isoformat()},
             message='Sieges reserves temporairement pour 10 minutes.')
+
+
+class LignesPopulairesView(APIView):
+    """
+    GET /api/v1/lignes/populaires/ — toutes les lignes actives, populaires en premier,
+    avec le prix de départ et le nombre moyen de départs par jour sur les 7 prochains jours.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        maintenant = timezone.now()
+        a_venir = Q(trajets__heure_depart__gt=maintenant,
+                    trajets__heure_depart__lte=maintenant + timedelta(days=7),
+                    trajets__statut=Trajet.Statut.PLANIFIE)
+        lignes = (Ligne.objects.filter(est_active=True)
+                  .select_related('depart', 'arrivee')
+                  .annotate(prix_min=Min('trajets__prix_fcfa', filter=a_venir),
+                            nb_trajets=Count('trajets', filter=a_venir))
+                  .order_by('-est_populaire', '-nb_trajets', 'depart__nom', 'arrivee__nom'))
+        data = [{
+            'id': str(l.id),
+            'depart': l.depart.nom, 'depart_id': str(l.depart.id), 'depart_region': l.depart.region,
+            'arrivee': l.arrivee.nom, 'arrivee_id': str(l.arrivee.id), 'arrivee_region': l.arrivee.region,
+            'distance_km': l.distance_km,
+            'duree_label': l.duree_label,
+            'prix_min': l.prix_min,
+            'trajets_par_jour': round(l.nb_trajets / 7) if l.nb_trajets else 0,
+            'est_populaire': l.est_populaire,
+        } for l in lignes]
+        return success_response(data={'results': data})
 
 
 # ── Helpers notifications ──────────────────────────────────────────────────

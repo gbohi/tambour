@@ -24,20 +24,20 @@ class EmptyState extends StatelessWidget {
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(
           width: 88, height: 88,
-          decoration: BoxDecoration(color: YoBusColors.primaryLight, shape: BoxShape.circle),
-          child: Icon(icon, color: YoBusColors.primary, size: 42)),
+          decoration: BoxDecoration(color: TamBourColors.primaryLight, shape: BoxShape.circle),
+          child: Icon(icon, color: TamBourColors.primary, size: 42)),
         const SizedBox(height: 24),
-        Text(titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary), textAlign: TextAlign.center),
+        Text(titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary), textAlign: TextAlign.center),
         if (description != null) ...[
           const SizedBox(height: 10),
-          Text(description!, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textSecondary, height: 1.5), textAlign: TextAlign.center),
+          Text(description!, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary, height: 1.5), textAlign: TextAlign.center),
         ],
         if (labelBouton != null && onBouton != null) ...[
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: onBouton,
             style: ElevatedButton.styleFrom(
-              backgroundColor: YoBusColors.primary, foregroundColor: Colors.white,
+              backgroundColor: TamBourColors.primary, foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               elevation: 0,

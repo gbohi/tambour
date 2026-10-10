@@ -2,9 +2,9 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'yobus_backend.settings.development')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tambour_backend.settings.development')
 
-app = Celery('yobus_backend')
+app = Celery('tambour_backend')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 

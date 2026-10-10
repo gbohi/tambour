@@ -20,11 +20,11 @@ class SectionHeader extends StatelessWidget {
     return Padding(
       padding: padding,
       child: Row(children: [
-        Expanded(child: Text(titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary))),
+        Expanded(child: Text(titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary))),
         if (actionLabel != null && onAction != null)
           GestureDetector(
             onTap: onAction,
-            child: Text(actionLabel!, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: YoBusColors.primary))),
+            child: Text(actionLabel!, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: TamBourColors.primary))),
       ]),
     );
   }

@@ -62,7 +62,7 @@ class PaiementNotifier extends StateNotifier<PaiementState> {
   String _genRef() {
     final now = DateTime.now();
     final rnd = Random().nextInt(9999).toString().padLeft(4, '0');
-    return 'YB${now.year}${now.month.toString().padLeft(2,'0')}${now.day.toString().padLeft(2,'0')}$rnd';
+    return 'TB${now.year}${now.month.toString().padLeft(2,'0')}${now.day.toString().padLeft(2,'0')}$rnd';
   }
 }
 

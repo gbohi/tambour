@@ -48,6 +48,15 @@ class Siege {
     return sieges;
   }
 
+  /// Attribution automatique : les `nombre` premiers sièges libres dans l'ordre du car
+  /// (les passagers d'une même réservation sont ainsi placés côte à côte).
+  static List<String> attribuerAuto(int nombre, {List<String> siegesOccupes = const []}) =>
+    genererBus54Places(siegesOccupes: siegesOccupes)
+      .where((s) => s.estSelectionnable)
+      .take(nombre)
+      .map((s) => s.id)
+      .toList();
+
   static List<String> mockOccupes() => [
     '1A','1B','1C','2A','2D','3B','3C','4A','4B',
     '5C','5D','6A','6B','7D','8A','8C','9B','9D',

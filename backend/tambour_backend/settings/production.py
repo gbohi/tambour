@@ -8,4 +8,4 @@ SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
-CORS_ALLOWED_ORIGINS = ['https://yobus.ci', 'https://www.yobus.ci', 'https://admin.yobus.ci']
+CORS_ALLOWED_ORIGINS = ['https://tambour.ci', 'https://www.tambour.ci', 'https://admin.tambour.ci']

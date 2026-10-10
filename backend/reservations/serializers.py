@@ -11,7 +11,6 @@ class PassagerInputSerializer(serializers.Serializer):
     nom       = serializers.CharField(max_length=100)
     telephone = serializers.CharField(max_length=20)
     email     = serializers.EmailField(required=False, allow_blank=True, default='')
-    siege_id  = serializers.CharField(max_length=5)
 
 
 class CreerReservationSerializer(serializers.Serializer):
@@ -36,26 +35,12 @@ class CreerReservationSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
-        trajet        = attrs['trajet_id']
-        passagers_data = attrs['passagers']
-        siege_ids     = [p['siege_id'] for p in passagers_data]
-
-        if len(siege_ids) != len(set(siege_ids)):
+        # Les sièges sont attribués automatiquement : on vérifie seulement qu'il reste assez de places.
+        trajet = attrs['trajet_id']
+        nb_libres = Siege.disponibles(trajet).count()
+        if nb_libres < len(attrs['passagers']):
             raise serializers.ValidationError(
-                {'passagers': 'Deux passagers ne peuvent pas avoir le même siège.'})
-
-        sieges_qs = Siege.objects.filter(trajet=trajet, numero__in=siege_ids)
-        if sieges_qs.count() != len(siege_ids):
-            manquants = set(siege_ids) - set(sieges_qs.values_list('numero', flat=True))
-            raise serializers.ValidationError(
-                {'passagers': f'Sièges introuvables : {manquants}'})
-
-        indispos = [s for s in sieges_qs if not s.est_disponible]
-        if indispos:
-            raise serializers.ValidationError(
-                {'passagers': f'Sièges non disponibles : {[s.numero for s in indispos]}'})
-
-        attrs['sieges_qs'] = {s.numero: s for s in sieges_qs}
+                {'passagers': f'Plus assez de places sur ce trajet ({nb_libres} disponible(s)).'})
         return attrs
 
 

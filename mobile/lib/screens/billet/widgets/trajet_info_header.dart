@@ -13,7 +13,7 @@ class TrajetInfoHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
-        color: YoBusColors.primary,
+        color: TamBourColors.primary,
         borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24))),
       child: Column(children: [
         Row(children: [
@@ -22,7 +22,7 @@ class TrajetInfoHeader extends StatelessWidget {
             Text(trajet.depart.region, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: Colors.white.withOpacity(0.7))),
           ])),
           Column(children: [
-            const Icon(Icons.arrow_forward_rounded, color: YoBusColors.gold, size: 28),
+            const Icon(Icons.arrow_forward_rounded, color: TamBourColors.gold, size: 28),
             Text(trajet.dureeLabel, style: TextStyle(fontFamily: 'Outfit', fontSize: 10, color: Colors.white.withOpacity(0.7))),
           ]),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [

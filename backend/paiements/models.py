@@ -73,7 +73,7 @@ class Versement(models.Model):
     periode_debut = models.DateField()
     periode_fin = models.DateField()
     montant_brut = models.PositiveIntegerField()
-    commission_yobus = models.PositiveIntegerField()
+    commission_tambour = models.PositiveIntegerField()
     montant_net = models.PositiveIntegerField()
     statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.EN_ATTENTE)
     reference_virement = models.CharField(max_length=100, blank=True, default='')

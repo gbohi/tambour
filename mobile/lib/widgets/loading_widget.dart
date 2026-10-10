@@ -13,13 +13,13 @@ class LoadingWidget extends StatelessWidget {
     return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
       Container(
         width: size, height: size,
-        decoration: BoxDecoration(color: YoBusColors.primaryLight, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: TamBourColors.primaryLight, shape: BoxShape.circle),
         child: Padding(
           padding: EdgeInsets.all(size * 0.2),
-          child: CircularProgressIndicator(color: YoBusColors.primary, strokeWidth: 3))),
+          child: CircularProgressIndicator(color: TamBourColors.primary, strokeWidth: 3))),
       if (message != null) ...[
         const SizedBox(height: 16),
-        Text(message!, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textSecondary)),
+        Text(message!, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary)),
       ],
     ]));
   }
@@ -36,7 +36,7 @@ class SkeletonBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width, height: height,
-      decoration: BoxDecoration(color: YoBusColors.border, borderRadius: BorderRadius.circular(borderRadius)),
+      decoration: BoxDecoration(color: TamBourColors.border, borderRadius: BorderRadius.circular(borderRadius)),
     ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.6));
   }
 }

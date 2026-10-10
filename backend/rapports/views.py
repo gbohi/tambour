@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from authentication.permissions import EstAdmin
-from yobus_backend.utils import error_response
+from tambour_backend.utils import error_response
 
 
 class ExportCsvView(APIView):
@@ -27,7 +27,7 @@ class ExportCsvView(APIView):
             return error_response(
                 f"Type invalide. Valeurs acceptées : {', '.join(self.TYPES_VALIDES)}")
 
-        filename = f'yobus_{type_export}_{date_debut}_{date_fin}.csv'
+        filename = f'tambour_{type_export}_{date_debut}_{date_fin}.csv'
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response.write('\ufeff')  # BOM UTF-8 pour Excel

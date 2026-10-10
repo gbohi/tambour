@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from authentication.permissions import EstAdminOuSupport
-from yobus_backend.utils import success_response
+from tambour_backend.utils import success_response
 
 
 class DashboardStatsView(APIView):

@@ -95,10 +95,10 @@ class _MesBilletsScreenState extends State<MesBilletsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(children: [
         Container(
-          color: YoBusColors.primary,
+          color: TamBourColors.primary,
           child: SafeArea(bottom: false, child: Column(children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
@@ -113,7 +113,7 @@ class _MesBilletsScreenState extends State<MesBilletsScreen>
               ])),
             TabBar(
               controller: _tab,
-              indicatorColor: YoBusColors.gold, indicatorWeight: 3,
+              indicatorColor: TamBourColors.gold, indicatorWeight: 3,
               labelColor: Colors.white, unselectedLabelColor: Colors.white54,
               labelStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700),
               unselectedLabelStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14),
@@ -154,17 +154,17 @@ class _ReservationsList extends StatelessWidget {
       return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(width: 80, height: 80,
           decoration: const BoxDecoration(
-            color: YoBusColors.primaryLight, shape: BoxShape.circle),
+            color: TamBourColors.primaryLight, shape: BoxShape.circle),
           child: const Icon(Icons.confirmation_number_rounded,
-            color: YoBusColors.primary, size: 38)),
+            color: TamBourColors.primary, size: 38)),
         const SizedBox(height: 20),
         Text(estAVenir ? 'Aucun voyage à venir' : 'Aucun voyage passé',
           style: const TextStyle(fontFamily: 'Outfit', fontSize: 17,
-            fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+            fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
         const SizedBox(height: 8),
         const Text("Réservez votre prochain trajet depuis l'accueil.",
           textAlign: TextAlign.center,
-          style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: YoBusColors.textSecondary)),
+          style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.textSecondary)),
       ]));
     }
 
@@ -201,9 +201,9 @@ class _BilletIndividuelCard extends StatelessWidget {
   });
 
   Color get _statutColor => switch (reservation.statut) {
-    'confirmee' => YoBusColors.primary,
-    'annulee'   => YoBusColors.error,
-    _           => YoBusColors.textSecondary,
+    'confirmee' => TamBourColors.primary,
+    'annulee'   => TamBourColors.error,
+    _           => TamBourColors.textSecondary,
   };
   String get _statutLabel => switch (reservation.statut) {
     'confirmee' => 'Confirmé',
@@ -226,33 +226,33 @@ class _BilletIndividuelCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: YoBusColors.surface, borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: YoBusColors.border, width: 0.5)),
+        color: TamBourColors.surface, borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: TamBourColors.border, width: 0.5)),
       child: Column(children: [
         // ── Header vert ─────────────────────────────────────────────────
         Container(
           padding: const EdgeInsets.all(14),
           decoration: const BoxDecoration(
-            color: YoBusColors.primaryLight,
+            color: TamBourColors.primaryLight,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(18), topRight: Radius.circular(18))),
           child: Row(children: [
             Container(width: 38, height: 38,
               decoration: BoxDecoration(
-                color: YoBusColors.primary, borderRadius: BorderRadius.circular(10)),
+                color: TamBourColors.primary, borderRadius: BorderRadius.circular(10)),
               child: const Icon(Icons.directions_bus_rounded, color: Colors.white, size: 20)),
             const SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
                 Text(reservation.depart, style: const TextStyle(fontFamily: 'Outfit',
-                  fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.primaryDark)),
+                  fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.primaryDark)),
                 const Padding(padding: EdgeInsets.symmetric(horizontal: 5),
-                  child: Icon(Icons.arrow_forward_rounded, size: 12, color: YoBusColors.primary)),
+                  child: Icon(Icons.arrow_forward_rounded, size: 12, color: TamBourColors.primary)),
                 Text(reservation.arrivee, style: const TextStyle(fontFamily: 'Outfit',
-                  fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.primaryDark)),
+                  fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.primaryDark)),
               ]),
               Text(reservation.compagnie, style: const TextStyle(fontFamily: 'Outfit',
-                fontSize: 11, color: YoBusColors.primary)),
+                fontSize: 11, color: TamBourColors.primary)),
             ])),
             // Badge numéro billet
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -270,10 +270,10 @@ class _BilletIndividuelCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(10)),
+                    color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(10)),
                   child: Text('Billet $numeroBillet/$totalBillets',
                     style: const TextStyle(fontFamily: 'Outfit', fontSize: 10,
-                      fontWeight: FontWeight.w700, color: YoBusColors.primary))),
+                      fontWeight: FontWeight.w700, color: TamBourColors.primary))),
               ],
             ]),
           ])),
@@ -286,60 +286,60 @@ class _BilletIndividuelCard extends StatelessWidget {
             Row(children: [
               Container(width: 34, height: 34,
                 decoration: BoxDecoration(
-                  color: YoBusColors.primaryLight, shape: BoxShape.circle),
+                  color: TamBourColors.primaryLight, shape: BoxShape.circle),
                 child: const Icon(Icons.person_rounded,
-                  color: YoBusColors.primary, size: 18)),
+                  color: TamBourColors.primary, size: 18)),
               const SizedBox(width: 10),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(passager.nomComplet, style: const TextStyle(
                   fontFamily: 'Outfit', fontSize: 14,
-                  fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+                  fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
                 Text(passager.telephone, style: const TextStyle(
-                  fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textSecondary)),
+                  fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textSecondary)),
               ])),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(10)),
+                  color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(10)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   const Icon(Icons.event_seat_rounded,
-                    size: 14, color: YoBusColors.primary),
+                    size: 14, color: TamBourColors.primary),
                   const SizedBox(width: 4),
                   Text('Siège ${passager.siege}', style: const TextStyle(
                     fontFamily: 'Outfit', fontSize: 12,
-                    fontWeight: FontWeight.w800, color: YoBusColors.primary)),
+                    fontWeight: FontWeight.w800, color: TamBourColors.primary)),
                 ])),
             ]),
             const SizedBox(height: 10),
             Row(children: [
-              const Icon(Icons.access_time_rounded, size: 13, color: YoBusColors.textHint),
+              const Icon(Icons.access_time_rounded, size: 13, color: TamBourColors.textHint),
               const SizedBox(width: 6),
               Text(dateFmt.format(reservation.date), style: const TextStyle(
                 fontFamily: 'Outfit', fontSize: 12,
-                fontWeight: FontWeight.w600, color: YoBusColors.textPrimary)),
+                fontWeight: FontWeight.w600, color: TamBourColors.textPrimary)),
               const Spacer(),
               Text('${fmt.format(reservation.prixParPassager)} FCFA',
                 style: const TextStyle(fontFamily: 'Outfit', fontSize: 14,
-                  fontWeight: FontWeight.w800, color: YoBusColors.primary)),
+                  fontWeight: FontWeight.w800, color: TamBourColors.primary)),
             ]),
             const SizedBox(height: 6),
             Row(children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: YoBusColors.surfaceVariant,
+                  color: TamBourColors.surfaceVariant,
                   borderRadius: BorderRadius.circular(6)),
                 child: Text('Réf: $_refBillet', style: const TextStyle(
                   fontFamily: 'Outfit', fontSize: 11,
-                  color: YoBusColors.textSecondary, fontWeight: FontWeight.w500))),
+                  color: TamBourColors.textSecondary, fontWeight: FontWeight.w500))),
               if (passager.email.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                const Icon(Icons.email_outlined, size: 12, color: YoBusColors.textHint),
+                const Icon(Icons.email_outlined, size: 12, color: TamBourColors.textHint),
                 const SizedBox(width: 4),
                 Expanded(child: Text(passager.email,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontFamily: 'Outfit', fontSize: 11,
-                    color: YoBusColors.textHint))),
+                    color: TamBourColors.textHint))),
               ],
             ]),
 
@@ -352,8 +352,8 @@ class _BilletIndividuelCard extends StatelessWidget {
                   icon: const Icon(Icons.qr_code_rounded, size: 16),
                   label: const Text('Voir le billet'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: YoBusColors.primary,
-                    side: const BorderSide(color: YoBusColors.primary, width: 1.5),
+                    foregroundColor: TamBourColors.primary,
+                    side: const BorderSide(color: TamBourColors.primary, width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     textStyle: const TextStyle(fontFamily: 'Outfit',
@@ -364,7 +364,7 @@ class _BilletIndividuelCard extends StatelessWidget {
                   icon: const Icon(Icons.share_rounded, size: 16),
                   label: const Text('Partager'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: YoBusColors.primary, foregroundColor: Colors.white,
+                    backgroundColor: TamBourColors.primary, foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -438,13 +438,13 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
       initialChildSize: 0.92, maxChildSize: 0.95, minChildSize: 0.6,
       builder: (context, sc) => Container(
         decoration: const BoxDecoration(
-          color: YoBusColors.background,
+          color: TamBourColors.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         child: Column(children: [
           // Header
           Container(
             decoration: const BoxDecoration(
-              color: YoBusColors.primary,
+              color: TamBourColors.primary,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
             child: SafeArea(bottom: false, child: Column(children: [
               Container(margin: const EdgeInsets.only(top: 12), width: 40, height: 4,
@@ -471,13 +471,13 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                       child: _generatingPdf
                         ? const SizedBox(width: 16, height: 16,
                             child: CircularProgressIndicator(
-                              strokeWidth: 2, color: YoBusColors.primary))
+                              strokeWidth: 2, color: TamBourColors.primary))
                         : const Row(mainAxisSize: MainAxisSize.min, children: [
-                            Icon(Icons.download_rounded, size: 16, color: YoBusColors.primary),
+                            Icon(Icons.download_rounded, size: 16, color: TamBourColors.primary),
                             SizedBox(width: 6),
                             Text('PDF', style: TextStyle(fontFamily: 'Outfit',
                               fontSize: 13, fontWeight: FontWeight.w700,
-                              color: YoBusColors.primary)),
+                              color: TamBourColors.primary)),
                           ]))),
                 ])),
             ])),
@@ -489,7 +489,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
             padding: const EdgeInsets.all(20),
             child: Container(
               decoration: BoxDecoration(
-                color: YoBusColors.surface, borderRadius: BorderRadius.circular(24),
+                color: TamBourColors.surface, borderRadius: BorderRadius.circular(24),
                 boxShadow: [BoxShadow(
                   color: Colors.black.withOpacity(0.08),
                   blurRadius: 20, offset: const Offset(0, 6))]),
@@ -498,7 +498,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
-                    color: YoBusColors.primary,
+                    color: TamBourColors.primary,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(24), topRight: Radius.circular(24))),
                   child: Column(children: [
@@ -508,7 +508,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                         TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit',
                           fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
                         TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit',
-                          fontSize: 18, fontWeight: FontWeight.w900, color: YoBusColors.gold)),
+                          fontSize: 18, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
                       ])),
                       if (widget.totalBillets > 1)
                         Container(
@@ -530,10 +530,10 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                           fontSize: 11, color: Colors.white.withOpacity(0.7))),
                       ])),
                       Column(children: [
-                        const Icon(Icons.arrow_forward_rounded, color: YoBusColors.gold, size: 28),
+                        const Icon(Icons.arrow_forward_rounded, color: TamBourColors.gold, size: 28),
                         Text(heureFmt.format(r.date), style: const TextStyle(
                           fontFamily: 'Outfit', fontSize: 14,
-                          fontWeight: FontWeight.w800, color: YoBusColors.gold)),
+                          fontWeight: FontWeight.w800, color: TamBourColors.gold)),
                       ]),
                       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                         Text(r.arrivee, style: const TextStyle(fontFamily: 'Outfit',
@@ -563,17 +563,17 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                 Row(children: [
                   Container(width: 22, height: 22,
                     decoration: const BoxDecoration(
-                      color: YoBusColors.primary, shape: BoxShape.circle)),
+                      color: TamBourColors.primary, shape: BoxShape.circle)),
                   Expanded(child: LayoutBuilder(builder: (_, c) {
                     const dw = 8.0, ds = 5.0;
                     final n = (c.maxWidth / (dw + ds)).floor();
                     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: List.generate(n, (_) => Container(
-                        width: dw, height: 1.5, color: YoBusColors.border)));
+                        width: dw, height: 1.5, color: TamBourColors.border)));
                   })),
                   Container(width: 22, height: 22,
                     decoration: const BoxDecoration(
-                      color: YoBusColors.primary, shape: BoxShape.circle)),
+                      color: TamBourColors.primary, shape: BoxShape.circle)),
                 ]),
 
                 // QR Code unique par passager
@@ -584,25 +584,25 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white, borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: YoBusColors.border, width: 0.5)),
+                        border: Border.all(color: TamBourColors.border, width: 0.5)),
                       child: Column(children: [
                         QrImageView(
                           data: widget.qrData, version: QrVersions.auto, size: 180,
                           backgroundColor: Colors.white,
                           eyeStyle: const QrEyeStyle(
-                            eyeShape: QrEyeShape.square, color: YoBusColors.primary),
+                            eyeShape: QrEyeShape.square, color: TamBourColors.primary),
                           dataModuleStyle: const QrDataModuleStyle(
                             dataModuleShape: QrDataModuleShape.square,
-                            color: YoBusColors.textPrimary)),
+                            color: TamBourColors.textPrimary)),
                         const SizedBox(height: 10),
                         Text(widget.refBillet, style: const TextStyle(
                           fontFamily: 'Outfit', fontSize: 13,
-                          fontWeight: FontWeight.w700, color: YoBusColors.textSecondary,
+                          fontWeight: FontWeight.w700, color: TamBourColors.textSecondary,
                           letterSpacing: 1.5)),
                         const SizedBox(height: 4),
                         const Text("Présentez ce QR code à l'embarquement",
                           style: TextStyle(fontFamily: 'Outfit', fontSize: 11,
-                            color: YoBusColors.textHint)),
+                            color: TamBourColors.textHint)),
                       ])),
 
                     const SizedBox(height: 14),
@@ -611,7 +611,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: YoBusColors.surfaceVariant,
+                        color: TamBourColors.surfaceVariant,
                         borderRadius: BorderRadius.circular(12)),
                       child: Column(children: [
                         _InfoRow(Icons.person_rounded, 'Passager', p.nomComplet),
@@ -633,23 +633,23 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: YoBusColors.primaryLight,
+                        color: TamBourColors.primaryLight,
                         borderRadius: BorderRadius.circular(12)),
                       child: Row(children: [
-                        const Icon(Icons.payments_rounded, color: YoBusColors.primary, size: 20),
+                        const Icon(Icons.payments_rounded, color: TamBourColors.primary, size: 20),
                         const SizedBox(width: 8),
                         const Text('Montant payé', style: TextStyle(
-                          fontFamily: 'Outfit', fontSize: 13, color: YoBusColors.primary)),
+                          fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.primary)),
                         const Spacer(),
                         Text('${fmt.format(r.prixParPassager)} FCFA',
                           style: const TextStyle(fontFamily: 'Outfit', fontSize: 17,
-                            fontWeight: FontWeight.w800, color: YoBusColors.primary)),
+                            fontWeight: FontWeight.w800, color: TamBourColors.primary)),
                       ])),
 
                     const SizedBox(height: 10),
                     Text(dateFmt.format(r.date), textAlign: TextAlign.center,
                       style: const TextStyle(fontFamily: 'Outfit',
-                        fontSize: 12, color: YoBusColors.textSecondary)),
+                        fontSize: 12, color: TamBourColors.textSecondary)),
                   ]),
                 ),
               ]),
@@ -775,7 +775,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Erreur PDF : $e'),
-        backgroundColor: YoBusColors.error, behavior: SnackBarBehavior.floating));
+        backgroundColor: TamBourColors.error, behavior: SnackBarBehavior.floating));
     } finally {
       if (mounted) setState(() => _generatingPdf = false);
     }
@@ -813,12 +813,12 @@ class _InfoRow extends StatelessWidget {
   const _InfoRow(this.icon, this.label, this.value);
   @override
   Widget build(BuildContext context) => Row(children: [
-    Icon(icon, size: 14, color: YoBusColors.textHint),
+    Icon(icon, size: 14, color: TamBourColors.textHint),
     const SizedBox(width: 8),
     Text('$label : ', style: const TextStyle(fontFamily: 'Outfit', fontSize: 12,
-      color: YoBusColors.textSecondary)),
+      color: TamBourColors.textSecondary)),
     Expanded(child: Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12,
-      fontWeight: FontWeight.w700, color: YoBusColors.textPrimary),
+      fontWeight: FontWeight.w700, color: TamBourColors.textPrimary),
       overflow: TextOverflow.ellipsis)),
   ]);
 }

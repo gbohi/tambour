@@ -28,7 +28,7 @@ class _ResultatsScreenState extends ConsumerState<ResultatsScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(rechercheProvider);
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(children: [
         _ResultatsHeader(params: widget.params, dateLabel: _dateLabel),
         FiltreBar(
@@ -52,7 +52,7 @@ class _ResultatsScreenState extends ConsumerState<ResultatsScreen> {
       itemBuilder: (context, i) {
         if (i == 0) return Padding(padding: const EdgeInsets.only(bottom: 12),
           child: Text('${state.resultatsFiltres.length} trajet${state.resultatsFiltres.length > 1 ? 's' : ''} disponible${state.resultatsFiltres.length > 1 ? 's' : ''}',
-            style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textSecondary, fontWeight: FontWeight.w500)));
+            style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary, fontWeight: FontWeight.w500)));
         final trajet = state.resultatsFiltres[i - 1];
         return Padding(padding: const EdgeInsets.only(bottom: 12),
           child: TrajetCard(trajet: trajet, nbPassagers: widget.params.nbPassagers, index: i - 1, params: widget.params));
@@ -62,27 +62,27 @@ class _ResultatsScreenState extends ConsumerState<ResultatsScreen> {
   Widget _buildLoading() => ListView.builder(
     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), itemCount: 4,
     itemBuilder: (_, i) => Padding(padding: const EdgeInsets.only(bottom: 12),
-      child: Container(height: 170, decoration: BoxDecoration(color: YoBusColors.border, borderRadius: BorderRadius.circular(16)))
+      child: Container(height: 170, decoration: BoxDecoration(color: TamBourColors.border, borderRadius: BorderRadius.circular(16)))
         .animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.6))));
 
   Widget _buildErreur(String message) => Center(child: Padding(padding: const EdgeInsets.all(32),
     child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Container(width: 72, height: 72, decoration: BoxDecoration(color: YoBusColors.error.withOpacity(0.1), shape: BoxShape.circle),
-        child: const Icon(Icons.wifi_off_rounded, color: YoBusColors.error, size: 34)),
+      Container(width: 72, height: 72, decoration: BoxDecoration(color: TamBourColors.error.withOpacity(0.1), shape: BoxShape.circle),
+        child: const Icon(Icons.wifi_off_rounded, color: TamBourColors.error, size: 34)),
       const SizedBox(height: 20),
-      const Text('Connexion impossible', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+      const Text('Connexion impossible', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
       const SizedBox(height: 8),
-      Text(message, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textSecondary)),
+      Text(message, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary)),
     ])));
 
   Widget _buildVide() => Center(child: Padding(padding: const EdgeInsets.all(32),
     child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Container(width: 80, height: 80, decoration: BoxDecoration(color: YoBusColors.primaryLight, shape: BoxShape.circle),
-        child: const Icon(Icons.directions_bus_rounded, color: YoBusColors.primary, size: 38)),
+      Container(width: 80, height: 80, decoration: BoxDecoration(color: TamBourColors.primaryLight, shape: BoxShape.circle),
+        child: const Icon(Icons.directions_bus_rounded, color: TamBourColors.primary, size: 38)),
       const SizedBox(height: 20),
-      const Text('Aucun trajet trouvé', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+      const Text('Aucun trajet trouvé', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
       const SizedBox(height: 8),
-      const Text('Essayez une autre date ou modifiez vos filtres.', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textSecondary, height: 1.5)),
+      const Text('Essayez une autre date ou modifiez vos filtres.', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary, height: 1.5)),
     ])));
 }
 
@@ -93,7 +93,7 @@ class _ResultatsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: SafeArea(bottom: false, child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 8, 20, 14),
         child: Row(children: [
@@ -101,7 +101,7 @@ class _ResultatsHeader extends StatelessWidget {
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Text(params.villeDepart.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
-              const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_forward_rounded, color: YoBusColors.gold, size: 16)),
+              const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_forward_rounded, color: TamBourColors.gold, size: 16)),
               Text(params.villeArrivee.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
             ]),
             const SizedBox(height: 4),

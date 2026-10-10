@@ -9,7 +9,6 @@ import '../../models/trajet.dart';
 import '../../models/billet.dart';
 import '../../providers/passager_provider.dart';
 import '../../providers/recherche_provider.dart';
-import '../../providers/siege_provider.dart';
 import '../billets/mes_billets_screen.dart';
 
 class BilletScreen extends ConsumerWidget {
@@ -38,7 +37,7 @@ class BilletScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: YoBusColors.primary,
+      backgroundColor: TamBourColors.primary,
       body: Column(children: [
         _Header(),
         Expanded(child: SingleChildScrollView(
@@ -122,7 +121,7 @@ class _SuccessAnimation extends StatelessWidget {
           .then().scale(begin: const Offset(1.15,1.15), end: const Offset(1,1), duration: 1200.ms),
         Container(width: 72, height: 72,
           decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-          child: const Icon(Icons.check_rounded, color: YoBusColors.primary, size: 38))
+          child: const Icon(Icons.check_rounded, color: TamBourColors.primary, size: 38))
           .animate().scale(begin: const Offset(0,0), end: const Offset(1,1),
             duration: 500.ms, curve: Curves.elasticOut),
       ]),
@@ -156,7 +155,7 @@ class _BilletIndividuel extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: YoBusColors.surface, borderRadius: BorderRadius.circular(20),
+        color: TamBourColors.surface, borderRadius: BorderRadius.circular(20),
         boxShadow: [BoxShadow(
           color: Colors.black.withOpacity(0.15), blurRadius: 24, offset: const Offset(0, 8))]),
       child: Column(children: [
@@ -164,7 +163,7 @@ class _BilletIndividuel extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(18),
           decoration: const BoxDecoration(
-            color: YoBusColors.primary,
+            color: TamBourColors.primary,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
           child: Column(children: [
@@ -174,7 +173,7 @@ class _BilletIndividuel extends StatelessWidget {
                 TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit',
                   fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
                 TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit',
-                  fontSize: 16, fontWeight: FontWeight.w900, color: YoBusColors.gold)),
+                  fontSize: 16, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
               ])),
               if (b.totalBillets > 1)
                 Container(
@@ -196,10 +195,10 @@ class _BilletIndividuel extends StatelessWidget {
                   fontSize: 10, color: Colors.white.withOpacity(0.7))),
               ])),
               Column(children: [
-                const Icon(Icons.arrow_forward_rounded, color: YoBusColors.gold, size: 24),
+                const Icon(Icons.arrow_forward_rounded, color: TamBourColors.gold, size: 24),
                 Text(heureFmt.format(b.trajet.heureDepart), style: const TextStyle(
                   fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w800,
-                  color: YoBusColors.gold)),
+                  color: TamBourColors.gold)),
               ]),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Text(b.trajet.arrivee.nom, style: const TextStyle(fontFamily: 'Outfit',
@@ -226,16 +225,16 @@ class _BilletIndividuel extends StatelessWidget {
         // Pointillés
         Row(children: [
           Container(width: 20, height: 20,
-            decoration: const BoxDecoration(color: YoBusColors.primary, shape: BoxShape.circle)),
+            decoration: const BoxDecoration(color: TamBourColors.primary, shape: BoxShape.circle)),
           Expanded(child: LayoutBuilder(builder: (_, c) {
             const dw = 8.0, ds = 5.0;
             final n = (c.maxWidth / (dw + ds)).floor();
             return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(n, (_) => Container(
-                width: dw, height: 1.5, color: YoBusColors.border)));
+                width: dw, height: 1.5, color: TamBourColors.border)));
           })),
           Container(width: 20, height: 20,
-            decoration: const BoxDecoration(color: YoBusColors.primary, shape: BoxShape.circle)),
+            decoration: const BoxDecoration(color: TamBourColors.primary, shape: BoxShape.circle)),
         ]),
 
         // Corps
@@ -247,30 +246,30 @@ class _BilletIndividuel extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: YoBusColors.border, width: 0.5)),
+                border: Border.all(color: TamBourColors.border, width: 0.5)),
               child: Column(children: [
                 QrImageView(
                   data: b.codeQr, version: QrVersions.auto, size: 160,
                   backgroundColor: Colors.white,
                   eyeStyle: const QrEyeStyle(
-                    eyeShape: QrEyeShape.square, color: YoBusColors.primary),
+                    eyeShape: QrEyeShape.square, color: TamBourColors.primary),
                   dataModuleStyle: const QrDataModuleStyle(
                     dataModuleShape: QrDataModuleShape.square,
-                    color: YoBusColors.textPrimary)),
+                    color: TamBourColors.textPrimary)),
                 const SizedBox(height: 8),
                 Text(b.referenceBillet, style: const TextStyle(
                   fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w700,
-                  color: YoBusColors.textSecondary, letterSpacing: 1.5)),
+                  color: TamBourColors.textSecondary, letterSpacing: 1.5)),
                 const SizedBox(height: 4),
                 const Text("Présentez ce QR à l'embarquement", style: TextStyle(
-                  fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textHint)),
+                  fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint)),
               ])),
             const SizedBox(height: 14),
             // Infos passager
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: YoBusColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
+                color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
               child: Column(children: [
                 _InfoLigne(Icons.person_rounded,    'Passager',   b.passager.nomComplet),
                 const SizedBox(height: 8),
@@ -289,16 +288,16 @@ class _BilletIndividuel extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: YoBusColors.primaryLight, borderRadius: BorderRadius.circular(12)),
+                color: TamBourColors.primaryLight, borderRadius: BorderRadius.circular(12)),
               child: Row(children: [
-                const Icon(Icons.payments_rounded, color: YoBusColors.primary, size: 20),
+                const Icon(Icons.payments_rounded, color: TamBourColors.primary, size: 20),
                 const SizedBox(width: 10),
                 const Text('Montant payé', style: TextStyle(
-                  fontFamily: 'Outfit', fontSize: 13, color: YoBusColors.primary)),
+                  fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.primary)),
                 const Spacer(),
                 Text('${fmt.format(b.paiement.montantFcfa)} FCFA', style: const TextStyle(
                   fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w800,
-                  color: YoBusColors.primary)),
+                  color: TamBourColors.primary)),
               ])),
           ])),
       ]),
@@ -324,12 +323,12 @@ class _InfoLigne extends StatelessWidget {
   const _InfoLigne(this.icon, this.label, this.value);
   @override
   Widget build(BuildContext context) => Row(children: [
-    Icon(icon, size: 14, color: YoBusColors.textHint),
+    Icon(icon, size: 14, color: TamBourColors.textHint),
     const SizedBox(width: 8),
     Text('$label : ', style: const TextStyle(fontFamily: 'Outfit', fontSize: 12,
-      color: YoBusColors.textSecondary)),
+      color: TamBourColors.textSecondary)),
     Expanded(child: Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12,
-      fontWeight: FontWeight.w700, color: YoBusColors.textPrimary),
+      fontWeight: FontWeight.w700, color: TamBourColors.textPrimary),
       overflow: TextOverflow.ellipsis)),
   ]);
 }
@@ -349,7 +348,7 @@ class _Actions extends StatelessWidget {
           icon: const Icon(Icons.confirmation_number_rounded, size: 20),
           label: const Text('Voir mes billets'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white, foregroundColor: YoBusColors.primary,
+            backgroundColor: Colors.white, foregroundColor: TamBourColors.primary,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700)))),

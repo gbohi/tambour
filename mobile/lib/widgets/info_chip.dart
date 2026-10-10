@@ -22,12 +22,12 @@ class InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: backgroundColor ?? YoBusColors.surfaceVariant,
+        color: backgroundColor ?? TamBourColors.surfaceVariant,
         borderRadius: BorderRadius.circular(20)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 13, color: iconColor ?? YoBusColors.textSecondary),
+        Icon(icon, size: 13, color: iconColor ?? TamBourColors.textSecondary),
         const SizedBox(width: 5),
-        Text(label, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w500, color: textColor ?? YoBusColors.textSecondary)),
+        Text(label, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w500, color: textColor ?? TamBourColors.textSecondary)),
       ]));
   }
 }

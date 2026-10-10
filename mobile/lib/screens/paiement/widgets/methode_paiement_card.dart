@@ -55,9 +55,9 @@ class MethodePaiementCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: selected ? _couleur.withOpacity(0.08) : YoBusColors.surface,
+          color: selected ? _couleur.withOpacity(0.08) : TamBourColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? _couleur : YoBusColors.border, width: selected ? 2 : 0.5)),
+          border: Border.all(color: selected ? _couleur : TamBourColors.border, width: selected ? 2 : 0.5)),
         child: Row(children: [
           Container(
             width: 48, height: 48,
@@ -65,9 +65,9 @@ class MethodePaiementCard extends StatelessWidget {
             child: Icon(_icon, color: _textColor, size: 24)),
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(_nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+            Text(_nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
             const SizedBox(height: 3),
-            Text(_description, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textSecondary)),
+            Text(_description, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textSecondary)),
           ])),
           const SizedBox(width: 10),
           AnimatedContainer(
@@ -76,7 +76,7 @@ class MethodePaiementCard extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: selected ? _couleur : Colors.transparent,
-              border: Border.all(color: selected ? _couleur : YoBusColors.border, width: 2)),
+              border: Border.all(color: selected ? _couleur : TamBourColors.border, width: 2)),
             child: selected ? const Icon(Icons.check_rounded, color: Colors.white, size: 12) : null),
         ]),
       ),

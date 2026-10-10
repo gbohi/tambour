@@ -1,4 +1,4 @@
-# TamBour (YôBus)
+# TamBour (TamBour)
 
 Réservation de transport interurbain en Côte d'Ivoire.
 

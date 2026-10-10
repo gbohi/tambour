@@ -65,7 +65,7 @@ class EstEmailVerifie(BasePermission):
 
 
 class EstTransporteurVerifie(BasePermission):
-    """Autorise uniquement les transporteurs verifies par YoBus."""
+    """Autorise uniquement les transporteurs verifies par TamBour."""
     message = 'Votre compte transporteur est en attente de verification.'
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:

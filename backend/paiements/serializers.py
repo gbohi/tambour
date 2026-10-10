@@ -48,7 +48,7 @@ class VersementSerializer(serializers.ModelSerializer):
         model = Versement
         fields = [
             'id', 'transporteur', 'transporteur_nom', 'periode_debut', 'periode_fin',
-            'montant_brut', 'commission_yobus', 'montant_net', 'statut', 'statut_label',
+            'montant_brut', 'commission_tambour', 'montant_net', 'statut', 'statut_label',
             'reference_virement', 'created_at', 'traite_le',
         ]
         read_only_fields = fields

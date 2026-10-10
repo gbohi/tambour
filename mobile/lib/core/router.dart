@@ -2,7 +2,6 @@ import 'package:go_router/go_router.dart';
 import '../screens/auth/auth_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/resultats/resultats_screen.dart';
-import '../screens/siege/siege_screen.dart';
 import '../screens/passagers/passagers_screen.dart';
 import '../screens/paiement/paiement_screen.dart';
 import '../screens/billet/billet_screen.dart';
@@ -11,6 +10,7 @@ import '../screens/compte/compte_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/gares/gares_screen.dart';
 import '../screens/profil/profil_edit_screen.dart';
+import '../screens/lignes/lignes_populaires_screen.dart';
 import '../providers/recherche_provider.dart';
 import '../models/paiement.dart';
 import '../models/trajet.dart';
@@ -23,13 +23,6 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/resultats',
       builder: (_, state) => ResultatsScreen(params: state.extra as RechercheParams),
-    ),
-    GoRoute(
-      path: '/siege',
-      builder: (_, state) {
-        final extra = state.extra as Map<String, dynamic>;
-        return SiegeScreen(trajet: extra['trajet'] as Trajet, params: extra['params'] as RechercheParams);
-      },
     ),
     GoRoute(
       path: '/passagers',
@@ -57,5 +50,6 @@ final appRouter = GoRouter(
     GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
     GoRoute(path: '/gares', builder: (_, __) => const GaresScreen()),
     GoRoute(path: '/profil/edit', builder: (_, __) => const ProfilEditScreen()),
+    GoRoute(path: '/lignes-populaires', builder: (_, __) => const LignesPopulairesScreen()),
   ],
 );

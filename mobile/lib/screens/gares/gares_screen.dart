@@ -47,7 +47,7 @@ class _GaresScreenState extends State<GaresScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(
         children: [
           _Header(nbGares: _gares.length),
@@ -86,7 +86,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -137,10 +137,10 @@ class _TabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: TabBar(
         controller: controller,
-        indicatorColor: YoBusColors.gold,
+        indicatorColor: TamBourColors.gold,
         indicatorWeight: 3,
         labelColor: Colors.white,
         unselectedLabelColor: Colors.white54,
@@ -197,7 +197,7 @@ class _CarteView extends StatelessWidget {
             // Tuiles OpenStreetMap — gratuit, pas de clé API
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'ci.yobus.app',
+              userAgentPackageName: 'ci.tambour.app',
               maxZoom: 19,
             ),
             MarkerLayer(
@@ -229,11 +229,11 @@ class _CarteView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: YoBusColors.border, width: 0.5),
+                border: Border.all(color: TamBourColors.border, width: 0.5),
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))],
               ),
               child: const Icon(Icons.my_location_rounded,
-                  color: YoBusColors.primary, size: 20),
+                  color: TamBourColors.primary, size: 20),
             ),
           ),
         ),
@@ -247,12 +247,12 @@ class _CarteView extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.92),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: YoBusColors.border, width: 0.5),
+              border: Border.all(color: TamBourColors.border, width: 0.5),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.location_on_rounded, size: 14, color: YoBusColors.primary),
+                const Icon(Icons.location_on_rounded, size: 14, color: TamBourColors.primary),
                 const SizedBox(width: 5),
                 Text(
                   '${gares.length} gares',
@@ -260,7 +260,7 @@ class _CarteView extends StatelessWidget {
                     fontFamily: 'Outfit',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: YoBusColors.primary,
+                    color: TamBourColors.primary,
                   ),
                 ),
               ],
@@ -302,26 +302,26 @@ class _Marqueur extends StatelessWidget {
           width: taille,
           height: taille,
           decoration: BoxDecoration(
-            color: estSelectionne ? YoBusColors.primary : gare.estPrincipale ? YoBusColors.primary : YoBusColors.surface,
+            color: estSelectionne ? TamBourColors.primary : gare.estPrincipale ? TamBourColors.primary : TamBourColors.surface,
             shape: BoxShape.circle,
-            border: Border.all(color: YoBusColors.primary, width: estSelectionne ? 3 : 2),
-            boxShadow: [BoxShadow(color: YoBusColors.primary.withOpacity(estSelectionne ? 0.4 : 0.2), blurRadius: estSelectionne ? 12 : 6, offset: const Offset(0, 3))],
+            border: Border.all(color: TamBourColors.primary, width: estSelectionne ? 3 : 2),
+            boxShadow: [BoxShadow(color: TamBourColors.primary.withOpacity(estSelectionne ? 0.4 : 0.2), blurRadius: estSelectionne ? 12 : 6, offset: const Offset(0, 3))],
           ),
           child: Center(
             child: Icon(
               Icons.directions_bus_rounded,
               size: estSelectionne ? 22 : 18,
-              color: estSelectionne || gare.estPrincipale ? Colors.white : YoBusColors.primary,
+              color: estSelectionne || gare.estPrincipale ? Colors.white : TamBourColors.primary,
             ),
           ),
         ),
-        Container(width: 2.5, height: 8, color: YoBusColors.primary),
-        Container(width: 7, height: 7, decoration: const BoxDecoration(color: YoBusColors.primary, shape: BoxShape.circle)),
+        Container(width: 2.5, height: 8, color: TamBourColors.primary),
+        Container(width: 7, height: 7, decoration: const BoxDecoration(color: TamBourColors.primary, shape: BoxShape.circle)),
         if (estSelectionne)
           Container(
             margin: const EdgeInsets.only(top: 2),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: YoBusColors.primary, borderRadius: BorderRadius.circular(5)),
+            decoration: BoxDecoration(color: TamBourColors.primary, borderRadius: BorderRadius.circular(5)),
             child: Text(
               gare.ville,
               style: const TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white),
@@ -343,9 +343,9 @@ class _FicheGare extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: YoBusColors.surface,
+        color: TamBourColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: YoBusColors.primary, width: 1.5),
+        border: Border.all(color: TamBourColors.primary, width: 1.5),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 20, offset: const Offset(0, 6))],
       ),
       child: Column(
@@ -356,7 +356,7 @@ class _FicheGare extends StatelessWidget {
             children: [
               Container(
                 width: 46, height: 46,
-                decoration: BoxDecoration(color: YoBusColors.primary, borderRadius: BorderRadius.circular(13)),
+                decoration: BoxDecoration(color: TamBourColors.primary, borderRadius: BorderRadius.circular(13)),
                 child: const Icon(Icons.directions_bus_rounded, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
@@ -364,12 +364,12 @@ class _FicheGare extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(gare.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: YoBusColors.textPrimary)),
+                    Text(gare.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
                     const SizedBox(height: 2),
                     Row(children: [
-                      const Icon(Icons.access_time_rounded, size: 12, color: YoBusColors.textHint),
+                      const Icon(Icons.access_time_rounded, size: 12, color: TamBourColors.textHint),
                       const SizedBox(width: 4),
-                      Text(gare.heuresOuverture, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.textSecondary)),
+                      Text(gare.heuresOuverture, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
                     ]),
                   ],
                 ),
@@ -379,12 +379,12 @@ class _FicheGare extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(Icons.location_on_rounded, size: 13, color: YoBusColors.textHint),
+              const Icon(Icons.location_on_rounded, size: 13, color: TamBourColors.textHint),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   gare.adresse,
-                  style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.textSecondary),
+                  style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary),
                   maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -396,8 +396,8 @@ class _FicheGare extends StatelessWidget {
               spacing: 6,
               children: gare.compagnies.map((c) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: YoBusColors.surfaceVariant, borderRadius: BorderRadius.circular(6)),
-                child: Text(c, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w600, color: YoBusColors.textSecondary)),
+                decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(6)),
+                child: Text(c, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
               )).toList(),
             ),
           ],
@@ -410,8 +410,8 @@ class _FicheGare extends StatelessWidget {
                   icon: const Icon(Icons.search_rounded, size: 16),
                   label: const Text('Voir les trajets'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: YoBusColors.primary,
-                    side: const BorderSide(color: YoBusColors.primary, width: 1.5),
+                    foregroundColor: TamBourColors.primary,
+                    side: const BorderSide(color: TamBourColors.primary, width: 1.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700),
@@ -425,7 +425,7 @@ class _FicheGare extends StatelessWidget {
                   icon: const Icon(Icons.navigation_rounded, size: 16),
                   label: const Text('Y aller'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: YoBusColors.primary, foregroundColor: Colors.white,
+                    backgroundColor: TamBourColors.primary, foregroundColor: Colors.white,
                     elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700),
@@ -466,10 +466,10 @@ class _ListeView extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: estSel ? YoBusColors.primaryLight : YoBusColors.surface,
+                color: estSel ? TamBourColors.primaryLight : TamBourColors.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: estSel ? YoBusColors.primary : YoBusColors.border,
+                  color: estSel ? TamBourColors.primary : TamBourColors.border,
                   width: estSel ? 1.5 : 0.5,
                 ),
               ),
@@ -478,10 +478,10 @@ class _ListeView extends StatelessWidget {
                   Container(
                     width: 46, height: 46,
                     decoration: BoxDecoration(
-                      color: estSel ? YoBusColors.primary : YoBusColors.primaryLight,
+                      color: estSel ? TamBourColors.primary : TamBourColors.primaryLight,
                       borderRadius: BorderRadius.circular(13),
                     ),
-                    child: Icon(Icons.directions_bus_rounded, color: estSel ? Colors.white : YoBusColors.primary, size: 22),
+                    child: Icon(Icons.directions_bus_rounded, color: estSel ? Colors.white : TamBourColors.primary, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -491,29 +491,29 @@ class _ListeView extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(gare.nom, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: estSel ? YoBusColors.primaryDark : YoBusColors.textPrimary)),
+                              child: Text(gare.nom, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: estSel ? TamBourColors.primaryDark : TamBourColors.textPrimary)),
                             ),
                             if (gare.estPrincipale)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: YoBusColors.goldLight, borderRadius: BorderRadius.circular(5)),
-                                child: const Text('Principale', style: TextStyle(fontFamily: 'Outfit', fontSize: 10, fontWeight: FontWeight.w700, color: YoBusColors.gold)),
+                                decoration: BoxDecoration(color: TamBourColors.goldLight, borderRadius: BorderRadius.circular(5)),
+                                child: const Text('Principale', style: TextStyle(fontFamily: 'Outfit', fontSize: 10, fontWeight: FontWeight.w700, color: TamBourColors.gold)),
                               ),
                           ],
                         ),
                         const SizedBox(height: 3),
-                        Text(gare.ville, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: YoBusColors.primary, fontWeight: FontWeight.w600)),
+                        Text(gare.ville, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.primary, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 2),
-                        Text(gare.adresse, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textHint), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(gare.adresse, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint), maxLines: 1, overflow: TextOverflow.ellipsis),
                         if (gare.compagnies.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text('${gare.compagnies.length} compagnie${gare.compagnies.length > 1 ? 's' : ''} · ${gare.heuresOuverture}',
-                            style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: YoBusColors.textSecondary)),
+                            style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textSecondary)),
                         ],
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right_rounded, color: YoBusColors.textHint, size: 20),
+                  const Icon(Icons.chevron_right_rounded, color: TamBourColors.textHint, size: 20),
                 ],
               ),
             ).animate().fadeIn(delay: Duration(milliseconds: 60 + i * 50), duration: 300.ms).slideX(begin: 0.04, end: 0),

@@ -13,13 +13,13 @@ class CompteScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
 
     return Scaffold(
-      backgroundColor: YoBusColors.background,
+      backgroundColor: TamBourColors.background,
       body: Column(
         children: [
           _Header(
-            nom: user?.nomComplet ?? 'Voyageur YôBus',
+            nom: user?.nomComplet ?? 'Voyageur TamBour',
             email: user?.email ?? '',
-            initiales: user?.initiales ?? 'YB',
+            initiales: user?.initiales ?? 'TB',
             nbVoyages: user?.nbVoyages ?? 0,
             points: user?.pointsFidelite ?? 0,
           ),
@@ -37,7 +37,7 @@ class CompteScreen extends ConsumerWidget {
                   ]).animate().fadeIn(delay: 100.ms),
                   const SizedBox(height: 16),
                   _Section(titre: 'Fidélité & avantages', items: [
-                    _Item(icon: Icons.star_rounded, label: 'Programme fidélité', trailing: _Badge('${user?.pointsFidelite ?? 0} pts', YoBusColors.gold), onTap: () {}),
+                    _Item(icon: Icons.star_rounded, label: 'Programme fidélité', trailing: _Badge('${user?.pointsFidelite ?? 0} pts', TamBourColors.gold), onTap: () {}),
                     _Item(icon: Icons.local_offer_rounded, label: 'Mes coupons & promos', onTap: () {}),
                   ]).animate().fadeIn(delay: 180.ms),
                   const SizedBox(height: 16),
@@ -55,11 +55,11 @@ class CompteScreen extends ConsumerWidget {
                   ).animate().fadeIn(delay: 340.ms),
                   const SizedBox(height: 20),
                   Text(
-                    'YôBus v1.0.0 · Côte d\'Ivoire',
+                    'TamBour v1.0.0 · Côte d\'Ivoire',
                     style: const TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 12,
-                      color: YoBusColors.textHint,
+                      color: TamBourColors.textHint,
                     ),
                   ),
                 ],
@@ -84,7 +84,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: YoBusColors.primary,
+      color: TamBourColors.primary,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -130,7 +130,7 @@ class _Header extends StatelessWidget {
                   Container(
                     width: 68, height: 68,
                     decoration: const BoxDecoration(
-                      color: YoBusColors.gold,
+                      color: TamBourColors.gold,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -205,16 +205,16 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: highlight ? YoBusColors.gold.withOpacity(0.15) : Colors.white.withOpacity(0.12),
+          color: highlight ? TamBourColors.gold.withOpacity(0.15) : Colors.white.withOpacity(0.12),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: highlight ? YoBusColors.gold.withOpacity(0.3) : Colors.white.withOpacity(0.2),
+            color: highlight ? TamBourColors.gold.withOpacity(0.3) : Colors.white.withOpacity(0.2),
             width: 0.5,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: highlight ? YoBusColors.gold : Colors.white70, size: 20),
+            Icon(icon, color: highlight ? TamBourColors.gold : Colors.white70, size: 20),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,7 +225,7 @@ class _StatCard extends StatelessWidget {
                     fontFamily: 'Outfit',
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: highlight ? YoBusColors.gold : Colors.white,
+                    color: highlight ? TamBourColors.gold : Colors.white,
                   ),
                 ),
                 Text(
@@ -233,7 +233,7 @@ class _StatCard extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 11,
-                    color: highlight ? YoBusColors.gold.withOpacity(0.8) : Colors.white60,
+                    color: highlight ? TamBourColors.gold.withOpacity(0.8) : Colors.white60,
                   ),
                 ),
               ],
@@ -264,16 +264,16 @@ class _Section extends StatelessWidget {
               fontFamily: 'Outfit',
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: YoBusColors.textSecondary,
+              color: TamBourColors.textSecondary,
               letterSpacing: 0.5,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: YoBusColors.surface,
+            color: TamBourColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: YoBusColors.border, width: 0.5),
+            border: Border.all(color: TamBourColors.border, width: 0.5),
           ),
           child: Column(
             children: items.asMap().entries.map((e) {
@@ -315,10 +315,10 @@ class _Item extends StatelessWidget {
             Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: YoBusColors.primaryLight,
+                color: TamBourColors.primaryLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: YoBusColors.primary, size: 18),
+              child: Icon(icon, color: TamBourColors.primary, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -328,13 +328,13 @@ class _Item extends StatelessWidget {
                   fontFamily: 'Outfit',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: YoBusColors.textPrimary,
+                  color: TamBourColors.textPrimary,
                 ),
               ),
             ),
             if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
             const Icon(Icons.chevron_right_rounded,
-                color: YoBusColors.textHint, size: 20),
+                color: TamBourColors.textHint, size: 20),
           ],
         ),
       ),
@@ -379,17 +379,17 @@ class _DeconnexionBtn extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: YoBusColors.error.withOpacity(0.06),
+          color: TamBourColors.error.withOpacity(0.06),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: YoBusColors.error.withOpacity(0.2),
+            color: TamBourColors.error.withOpacity(0.2),
             width: 0.5,
           ),
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.logout_rounded, color: YoBusColors.error, size: 18),
+            Icon(Icons.logout_rounded, color: TamBourColors.error, size: 18),
             SizedBox(width: 10),
             Text(
               'Se déconnecter',
@@ -397,7 +397,7 @@ class _DeconnexionBtn extends StatelessWidget {
                 fontFamily: 'Outfit',
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: YoBusColors.error,
+                color: TamBourColors.error,
               ),
             ),
           ],

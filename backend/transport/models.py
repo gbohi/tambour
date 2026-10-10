@@ -259,6 +259,25 @@ class Siege(models.Model):
         return False
 
     @classmethod
+    def disponibles(cls, trajet):
+        """Sièges libres, ou réservés dont la réservation temporaire a expiré."""
+        return cls.objects.filter(trajet=trajet).filter(
+            models.Q(statut=cls.Statut.LIBRE)
+            | models.Q(statut=cls.Statut.RESERVE, reserve_jusqu__lt=timezone.now())
+        ).order_by('rangee', 'colonne')
+
+    @classmethod
+    def attribuer(cls, trajet, nombre):
+        """
+        Choisit automatiquement `nombre` sièges disponibles, les uns à côté des autres autant que
+        possible (premiers sièges libres dans l'ordre du car). À appeler dans une transaction :
+        les sièges retenus sont verrouillés pour éviter une double attribution.
+        Retourne None s'il n'y a pas assez de places.
+        """
+        sieges = list(cls.disponibles(trajet).select_for_update(skip_locked=True)[:nombre])
+        return sieges if len(sieges) == nombre else None
+
+    @classmethod
     def generer_pour_trajet(cls, trajet):
         if not trajet.bus:
             return

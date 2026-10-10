@@ -36,9 +36,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       child: Form(
         key: _formKey,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Bon retour !', style: TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w800, color: YoBusColors.textPrimary)).animate().fadeIn(duration: 300.ms),
+          const Text('Bon retour !', style: TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w800, color: TamBourColors.textPrimary)).animate().fadeIn(duration: 300.ms),
           const SizedBox(height: 4),
-          const Text('Connectez-vous pour accéder à vos billets.', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: YoBusColors.textSecondary)).animate().fadeIn(delay: 80.ms),
+          const Text('Connectez-vous pour accéder à vos billets.', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary)).animate().fadeIn(delay: 80.ms),
           const SizedBox(height: 28),
           AuthField(controller: _emailCtrl, label: 'Adresse email', hint: 'exemple@email.com',
             icone: Icons.email_outlined, keyboardType: TextInputType.emailAddress,
@@ -46,11 +46,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           const SizedBox(height: 14),
           AuthField(controller: _mdpCtrl, label: 'Mot de passe', hint: '••••••••',
             icone: Icons.lock_outline_rounded, obscureText: !_mdpVisible,
-            suffixIcon: IconButton(icon: Icon(_mdpVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: YoBusColors.textHint, size: 20), onPressed: () => setState(() => _mdpVisible = !_mdpVisible)),
+            suffixIcon: IconButton(icon: Icon(_mdpVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: TamBourColors.textHint, size: 20), onPressed: () => setState(() => _mdpVisible = !_mdpVisible)),
             validator: (v) { if (v == null || v.isEmpty) return 'Le mot de passe est requis'; return null; }).animate().fadeIn(delay: 160.ms),
           const SizedBox(height: 10),
           Align(alignment: Alignment.centerRight,
-            child: const Text('Mot de passe oublié ?', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: YoBusColors.primary))).animate().fadeIn(delay: 200.ms),
+            child: const Text('Mot de passe oublié ?', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: TamBourColors.primary))).animate().fadeIn(delay: 200.ms),
           if (authState.erreur != null) ...[
             const SizedBox(height: 14),
             ErreurBanner(message: authState.erreur!).animate().fadeIn(duration: 250.ms).shakeX(hz: 4, amount: 4),
@@ -59,7 +59,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           SizedBox(width: double.infinity, height: 54,
             child: ElevatedButton(
               onPressed: authState.estChargement ? null : _connexion,
-              style: ElevatedButton.styleFrom(backgroundColor: YoBusColors.primary, foregroundColor: Colors.white, disabledBackgroundColor: YoBusColors.border, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0),
+              style: ElevatedButton.styleFrom(backgroundColor: TamBourColors.primary, foregroundColor: Colors.white, disabledBackgroundColor: TamBourColors.border, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0),
               child: authState.estChargement
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
                 : const Text('Se connecter', style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700)))).animate().fadeIn(delay: 240.ms),
@@ -69,11 +69,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           GestureDetector(
             onTap: () {},
             child: Container(width: double.infinity, height: 54,
-              decoration: BoxDecoration(color: YoBusColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: YoBusColors.border)),
+              decoration: BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: TamBourColors.border)),
               child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(Icons.phone_android_rounded, color: YoBusColors.primary, size: 22),
+                Icon(Icons.phone_android_rounded, color: TamBourColors.primary, size: 22),
                 SizedBox(width: 10),
-                Text('Continuer avec un numéro', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w600, color: YoBusColors.textPrimary)),
+                Text('Continuer avec un numéro', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w600, color: TamBourColors.textPrimary)),
               ]))).animate().fadeIn(delay: 320.ms),
         ]),
       ),

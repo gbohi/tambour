@@ -119,7 +119,7 @@ export class NotificationsComponent implements OnInit {
   envoi = { titre: '', message: '', type_notif: 'info', cibles: 'all' };
 
   readonly templates: Template[] = [
-    { icon: '🎁', label: 'Offre spéciale', titre: 'Offre exclusive YoBus !', message: '-20% sur tous les trajets ce week-end. Reservez maintenant !' },
+    { icon: '🎁', label: 'Offre spéciale', titre: 'Offre exclusive TamBour !', message: '-20% sur tous les trajets ce week-end. Reservez maintenant !' },
     { icon: '⚠️', label: 'Perturbations', titre: 'Perturbations sur le reseau', message: 'Des retards sont a prevoir. Merci de votre comprehension.' },
     { icon: '🔔', label: 'Rappel voyage', titre: 'Votre voyage approche', message: 'Rappel : trajet prevu demain. Soyez a la gare 30 min avant.' },
   ];

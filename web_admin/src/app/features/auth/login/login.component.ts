@@ -14,7 +14,7 @@ import { ToastService } from '../../../core/services/toast.service';
       <!-- Branding -->
       <div class="login-brand">
         <div class="brand-content">
-          <div class="brand-logo"><span class="ly">Yô</span><span class="lb">Bus</span></div>
+          <div class="brand-logo"><span class="ly">Tam</span><span class="lb">Bour</span></div>
           <h1 class="brand-title">Espace Administration</h1>
           <p class="brand-sub">Gérez vos trajets, voyageurs et paiements depuis un seul tableau de bord.</p>
           <div class="brand-stats">
@@ -42,7 +42,7 @@ import { ToastService } from '../../../core/services/toast.service';
             <div class="form-group">
               <label class="form-label">Adresse email</label>
               <input type="email" class="form-control" [(ngModel)]="email" name="email"
-                placeholder="admin@yobus.ci" required autocomplete="email">
+                placeholder="admin@tambour.ci" required autocomplete="email">
             </div>
             <div class="form-group" style="margin-top:14px">
               <label class="form-label">Mot de passe</label>

@@ -1,20 +1,21 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, CodeVerification, SessionAppareil
+from .models import User, CodeVerification, SessionAppareil, MouvementPoints
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = ['email', 'prenom', 'nom', 'role', 'is_verified', 'is_active', 'points_fidelite', 'nb_voyages', 'date_joined']
     list_filter = ['role', 'is_verified', 'is_active', 'is_staff']
-    search_fields = ['email', 'prenom', 'nom', 'telephone']
+    search_fields = ['email', 'prenom', 'nom', 'telephone', 'code_parrainage']
+    raw_id_fields = ['parrain']
     ordering = ['-date_joined']
     readonly_fields = ['id', 'date_joined', 'last_login', 'updated_at']
     fieldsets = (
         (None, {'fields': ('id', 'email', 'password')}),
         ('Informations personnelles', {'fields': ('prenom', 'nom', 'telephone', 'avatar')}),
         ('Role & statut', {'fields': ('role', 'is_active', 'is_verified', 'is_staff', 'is_superuser')}),
-        ('Fidelite', {'fields': ('points_fidelite', 'nb_voyages')}),
+        ('Fidelite', {'fields': ('points_fidelite', 'nb_voyages', 'code_parrainage', 'parrain')}),
         ('Notifications', {'fields': ('notif_sms', 'notif_push', 'notif_email', 'notif_promotions')}),
         ('Dates', {'fields': ('date_joined', 'last_login', 'updated_at')}),
     )
@@ -33,3 +34,11 @@ class SessionAppareilAdmin(admin.ModelAdmin):
     list_display = ['user', 'appareil', 'adresse_ip', 'est_actif', 'last_active']
     list_filter = ['est_actif']
     search_fields = ['user__email', 'appareil']
+
+
+@admin.register(MouvementPoints)
+class MouvementPointsAdmin(admin.ModelAdmin):
+    list_display = ['user', 'points', 'motif', 'description', 'created_at']
+    list_filter = ['motif']
+    search_fields = ['user__email', 'description']
+    raw_id_fields = ['user']

@@ -167,7 +167,7 @@ def calculer_versements_mensuels():
         net = total - commission
         versement, created = Versement.objects.get_or_create(
             transporteur=transporteur, periode_debut=premier_jour.date(), periode_fin=dernier_jour.date(),
-            defaults={'montant_brut': total, 'commission_yobus': commission, 'montant_net': net})
+            defaults={'montant_brut': total, 'commission_tambour': commission, 'montant_net': net})
         if created:
             nb += 1
             logger.info(f'Versement cree : {transporteur.nom} - {net:,} FCFA')

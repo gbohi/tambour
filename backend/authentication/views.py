@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -8,15 +10,15 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
-from .models import CodeVerification, SessionAppareil
+from .models import CodeVerification, SessionAppareil, MouvementPoints
 from .permissions import EstAdminOuSupport
 from .serializers import (
     InscriptionSerializer, ConnexionSerializer, UserDetailSerializer,
     MiseAJourProfilSerializer, ChangementMotDePasseSerializer,
     VerificationCodeSerializer, ReinitialisationMotDePasseSerializer,
-    NouveauMotDePasseSerializer,
+    NouveauMotDePasseSerializer, MouvementPointsSerializer,
 )
-from yobus_backend.utils import success_response, error_response
+from tambour_backend.utils import success_response, error_response
 
 User = get_user_model()
 
@@ -307,3 +309,47 @@ class AdminUserDetailView(APIView):
         return success_response(
             data=UserDetailSerializer(user, context={'request': request}).data,
             message='Utilisateur mis a jour.')
+
+
+# ── Fidélité & parrainage ────────────────────────────────────────────────────
+
+class FideliteView(APIView):
+    """GET /api/v1/auth/fidelite/ — points, code de parrainage, filleuls et historique."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if not user.code_parrainage:
+            user.save()
+        mouvements = user.mouvements_points.all()
+        points_parrainage = mouvements.filter(
+            motif=MouvementPoints.Motif.PARRAINAGE).aggregate(t=Sum('points'))['t'] or 0
+        message = (
+            f"Rejoins-moi sur TamBour pour réserver tes billets de car en Côte d'Ivoire ! "
+            f"Inscris-toi avec mon code {user.code_parrainage} et gagne {settings.POINTS_FILLEUL} points : "
+            f"{settings.LIEN_TELECHARGEMENT_APP}")
+        return success_response(data={
+            'points': user.points_fidelite,
+            'nb_voyages': user.nb_voyages,
+            'code_parrainage': user.code_parrainage,
+            'nb_filleuls': user.filleuls.count(),
+            'points_parrainage': points_parrainage,
+            'points_parrain': settings.POINTS_PARRAIN,
+            'points_filleul': settings.POINTS_FILLEUL,
+            'lien_telechargement': settings.LIEN_TELECHARGEMENT_APP,
+            'message_partage': message,
+            'historique': MouvementPointsSerializer(mouvements[:30], many=True).data,
+        })
+
+
+class VerifierCodeParrainageView(APIView):
+    """GET /api/v1/auth/parrainage/verifier/?code=TBXXXXXX — utilisé à l'inscription."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        code = (request.query_params.get('code') or '').strip().upper()
+        parrain = User.objects.filter(code_parrainage=code, is_active=True).first() if code else None
+        if not parrain:
+            return error_response('Code de parrainage invalide.', status_code=status.HTTP_404_NOT_FOUND)
+        return success_response(data={
+            'valide': True, 'parrain_prenom': parrain.prenom, 'points_filleul': settings.POINTS_FILLEUL})

@@ -34,8 +34,8 @@ class AppButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            foregroundColor: YoBusColors.primary,
-            side: const BorderSide(color: YoBusColors.primary, width: 1.5),
+            foregroundColor: TamBourColors.primary,
+            side: const BorderSide(color: TamBourColors.primary, width: 1.5),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700)),
           child: child));
@@ -45,10 +45,10 @@ class AppButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? YoBusColors.primary,
+          backgroundColor: backgroundColor ?? TamBourColors.primary,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: YoBusColors.border,
-          disabledForegroundColor: YoBusColors.textHint,
+          disabledBackgroundColor: TamBourColors.border,
+          disabledForegroundColor: TamBourColors.textHint,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700)),

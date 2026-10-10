@@ -2,7 +2,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from rest_framework import serializers
-from .models import CodeVerification, SessionAppareil
+from django.conf import settings
+from django.db import transaction
+from .models import CodeVerification, SessionAppareil, MouvementPoints
 
 User = get_user_model()
 
@@ -10,10 +12,20 @@ User = get_user_model()
 class InscriptionSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password], style={'input_type': 'password'})
     password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    code_parrainage = serializers.CharField(write_only=True, required=False, allow_blank=True, max_length=12)
 
     class Meta:
         model = User
-        fields = ['prenom', 'nom', 'email', 'telephone', 'password', 'password_confirm']
+        fields = ['prenom', 'nom', 'email', 'telephone', 'password', 'password_confirm', 'code_parrainage']
+
+    def validate_code_parrainage(self, value):
+        code = (value or '').strip().upper()
+        if not code:
+            return None
+        parrain = User.objects.filter(code_parrainage=code, is_active=True).first()
+        if not parrain:
+            raise serializers.ValidationError('Code de parrainage invalide.')
+        return parrain
 
     def validate_email(self, value):
         if User.objects.filter(email=value.lower()).exists():
@@ -36,9 +48,16 @@ class InscriptionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
+        parrain = validated_data.pop('code_parrainage', None)
+        with transaction.atomic():
+            user = User(**validated_data, parrain=parrain)
+            user.set_password(password)
+            user.save()
+            if parrain:
+                parrain.ajouter_points(settings.POINTS_PARRAIN, MouvementPoints.Motif.PARRAINAGE,
+                                       f'{user.prenom} s\'est inscrit avec votre code')
+                user.ajouter_points(settings.POINTS_FILLEUL, MouvementPoints.Motif.BIENVENUE,
+                                    f'Inscription avec le code de {parrain.prenom}')
         return user
 
 
@@ -69,11 +88,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'prenom', 'nom', 'nom_complet', 'initiales', 'email', 'telephone',
-            'avatar_url', 'role', 'is_verified', 'points_fidelite', 'nb_voyages',
+            'avatar_url', 'role', 'is_verified', 'points_fidelite', 'nb_voyages', 'code_parrainage',
             'notif_sms', 'notif_push', 'notif_email', 'notif_promotions',
             'date_inscription', 'updated_at',
         ]
-        read_only_fields = ['id', 'role', 'is_verified', 'points_fidelite', 'nb_voyages', 'date_inscription']
+        read_only_fields = ['id', 'role', 'is_verified', 'points_fidelite', 'nb_voyages', 'code_parrainage', 'date_inscription']
 
     def get_avatar_url(self, obj):
         request = self.context.get('request')
@@ -155,3 +174,11 @@ class NouveauMotDePasseSerializer(serializers.Serializer):
         attrs['user'] = user
         attrs['code_obj'] = code_obj
         return attrs
+
+
+class MouvementPointsSerializer(serializers.ModelSerializer):
+    motif_label = serializers.CharField(source='get_motif_display', read_only=True)
+
+    class Meta:
+        model = MouvementPoints
+        fields = ['id', 'points', 'motif', 'motif_label', 'description', 'created_at']

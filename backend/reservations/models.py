@@ -93,7 +93,10 @@ class Passager(models.Model):
     """
     id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='passagers')
-    siege       = models.OneToOneField('transport.Siege', on_delete=models.CASCADE, related_name='passager')
+    # Siège attribué automatiquement. Un siège peut être réattribué après expiration ou
+    # annulation d'une réservation, d'où une ForeignKey (l'historique des passagers est conservé).
+    siege       = models.ForeignKey('transport.Siege', on_delete=models.CASCADE,
+                                    related_name='passagers', related_query_name='passager')
     prenom      = models.CharField(max_length=100)
     nom         = models.CharField(max_length=100)
     telephone   = models.CharField(max_length=20)

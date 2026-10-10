@@ -21,13 +21,28 @@ class _InscriptionFormState extends ConsumerState<InscriptionForm> {
   final _telCtrl = TextEditingController();
   final _mdpCtrl = TextEditingController();
   final _mdpConfirmCtrl = TextEditingController();
+  final _parrainCtrl = TextEditingController();
   bool _mdpVisible = false;
+  String? _parrainPrenom;   // prénom du parrain si le code est valide
+  bool _verifCode = false;
   bool _cguAcceptees = false;
 
   @override
   void dispose() {
-    for (final c in [_prenomCtrl, _nomCtrl, _emailCtrl, _telCtrl, _mdpCtrl, _mdpConfirmCtrl]) c.dispose();
+    for (final c in [_prenomCtrl, _nomCtrl, _emailCtrl, _telCtrl, _mdpCtrl, _mdpConfirmCtrl, _parrainCtrl]) c.dispose();
     super.dispose();
+  }
+
+  Future<void> _verifierCode(String valeur) async {
+    final code = valeur.trim().toUpperCase();
+    if (code.length < 8) {
+      if (_parrainPrenom != null) setState(() => _parrainPrenom = null);
+      return;
+    }
+    setState(() => _verifCode = true);
+    final prenom = await ref.read(authServiceProvider).verifierCodeParrainage(code);
+    if (!mounted || _parrainCtrl.text.trim().toUpperCase() != code) return;
+    setState(() { _verifCode = false; _parrainPrenom = prenom; });
   }
 
   Future<void> _inscrire() async {
@@ -42,7 +57,8 @@ class _InscriptionFormState extends ConsumerState<InscriptionForm> {
     final ok = await ref.read(authProvider.notifier).inscrire(
       prenom: _prenomCtrl.text.trim(), nom: _nomCtrl.text.trim(),
       email: _emailCtrl.text.trim(), telephone: _telCtrl.text.trim(),
-      motDePasse: _mdpCtrl.text);
+      motDePasse: _mdpCtrl.text,
+      codeParrainage: _parrainCtrl.text.trim().toUpperCase());
     if (ok && mounted) context.go('/');
   }
 
@@ -84,6 +100,10 @@ class _InscriptionFormState extends ConsumerState<InscriptionForm> {
             icone: Icons.lock_outline_rounded, obscureText: !_mdpVisible,
             suffixIcon: IconButton(icon: Icon(_mdpVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: TamBourColors.textHint, size: 20), onPressed: () => setState(() => _mdpVisible = !_mdpVisible)),
             validator: (v) => v != _mdpCtrl.text ? 'Les mots de passe ne correspondent pas' : null).animate().fadeIn(delay: 260.ms),
+          const SizedBox(height: 14),
+          _ChampParrainage(
+            controller: _parrainCtrl, onChanged: _verifierCode,
+            verification: _verifCode, parrainPrenom: _parrainPrenom).animate().fadeIn(delay: 280.ms),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () => setState(() => _cguAcceptees = !_cguAcceptees),
@@ -151,6 +171,61 @@ class _ChampTelephone extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textHint),
           errorStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.error))),
+    ]);
+  }
+}
+
+/// Code de parrainage facultatif : le parrain et le nouvel inscrit gagnent des points.
+class _ChampParrainage extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final bool verification;
+  final String? parrainPrenom;
+  const _ChampParrainage({required this.controller, required this.onChanged,
+    required this.verification, required this.parrainPrenom});
+
+  @override
+  Widget build(BuildContext context) {
+    final code = controller.text.trim();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Code de parrainage (facultatif)', style: TextStyle(fontFamily: 'Outfit', fontSize: 13,
+        fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
+      const SizedBox(height: 6),
+      TextFormField(
+        controller: controller, onChanged: onChanged,
+        textCapitalization: TextCapitalization.characters,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')), LengthLimitingTextInputFormatter(12)],
+        style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, letterSpacing: 1.5,
+          color: TamBourColors.textPrimary, fontWeight: FontWeight.w600),
+        decoration: InputDecoration(
+          hintText: 'Ex : TB7K2QX9',
+          prefixIcon: const Padding(padding: EdgeInsets.symmetric(horizontal: 14),
+            child: Icon(Icons.card_giftcard_rounded, size: 18, color: TamBourColors.gold)),
+          prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          suffixIcon: verification
+            ? const Padding(padding: EdgeInsets.all(14), child: SizedBox(width: 16, height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: TamBourColors.primary)))
+            : parrainPrenom != null
+              ? const Icon(Icons.check_circle_rounded, color: TamBourColors.success, size: 20)
+              : null,
+          filled: true, fillColor: TamBourColors.surfaceVariant,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: TamBourColors.primary, width: 2)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          hintStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, letterSpacing: 0, color: TamBourColors.textHint)),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        parrainPrenom != null
+          ? 'Parrainé par $parrainPrenom : vous recevrez des points de bienvenue 🎁'
+          : code.length >= 8 && !verification
+            ? 'Code introuvable : vérifiez-le ou laissez ce champ vide.'
+            : 'Un ami vous a invité ? Saisissez son code pour gagner des points.',
+        style: TextStyle(fontFamily: 'Outfit', fontSize: 12,
+          color: parrainPrenom != null ? TamBourColors.success
+            : code.length >= 8 && !verification ? TamBourColors.error : TamBourColors.textHint)),
     ]);
   }
 }

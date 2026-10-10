@@ -51,11 +51,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> inscrire({required String prenom, required String nom,
-    required String email, required String telephone, required String motDePasse}) async {
+    required String email, required String telephone, required String motDePasse,
+    String? codeParrainage}) async {
     state = state.copyWith(statut: AuthStatut.chargement, erreur: null);
     try {
       await _service.inscrire(prenom: prenom, nom: nom, email: email,
-        telephone: telephone, motDePasse: motDePasse);
+        telephone: telephone, motDePasse: motDePasse, codeParrainage: codeParrainage);
       final user = await _service.getProfile();
       state = state.copyWith(statut: AuthStatut.connecte, user: user);
       return true;
@@ -75,6 +76,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(statut: AuthStatut.erreur, erreur: e.message);
       return false;
     }
+  }
+
+  /// Recharge le profil (ex. après un gain de points).
+  Future<void> rafraichirProfil() async {
+    try {
+      final user = await _service.getProfile();
+      state = state.copyWith(statut: AuthStatut.connecte, user: user);
+    } catch (_) {}
   }
 
   Future<void> deconnecter() async {

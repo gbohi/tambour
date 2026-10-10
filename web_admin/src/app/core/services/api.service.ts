@@ -6,6 +6,9 @@ import { ApiResponse, PaginatedResponse, PageParams } from '../models/api.model'
 import { User } from '../models/user.model';
 import { Ville, Gare, Transporteur, Trajet, DashboardStats } from '../models/transport.model';
 import { Reservation, Paiement, NotifResponse, Versement } from '../models/reservation.model';
+import {
+  Reclamation, ReclamationsResponse, MessageSupport, MessagesResponse, AvisResponse,
+} from '../models/support.model';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -117,5 +120,22 @@ export class ApiService {
       params: { type, date_debut: dateDebut, date_fin: dateFin },
       responseType: 'blob'
     });
+  }
+
+  // ── Support client ─────────────────────────────────────────────────────────
+  getReclamations(p?: PageParams): Observable<ApiResponse<ReclamationsResponse>> {
+    return this.http.get<ApiResponse<ReclamationsResponse>>(`${this.API}/support/reclamations/`, { params: this.toParams(p) });
+  }
+  updateReclamation(id: string, data: Partial<Reclamation>): Observable<ApiResponse<Reclamation>> {
+    return this.http.patch<ApiResponse<Reclamation>>(`${this.API}/support/reclamations/${id}/`, data);
+  }
+  getMessagesSupport(p?: PageParams): Observable<ApiResponse<MessagesResponse>> {
+    return this.http.get<ApiResponse<MessagesResponse>>(`${this.API}/support/messages/`, { params: this.toParams(p) });
+  }
+  updateMessageSupport(id: string, data: Partial<MessageSupport>): Observable<ApiResponse<MessageSupport>> {
+    return this.http.patch<ApiResponse<MessageSupport>>(`${this.API}/support/messages/${id}/`, data);
+  }
+  getAvisApplication(): Observable<ApiResponse<AvisResponse>> {
+    return this.http.get<ApiResponse<AvisResponse>>(`${this.API}/support/avis-app/`);
   }
 }

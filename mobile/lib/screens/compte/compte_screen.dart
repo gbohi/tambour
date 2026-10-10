@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 
@@ -37,14 +38,16 @@ class CompteScreen extends ConsumerWidget {
                   ]).animate().fadeIn(delay: 100.ms),
                   const SizedBox(height: 16),
                   _Section(titre: 'Fidélité & avantages', items: [
-                    _Item(icon: Icons.star_rounded, label: 'Programme fidélité', trailing: _Badge('${user?.pointsFidelite ?? 0} pts', TamBourColors.gold), onTap: () {}),
+                    _Item(icon: Icons.star_rounded, label: 'Programme fidélité', trailing: _Badge('${user?.pointsFidelite ?? 0} pts', TamBourColors.gold), onTap: () => context.push('/fidelite')),
+                    _Item(icon: Icons.people_alt_rounded, label: 'Parrainer un ami', trailing: _Badge(user?.codeParrainage ?? '', TamBourColors.primary), onTap: () => context.push('/fidelite')),
                     _Item(icon: Icons.local_offer_rounded, label: 'Mes coupons & promos', onTap: () {}),
                   ]).animate().fadeIn(delay: 180.ms),
                   const SizedBox(height: 16),
                   _Section(titre: 'Aide & support', items: [
-                    _Item(icon: Icons.help_outline_rounded, label: 'Centre d\'aide', onTap: () {}),
-                    _Item(icon: Icons.headset_mic_rounded, label: 'Contacter le support', onTap: () {}),
-                    _Item(icon: Icons.star_outline_rounded, label: 'Noter l\'application', onTap: () {}),
+                    _Item(icon: Icons.help_outline_rounded, label: 'Centre d\'aide', onTap: () => context.push('/aide')),
+                    _Item(icon: Icons.headset_mic_rounded, label: 'Contacter le support', onTap: () => context.push('/support')),
+                    _Item(icon: Icons.report_problem_outlined, label: 'Faire une réclamation', onTap: () => context.push('/reclamations')),
+                    _Item(icon: Icons.star_outline_rounded, label: 'Noter l\'application', onTap: () => context.push('/noter')),
                   ]).animate().fadeIn(delay: 260.ms),
                   const SizedBox(height: 16),
                   _DeconnexionBtn(
@@ -55,7 +58,7 @@ class CompteScreen extends ConsumerWidget {
                   ).animate().fadeIn(delay: 340.ms),
                   const SizedBox(height: 20),
                   Text(
-                    'TamBour v1.0.0 · Côte d\'Ivoire',
+                    'TamBour v${AppConstants.version} · Côte d\'Ivoire',
                     style: const TextStyle(
                       fontFamily: 'Outfit',
                       fontSize: 12,

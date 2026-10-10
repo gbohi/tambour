@@ -68,6 +68,7 @@ export class TopbarComponent {
     '/reservations': 'Réservations', '/paiements': 'Paiements',
     '/notifications': 'Notifications', '/gares': 'Gares',
     '/rapports': 'Rapports & exports', '/profil': 'Mon profil',
+    '/support': 'Support client',
   };
 
   constructor() {

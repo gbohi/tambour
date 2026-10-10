@@ -30,16 +30,28 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> inscrire({required String prenom, required String nom,
-    required String email, required String telephone, required String motDePasse}) async {
+    required String email, required String telephone, required String motDePasse,
+    String? codeParrainage}) async {
     try {
       final response = await _dio.post('/auth/register/', data: {
         'prenom': prenom, 'nom': nom, 'email': email, 'telephone': telephone,
         'password': motDePasse, 'password_confirm': motDePasse,
+        if (codeParrainage != null && codeParrainage.isNotEmpty) 'code_parrainage': codeParrainage,
       });
       final data = response.data['data'] as Map<String, dynamic>;
       await _saveTokens(access: data['access'] as String, refresh: data['refresh'] as String);
       return data;
     } on DioException catch (e) { throw AuthException(_parseError(e)); }
+  }
+
+  /// Retourne le prénom du parrain si le code existe, sinon null.
+  Future<String?> verifierCodeParrainage(String code) async {
+    try {
+      final response = await _dio.get('/auth/parrainage/verifier/', queryParameters: {'code': code});
+      return response.data['data']['parrain_prenom'] as String?;
+    } on DioException {
+      return null;
+    }
   }
 
   Future<UserModel> getProfile() async {
@@ -73,6 +85,13 @@ class AuthService {
   String _parseError(DioException e) {
     if (e.response?.statusCode == 401) return 'Email ou mot de passe incorrect.';
     if (e.response?.statusCode == 400) {
+      // Préférer le premier message de champ (ex. « Code de parrainage invalide. »)
+      final errors = e.response?.data?['errors'];
+      if (errors is Map) {
+        for (final v in errors.values) {
+          if (v is List && v.isNotEmpty && v.first is String) return v.first as String;
+        }
+      }
       final msg = e.response?.data?['message'];
       if (msg is String && msg.isNotEmpty) return msg;
     }

@@ -11,6 +11,11 @@ import '../screens/notifications/notifications_screen.dart';
 import '../screens/gares/gares_screen.dart';
 import '../screens/profil/profil_edit_screen.dart';
 import '../screens/lignes/lignes_populaires_screen.dart';
+import '../screens/fidelite/fidelite_screen.dart';
+import '../screens/support/centre_aide_screen.dart';
+import '../screens/support/contact_support_screen.dart';
+import '../screens/support/noter_app_screen.dart';
+import '../screens/support/reclamations_screen.dart';
 import '../providers/recherche_provider.dart';
 import '../models/paiement.dart';
 import '../models/trajet.dart';
@@ -51,5 +56,10 @@ final appRouter = GoRouter(
     GoRoute(path: '/gares', builder: (_, __) => const GaresScreen()),
     GoRoute(path: '/profil/edit', builder: (_, __) => const ProfilEditScreen()),
     GoRoute(path: '/lignes-populaires', builder: (_, __) => const LignesPopulairesScreen()),
+    GoRoute(path: '/fidelite', builder: (_, __) => const FideliteScreen()),
+    GoRoute(path: '/aide', builder: (_, __) => const CentreAideScreen()),
+    GoRoute(path: '/support', builder: (_, __) => const ContactSupportScreen()),
+    GoRoute(path: '/noter', builder: (_, __) => const NoterAppScreen()),
+    GoRoute(path: '/reclamations', builder: (_, __) => const ReclamationsScreen()),
   ],
 );

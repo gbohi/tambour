@@ -8,6 +8,17 @@ Réservation de transport interurbain en Côte d'Ivoire.
 | `web_admin/` | Angular 17 | Back-office d'administration |
 | `mobile/` | Flutter | Application voyageurs |
 
+## Fonctionnalités récentes
+
+- **Sièges attribués automatiquement** : plus de choix de siège ; à la réservation, l'API attribue les premières
+  places libres du car (passagers côte à côte), avec verrouillage pour éviter les doubles attributions.
+- **Lignes populaires** : `GET /api/v1/lignes/populaires/` et page « Voir tout » dans l'application.
+- **Fidélité & parrainage** : chaque utilisateur a un code (ex. `TB7K2QX9`). À l'inscription avec ce code, le parrain
+  et le filleul gagnent des points (`POINTS_PARRAIN`, `POINTS_FILLEUL` dans `.env`). Historique des points
+  (`GET /api/v1/auth/fidelite/`).
+- **Support** (`/api/v1/support/…`) : centre d'aide (FAQ modifiable dans l'admin Django), contact du support,
+  réclamations suivies par référence, note de l'application. Traitement dans le web admin, page « Support client ».
+
 ## Backend
 
 ```bash
@@ -19,6 +30,7 @@ python manage.py migrate
 python manage.py seed_donnees      # villes, gares, lignes de démo
 python manage.py createsuperuser
 python manage.py runserver
+python manage.py test --settings=tambour_backend.settings.base   # tests
 ```
 
 PostgreSQL et Redis doivent tourner en local (voir `.env`).

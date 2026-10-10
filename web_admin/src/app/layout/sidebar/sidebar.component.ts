@@ -71,6 +71,7 @@ export class SidebarComponent {
     { label: 'Réservations',    icon: '🎫', path: '/reservations',  roles: ['admin','support','transporteur'] },
     { label: 'Paiements',       icon: '💳', path: '/paiements',     roles: ['admin'] },
     { label: 'Notifications',   icon: '🔔', path: '/notifications', roles: ['admin','support'] },
+    { label: 'Support client',  icon: '🎧', path: '/support',       roles: ['admin','support'] },
     { label: 'Gares',           icon: '📍', path: '/gares',         roles: ['admin'] },
     { label: 'Rapports',        icon: '📈', path: '/rapports',      roles: ['admin'] },
     { label: 'Mon profil',      icon: '⚙️', path: '/profil' },

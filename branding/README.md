@@ -18,10 +18,17 @@ Aux petites tailles, composer **symbole + « TamBour » + devise en texte** (pol
 
 ## Couleurs
 
-| | Hex |
-|---|---|
-| Vert TamBour | `#0F4A3B` |
-| Or | `#F2A93B` |
-| Crème | `#FAF7EF` |
+| | Hex | Usage |
+|---|---|---|
+| Vert TamBour | `#0F4A3B` | Couleur principale (boutons, liens, en-têtes) |
+| Vert foncé | `#0B3A2E` | Survol, états appuyés |
+| Vert nuit | `#072A21` | Dégradés, fonds sombres |
+| Vert vif | `#2E8466` | Fin de dégradés, accents |
+| Vert pâle | `#E7F0EC` | Fonds de pastilles et de sélection |
+| Or | `#F2A93B` | Appels à l'action secondaires, prix, points |
+| Crème | `#FAF7EF` | Fond de l'icône TamBour, écran de lancement |
+
+Ces valeurs sont appliquées au site (`web/src/styles.scss`), à l'admin (`web_admin/src/styles.scss`),
+à l'app mobile (`mobile/lib/core/theme.dart`), aux billets PDF et aux emails.
 
 Police : **Outfit** (SIL Open Font License), embarquée dans l'application mobile (`mobile/assets/fonts`).

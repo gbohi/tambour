@@ -212,7 +212,7 @@ const STATUTS_MESSAGE: { code: StatutMessage; label: string; badge: string }[] =
     .clickable{cursor:pointer;}
     .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;}
     .tabs button{background:none;border:none;padding:10px 16px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;display:flex;gap:6px;align-items:center;}
-    .tabs button.active{color:var(--primary,#0A7C4E);border-bottom-color:var(--primary,#0A7C4E);}
+    .tabs button.active{color:var(--primary,#0F4A3B);border-bottom-color:var(--primary,#0F4A3B);}
     .repartition{display:flex;flex-direction:column;gap:8px;padding:4px;}
     .rep-ligne{display:flex;align-items:center;gap:10px;font-size:13px;}
     .rep-barre{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}

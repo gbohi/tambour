@@ -130,7 +130,7 @@ const PAGES: Record<string, PageInfo> = {
     }
   `,
   styles: [`
-    .tete{background:linear-gradient(165deg,#04281A,#0A7C4E);color:#fff;padding:56px 0 48px;}
+    .tete{background:linear-gradient(165deg,#072A21,#0F4A3B);color:#fff;padding:56px 0 48px;}
     .tete .surtitre{color:var(--or);}
     h1{font-size:clamp(30px,4vw,44px);font-weight:900;letter-spacing:-.03em;margin:6px 0 10px;}
     .tete p{max-width:640px;color:rgba(255,255,255,.85);font-size:17px;}

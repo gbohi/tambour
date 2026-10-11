@@ -52,7 +52,7 @@ import { NombrePipe } from '../pipes/nombre.pipe';
     .barre{height:72px;display:flex;align-items:center;gap:28px;}
     .logo{display:flex;align-items:center;gap:10px;}
     .pict{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--vert),var(--vert-vif));color:#fff;display:flex;align-items:center;justify-content:center;
-      box-shadow:0 8px 18px -6px rgba(10,124,78,.6);}
+      box-shadow:0 8px 18px -6px rgba(15,74,59,.6);}
     .symbole{height:38px;width:auto;display:block;}
     .symbole.clair{display:none;}
     .nom{font-size:25px;font-weight:700;letter-spacing:-.02em;color:var(--marque);}

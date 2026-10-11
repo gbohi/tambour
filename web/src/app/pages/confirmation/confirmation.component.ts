@@ -139,7 +139,7 @@ export class ConfirmationComponent implements OnInit {
         const codes: Record<string, string> = {};
         for (const p of r.passagers) {
           if (p.billet?.qr_data) {
-            codes[p.id] = await QRCode.toDataURL(p.billet.qr_data, { margin: 1, width: 300, color: { dark: '#0B1A14', light: '#FFFFFF' } });
+            codes[p.id] = await QRCode.toDataURL(p.billet.qr_data, { margin: 1, width: 300, color: { dark: '#0A2019', light: '#FFFFFF' } });
           }
         }
         this.qr.set(codes);

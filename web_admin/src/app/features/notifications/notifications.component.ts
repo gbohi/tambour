@@ -81,7 +81,7 @@ interface Template { icon: string; label: string; titre: string; message: string
     .case input{accent-color:var(--primary);width:16px;height:16px;}
     .ni{display:flex;gap:14px;padding:14px 16px;border-bottom:1px solid var(--divider);cursor:pointer;transition:background .12s;}
     .ni:hover{background:#FAFCFB;}
-    .ni.unread{background:#F7FBF9;}
+    .ni.unread{background:#F3F8F5;}
     .ni-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface-2);color:var(--text-2);}
     .t-confirmation,.t-paiement{background:var(--success-bg);color:var(--success);} .t-rappel{background:var(--info-bg);color:var(--info);}
     .t-retard{background:var(--warning-bg);color:var(--warning);} .t-promotion{background:var(--gold-light);color:var(--gold-dark);}

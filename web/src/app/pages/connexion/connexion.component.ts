@@ -58,7 +58,7 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
   `,
   styles: [`
     .page{min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;padding:40px 16px;
-      background:radial-gradient(800px 400px at 100% 0,rgba(25,195,125,.12),transparent 60%),radial-gradient(600px 300px at 0 100%,rgba(245,166,35,.12),transparent 60%);}
+      background:radial-gradient(800px 400px at 100% 0,rgba(46,132,102,.12),transparent 60%),radial-gradient(600px 300px at 0 100%,rgba(245,166,35,.12),transparent 60%);}
     .boite{width:100%;max-width:480px;padding:32px;display:flex;flex-direction:column;gap:24px;box-shadow:var(--ombre-2);}
     @media (max-width:520px){.boite{padding:22px;}}
     .segment{align-self:stretch;display:grid;grid-template-columns:1fr 1fr;}

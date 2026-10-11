@@ -4,9 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 class TamBourColors {
   TamBourColors._();
-  static const Color primary = Color(0xFF0A7C4E);
-  static const Color primaryDark = Color(0xFF075C39);
-  static const Color primaryLight = Color(0xFFF0FBF6);
+  static const Color primary = Color(0xFF0F4A3B);
+  static const Color primaryDark = Color(0xFF0B3A2E);
+  static const Color primaryLight = Color(0xFFE7F0EC);
   /// Vert et or du logo TamBour.
   static const Color marque = Color(0xFF0F4A3B);
   static const Color gold = Color(0xFFF2A93B);
@@ -18,7 +18,7 @@ class TamBourColors {
   static const Color textSecondary = Color(0xFF6B6B6B);
   static const Color textHint = Color(0xFFAAAAAA);
   static const Color border = Color(0xFFE8E8E6);
-  static const Color success = Color(0xFF0A7C4E);
+  static const Color success = Color(0xFF0F4A3B);
   static const Color error = Color(0xFFD94040);
   static const Color warning = Color(0xFFF2A93B);
   static const Color divider = Color(0xFFF0F0EE);

@@ -172,8 +172,8 @@ const METHODES: Record<string, { label: string; couleur: string }> = {
     @media (max-width:1100px){.grille{grid-template-columns:1fr;}}
     .histo{display:flex;align-items:flex-end;gap:12px;height:220px;padding-top:12px;}
     .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px;}
-    .barre{width:100%;max-width:48px;min-height:4px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#9ED9BD,#5DBB8F);transition:height .5s cubic-bezier(.2,.8,.2,1);}
-    .col.aujourdhui .barre{background:linear-gradient(180deg,#13A86E,var(--primary));}
+    .barre{width:100%;max-width:48px;min-height:4px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#A9CDBF,#5DBB8F);transition:height .5s cubic-bezier(.2,.8,.2,1);}
+    .col.aujourdhui .barre{background:linear-gradient(180deg,#2E8466,var(--primary));}
     .val{font-size:12px;font-weight:700;color:var(--text-2);}
     .jour{font-size:12px;color:var(--text-3);font-weight:600;text-transform:capitalize;}
     .col.aujourdhui .jour{color:var(--primary);}
@@ -222,7 +222,7 @@ export class DashboardComponent implements OnInit {
   paiements = computed(() => {
     const liste = this.stats()?.methodes_paiement ?? [];
     const total = liste.reduce((s, p) => s + p.montant, 0) || 1;
-    return liste.map(p => ({ ...p, ...(METHODES[p.methode] ?? { label: p.methode, couleur: '#0A7C4E' }),
+    return liste.map(p => ({ ...p, ...(METHODES[p.methode] ?? { label: p.methode, couleur: '#0F4A3B' }),
       pct: Math.round(p.montant / total * 100) }));
   });
   totalPaiements = computed(() => this.paiements().reduce((s, p) => s + p.montant, 0));

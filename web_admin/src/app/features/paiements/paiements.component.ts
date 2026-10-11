@@ -115,7 +115,7 @@ export class PaiementsComponent implements OnInit {
     { code: 'orange_money', label: 'Orange', couleur: '#FF7900' }, { code: 'mtn_momo', label: 'MTN', couleur: '#FFCB05' },
     { code: 'wave', label: 'Wave', couleur: '#1DC8F2' }, { code: 'carte', label: 'Carte', couleur: '#2563EB' },
   ];
-  couleur(m: string): string { return this.methodes.find(x => x.code === m)?.couleur ?? '#0A7C4E'; }
+  couleur(m: string): string { return this.methodes.find(x => x.code === m)?.couleur ?? '#0F4A3B'; }
   statutBadge(s: string): string { const r: Record<string,string> = { initie:'badge-neutral', en_attente:'badge-warning', succes:'badge-success', echec:'badge-error', rembourse:'badge-info', annule:'badge-neutral' }; return r[s] ?? 'badge-neutral'; }
   exportCsv(): void {
     const csv = ['Référence,Méthode,Montant,Téléphone,Statut,Date',

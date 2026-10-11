@@ -2,11 +2,11 @@
    TamBour Admin — système de design
    ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  --primary:        #0A7C4E;
-  --primary-600:    #08693F;
-  --primary-dark:   #064E30;
-  --primary-light:  #ECF8F2;
-  --primary-ring:   rgba(10,124,78,.16);
+  --primary:        #0F4A3B;
+  --primary-600:    #0B3A2E;
+  --primary-dark:   #0B3A2E;
+  --primary-light:  #E7F0EC;
+  --primary-ring:   rgba(15,74,59,.16);
   --gold:           #F2A93B;
   --marque:         #0F4A3B;
   --gold-dark:      #B9740A;
@@ -21,8 +21,8 @@
   --text-3:         #98A1AE;
   --border:         #E4E8E6;
   --divider:        #EEF1EF;
-  --success:        #0A7C4E;
-  --success-bg:     #E8F6EF;
+  --success:        #0F4A3B;
+  --success-bg:     #E7F0EC;
   --error:          #D14343;
   --error-bg:       #FDECEC;
   --warning:        #B9740A;
@@ -78,11 +78,11 @@ a{color:var(--primary);}
 .btn:active:not(:disabled){transform:translateY(1px);}
 .btn:focus-visible{outline:none;box-shadow:0 0 0 4px var(--primary-ring);}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
-.btn-primary{background:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(10,124,78,.3),inset 0 1px 0 rgba(255,255,255,.12);}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(15,74,59,.3),inset 0 1px 0 rgba(255,255,255,.12);}
 .btn-primary:not(:disabled):hover{background:var(--primary-600);}
 .btn-secondary,.btn-ghost{background:var(--surface);color:var(--text-1);border-color:var(--border);box-shadow:var(--shadow-xs);}
 .btn-secondary:not(:disabled):hover,.btn-ghost:not(:disabled):hover{background:var(--surface-2);border-color:#D3DAD6;}
-.btn-outline{background:var(--surface);color:var(--primary);border-color:rgba(10,124,78,.35);}
+.btn-outline{background:var(--surface);color:var(--primary);border-color:rgba(15,74,59,.35);}
 .btn-outline:not(:disabled):hover{background:var(--primary-light);}
 .btn-gold{background:var(--gold);color:#fff;}
 .btn-gold:not(:disabled):hover{background:#E59710;}
@@ -225,7 +225,7 @@ tbody tr.clickable{cursor:pointer;}
 .info-row:last-child{border-bottom:none;}
 .info-label{font-size:13px;color:var(--text-2);}
 .info-value{font-size:14px;font-weight:600;text-align:right;max-width:62%;}
-.info-box{background:var(--primary-light);border:1px solid rgba(10,124,78,.15);border-radius:var(--radius);padding:14px 16px;font-size:13px;}
+.info-box{background:var(--primary-light);border:1px solid rgba(15,74,59,.15);border-radius:var(--radius);padding:14px 16px;font-size:13px;}
 .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
 @media (max-width:1100px){.grid-2,.grid-3{grid-template-columns:1fr;}}

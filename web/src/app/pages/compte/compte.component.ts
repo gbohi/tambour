@@ -177,7 +177,7 @@ type Onglet = 'billets' | 'fidelite' | 'profil';
     }
   `,
   styles: [`
-    .tete{background:linear-gradient(165deg,#04281A,#0A7C4E);color:#fff;padding-top:36px;}
+    .tete{background:linear-gradient(165deg,#072A21,#0F4A3B);color:#fff;padding-top:36px;}
     .tete-contenu{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
     .avatar{width:72px;height:72px;border-radius:24px;background:var(--or);color:var(--encre);font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;}
     .qui{flex:1;min-width:200px;}

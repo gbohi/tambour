@@ -89,7 +89,7 @@ const CATEGORIES_RECLAMATION = [
     </div>
   `,
   styles: [`
-    .tete{background:linear-gradient(165deg,#04281A,#0A7C4E);color:#fff;padding:64px 0 56px;}
+    .tete{background:linear-gradient(165deg,#072A21,#0F4A3B);color:#fff;padding:64px 0 56px;}
     .centre{text-align:center;display:flex;flex-direction:column;align-items:center;}
     .tete .surtitre{color:var(--or);}
     .recherche{position:relative;width:100%;max-width:620px;margin-top:16px;color:var(--texte);}

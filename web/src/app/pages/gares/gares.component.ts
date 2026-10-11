@@ -102,7 +102,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .depart:hover{border-color:var(--vert);}
     .depart .h,.depart .d{display:flex;flex-direction:column;}
     .depart .h b{font-size:18px;}
-    .itin{border:1px solid var(--bord);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,#F4FAF7,#fff);animation:monte .25s;}
+    .itin{border:1px solid var(--bord);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,#F3F8F5,#fff);animation:monte .25s;}
     .itin-tete{display:flex;justify-content:space-between;align-items:center;}
     .fermer{border:none;background:var(--surface-2);width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--texte-2);}
     .modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
@@ -185,7 +185,7 @@ export class GaresComponent implements AfterViewInit, OnDestroy {
       const it = await this.itineraires.calculer(moi, gare);
       if (this.choisie()?.id !== g.id || !this.carte) return;
       this.couchesItin?.remove();
-      const ligne = L.polyline(it.points, { color: '#0A7C4E', weight: 6, opacity: .9, dashArray: it.estimation ? '8 10' : undefined, lineCap: 'round' });
+      const ligne = L.polyline(it.points, { color: '#0F4A3B', weight: 6, opacity: .9, dashArray: it.estimation ? '8 10' : undefined, lineCap: 'round' });
       const halo = L.polyline(it.points, { color: '#fff', weight: 10, opacity: .9 });
       const moiMarqueur = L.marker([moi.lat, moi.lng], { icon: L.divIcon({ className: '', iconSize: [20, 20], iconAnchor: [10, 10], html: '<div class="marqueur-moi"></div>' }), title: 'Vous êtes ici' });
       this.couchesItin = L.layerGroup([halo, ligne, moiMarqueur]).addTo(this.carte);

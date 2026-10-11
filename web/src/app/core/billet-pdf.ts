@@ -7,7 +7,7 @@ import { Passager, Reservation } from './models';
  * A4, marges 40 pt, bandeau vert TamBour, infos passager à gauche, QR d'embarquement à droite.
  * Une page par passager.
  */
-const VERT: [number, number, number] = [10, 124, 78];      // #0A7C4E
+const VERT: [number, number, number] = [15, 74, 59];      // #0F4A3B
 const OR: [number, number, number] = [242, 169, 59];       // #F2A93B (logo)
 const ENCRE: [number, number, number] = [26, 26, 26];      // #1A1A1A
 const GRIS_300: [number, number, number] = [224, 224, 224];

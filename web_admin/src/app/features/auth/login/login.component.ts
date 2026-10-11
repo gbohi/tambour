@@ -57,8 +57,8 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
     .ecran{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;background:var(--surface);}
     .visuel{position:relative;overflow:hidden;color:#fff;padding:40px 56px;display:flex;flex-direction:column;justify-content:space-between;
       background:radial-gradient(1200px 600px at -10% 110%,rgba(245,166,35,.35),transparent 60%),
-                 radial-gradient(900px 500px at 110% -10%,rgba(19,168,110,.55),transparent 60%),
-                 linear-gradient(160deg,#063D27 0%,#0A7C4E 60%,#0B8F59 100%);}
+                 radial-gradient(900px 500px at 110% -10%,rgba(46,132,102,.55),transparent 60%),
+                 linear-gradient(160deg,#063D27 0%,#0F4A3B 60%,#0B8F59 100%);}
     .visuel::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;pointer-events:none;}
     .marque{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:800;letter-spacing:-.02em;position:relative;z-index:1;}
     .marque img{height:48px;width:auto;display:block;}

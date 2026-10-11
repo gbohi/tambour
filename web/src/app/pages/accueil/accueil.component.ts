@@ -124,9 +124,9 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
   `,
   styles: [`
     .hero{position:relative;overflow:hidden;color:#fff;padding:150px 0 110px;
-      background:radial-gradient(900px 500px at 85% 10%,rgba(25,195,125,.45),transparent 60%),
+      background:radial-gradient(900px 500px at 85% 10%,rgba(46,132,102,.45),transparent 60%),
                  radial-gradient(700px 400px at 0% 100%,rgba(245,166,35,.28),transparent 60%),
-                 linear-gradient(165deg,#04281A 0%,#06402A 45%,#0A7C4E 100%);}
+                 linear-gradient(165deg,#072A21 0%,#06402A 45%,#0F4A3B 100%);}
     .routes{position:absolute;inset:0;width:100%;height:100%;opacity:.35;}
     .routes path{fill:none;stroke:rgba(255,255,255,.28);stroke-width:2;}
     .routes .pointille{stroke:var(--or);stroke-dasharray:2 14;stroke-linecap:round;stroke-width:4;opacity:.8;}
@@ -170,7 +170,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .etapes{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
     @media (max-width:800px){.etapes{grid-template-columns:1fr;}}
     .etape{position:relative;padding:32px 28px;border-radius:var(--r-lg);background:var(--fond);overflow:hidden;}
-    .etape .num{position:absolute;right:20px;top:4px;font-size:96px;font-weight:900;color:rgba(10,124,78,.07);line-height:1;}
+    .etape .num{position:absolute;right:20px;top:4px;font-size:96px;font-weight:900;color:rgba(15,74,59,.07);line-height:1;}
     .etape .ico{width:56px;height:56px;border-radius:16px;background:#fff;color:var(--vert);display:flex;align-items:center;justify-content:center;box-shadow:var(--ombre-1);margin-bottom:20px;}
     .etape h3{font-size:20px;margin-bottom:8px;}
     .etape p{color:var(--texte-2);}
@@ -181,7 +181,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .bandeau p{max-width:380px;}
     .parrainage{background:linear-gradient(150deg,#FFF6E3,#FFE7B8);color:var(--encre);}
     .parrainage p{color:#5E4A1E;}
-    .appli{background:linear-gradient(150deg,var(--encre),#123A2A);color:#fff;}
+    .appli{background:linear-gradient(150deg,var(--encre),#0B3A2E);color:#fff;}
     .appli p{color:rgba(255,255,255,.75);max-width:300px;}
     .appli{padding-right:240px;}
     .appli .pastille{background:rgba(255,255,255,.1);color:#fff;}

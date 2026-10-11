@@ -764,7 +764,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
         errorCorrectionLevel: QrErrorCorrectLevel.L);
       final qrCode = qrValidation.qrCode!;
       final painter = QrPainter.withQr(qr: qrCode,
-        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0A7C4E)),
+        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F4A3B)),
         dataModuleStyle: const QrDataModuleStyle(
           dataModuleShape: QrDataModuleShape.square, color: Color(0xFF1A1A1A)));
       final imgData = await painter.toImageData(300);
@@ -783,7 +783,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
             pw.Container(
               padding: const pw.EdgeInsets.all(20),
               decoration: pw.BoxDecoration(
-                color: const PdfColor.fromInt(0xFF0A7C4E),
+                color: const PdfColor.fromInt(0xFF0F4A3B),
                 borderRadius: pw.BorderRadius.circular(12)),
               child: pw.Column(children: [
                 pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
@@ -803,7 +803,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                         'Billet ${widget.numeroBillet}/${widget.totalBillets}',
                         style: pw.TextStyle(
                           fontSize: 11, fontWeight: pw.FontWeight.bold,
-                          color: const PdfColor.fromInt(0xFF0A7C4E)))),
+                          color: const PdfColor.fromInt(0xFF0F4A3B)))),
                 ]),
                 pw.SizedBox(height: 16),
                 pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
@@ -894,7 +894,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
         if (coche) pw.Padding(padding: const pw.EdgeInsets.only(left: 6),
           child: pw.CustomPaint(size: const PdfPoint(10, 9), painter: (canvas, size) {
             canvas
-              ..setStrokeColor(const PdfColor.fromInt(0xFF0A7C4E))..setLineWidth(1.6)
+              ..setStrokeColor(const PdfColor.fromInt(0xFF0F4A3B))..setLineWidth(1.6)
               ..moveTo(0.5, 4.5)..lineTo(3.5, 1.5)..lineTo(9.5, 8.5)..strokePath();
           })),
       ]),

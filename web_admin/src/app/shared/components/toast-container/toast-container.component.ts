@@ -22,7 +22,7 @@ import { IconComponent } from '../icon/icon.component';
     .toast{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-radius:14px;font-size:14px;font-weight:500;cursor:pointer;
       background:var(--ink);color:#fff;box-shadow:var(--shadow-lg);animation:toastIn .25s cubic-bezier(.2,.8,.2,1);}
     .ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .toast-success .ico{background:rgba(19,168,110,.25);color:#4ADE9B;}
+    .toast-success .ico{background:rgba(46,132,102,.25);color:#7CC4A6;}
     .toast-error .ico{background:rgba(209,67,67,.25);color:#FF8A8A;}
     .toast-warning .ico{background:rgba(245,166,35,.25);color:#FFC766;}
     .toast-info .ico{background:rgba(37,99,235,.25);color:#8AB4FF;}

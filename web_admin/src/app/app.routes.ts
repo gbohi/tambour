@@ -25,6 +25,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/paiements/paiements.component').then(m => m.PaiementsComponent) },
       { path: 'notifications', canActivate: [roleGuard], data: { roles: ['admin','support'] },
         loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent) },
+      { path: 'chauffeurs',    canActivate: [roleGuard], data: { roles: ['admin','support'] },
+        loadComponent: () => import('./features/chauffeurs/chauffeurs.component').then(m => m.ChauffeursComponent) },
       { path: 'support',       canActivate: [roleGuard], data: { roles: ['admin','support'] },
         loadComponent: () => import('./features/support/support.component').then(m => m.SupportComponent) },
       { path: 'gares',         canActivate: [roleGuard], data: { roles: ['admin'] },

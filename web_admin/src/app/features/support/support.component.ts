@@ -1,6 +1,8 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import {
@@ -24,7 +26,7 @@ const STATUTS_MESSAGE: { code: StatutMessage; label: string; badge: string }[] =
 @Component({
   selector: 'app-support',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
@@ -42,22 +44,22 @@ const STATUTS_MESSAGE: { code: StatutMessage; label: string; badge: string }[] =
           </div>
         }
         <div class="stat-card clickable" (click)="onglet.set('avis')">
-          <div><div class="stat-value">⭐ {{ moyenneAvis() | number:'1.1-1' }}</div>
+          <div><div class="stat-value"><span class="text-gold">★</span> {{ moyenneAvis() | number:'1.1-1' }}</div>
           <div class="stat-label">{{ totalAvis() }} avis sur l'application</div></div>
         </div>
       </div>
 
       <div class="tabs">
-        <button [class.active]="onglet() === 'reclamations'" (click)="onglet.set('reclamations')">Réclamations</button>
-        <button [class.active]="onglet() === 'messages'" (click)="onglet.set('messages')">
+        <button [class.active]="onglet() === 'reclamations'" (click)="onglet.set('reclamations')"><tb-icon name="alert" [size]="16" /> Réclamations</button>
+        <button [class.active]="onglet() === 'messages'" (click)="onglet.set('messages')"><tb-icon name="message" [size]="16" />
           Messages @if (nbNouveaux() > 0) { <span class="badge badge-warning">{{ nbNouveaux() }}</span> }
         </button>
-        <button [class.active]="onglet() === 'avis'" (click)="onglet.set('avis')">Avis sur l'app</button>
+        <button [class.active]="onglet() === 'avis'" (click)="onglet.set('avis')"><tb-icon name="star" [size]="16" /> Avis sur l'app</button>
       </div>
 
       @switch (onglet()) {
         @case ('reclamations') {
-          <div class="filters">
+          <div class="filters" style="margin-bottom:12px">
             <select class="form-control" style="width:auto" [(ngModel)]="filtreReclamation" (change)="chargerReclamations()">
               <option value="">Tous les statuts</option>
               @for (s of statutsReclamation; track s.code) { <option [value]="s.code">{{ s.label }}</option> }
@@ -85,7 +87,7 @@ const STATUTS_MESSAGE: { code: StatutMessage; label: string; badge: string }[] =
           </div></div>
         }
         @case ('messages') {
-          <div class="filters">
+          <div class="filters" style="margin-bottom:12px">
             <select class="form-control" style="width:auto" [(ngModel)]="filtreMessage" (change)="chargerMessages()">
               <option value="">Tous les statuts</option>
               @for (s of statutsMessage; track s.code) { <option [value]="s.code">{{ s.label }}</option> }
@@ -150,7 +152,7 @@ const STATUTS_MESSAGE: { code: StatutMessage; label: string; badge: string }[] =
           <div class="modal-header">
             <div><div class="modal-title">{{ r.reference }} — {{ r.sujet }}</div>
               <div style="font-size:13px;color:var(--text-2)">{{ r.categorie_label }} · {{ r.created_at | date:'dd/MM/yyyy HH:mm' }}</div></div>
-            <button class="modal-close" (click)="reclamation.set(null)">&#215;</button>
+            <button class="modal-close" (click)="reclamation.set(null)"><tb-icon name="x" /></button>
           </div>
           <div class="modal-body">
             <div class="info-row"><span class="info-label">Voyageur</span><span class="info-value">{{ r.user_nom }} · {{ r.user_email }} · {{ r.user_telephone }}</span></div>
@@ -181,7 +183,7 @@ const STATUTS_MESSAGE: { code: StatutMessage; label: string; badge: string }[] =
           <div class="modal-header">
             <div><div class="modal-title">{{ m.sujet }}</div>
               <div style="font-size:13px;color:var(--text-2)">{{ m.nom }} · {{ m.created_at | date:'dd/MM/yyyy HH:mm' }}</div></div>
-            <button class="modal-close" (click)="message.set(null)">&#215;</button>
+            <button class="modal-close" (click)="message.set(null)"><tb-icon name="x" /></button>
           </div>
           <div class="modal-body">
             <div class="info-row"><span class="info-label">Contact</span><span class="info-value">{{ m.email || '—' }} · {{ m.telephone || '—' }}</span></div>

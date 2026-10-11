@@ -14,8 +14,8 @@ class TrajetService {
   ));
 
   Future<List<Ville>> getVilles() async {
-    final response = await _dio.get('/villes/');
-    return (response.data['results'] as List)
+    final response = await _dio.get('/villes/', queryParameters: {'page_size': 200});
+    return (response.data['data']['results'] as List)
       .map((v) => Ville.fromJson(v as Map<String, dynamic>))
       .toList();
   }

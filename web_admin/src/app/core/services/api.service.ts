@@ -138,4 +138,12 @@ export class ApiService {
   getAvisApplication(): Observable<ApiResponse<AvisResponse>> {
     return this.http.get<ApiResponse<AvisResponse>>(`${this.API}/support/avis-app/`);
   }
+
+  // ── Chauffeurs & comptes ───────────────────────────────────────────────────
+  creerUtilisateur(data: { email: string; prenom: string; nom: string; telephone?: string; password: string; role: string }): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(`${this.API}/auth/users/`, data);
+  }
+  affecterChauffeur(trajetId: string, chauffeurId: string | null): Observable<ApiResponse<Trajet>> {
+    return this.http.patch<ApiResponse<Trajet>>(`${this.API}/trajets/${trajetId}/`, { chauffeur: chauffeurId });
+  }
 }

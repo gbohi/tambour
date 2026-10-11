@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
@@ -9,91 +11,95 @@ import { Transporteur } from '../../core/models/transport.model';
 @Component({
   selector: 'app-transporteurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
-        <div><h1 class="page-title">Transporteurs partenaires</h1><p class="page-subtitle">{{ total() }} partenaires</p></div>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreVerif" (change)="onFiltreChange()">
-          <option value="">Tous</option>
-          <option value="true">Vérifiés</option>
-          <option value="false">En attente</option>
-        </select>
+        <div><h1 class="page-title">Compagnies partenaires</h1><p class="page-subtitle">{{ total() | nb }} compagnies de transport</p></div>
+        <div class="segmented">
+          <button [class.active]="filtreVerif === ''" (click)="filtreVerif = ''; onFiltreChange()">Toutes</button>
+          <button [class.active]="filtreVerif === 'true'" (click)="filtreVerif = 'true'; onFiltreChange()">Vérifiées</button>
+          <button [class.active]="filtreVerif === 'false'" (click)="filtreVerif = 'false'; onFiltreChange()">À vérifier</button>
+        </div>
       </div>
       @if (loading()) {
-        <div class="tg"><div class="skeleton-card" style="height:200px;border-radius:16px" *ngFor="let i of [1,2,3,4,5,6]"></div></div>
+        <div class="grille">@for (i of [1,2,3]; track i) { <div class="skeleton" style="height:220px;border-radius:16px"></div> }</div>
       } @else {
-        <div class="tg">
+        <div class="grille">
           @for (t of transporteurs(); track t.id) {
-            <div class="tc" (click)="selected.set(t)">
-              <div class="tc-hd">
-                <div class="tc-lg">{{ t.nom[0] }}</div>
-                <div>
-                  @if (t.est_verifie) { <span class="badge badge-success">&#10003; Vérifié</span> }
-                  @else { <span class="badge badge-warning">&#9203; En attente</span> }
-                  @if (!t.est_actif) { <span class="badge badge-error" style="margin-left:4px">Inactif</span> }
-                </div>
+            <article class="carte" (click)="selected.set(t)">
+              <div class="haut">
+                <div class="logo">{{ t.nom[0] }}</div>
+                <div class="titre"><h3>{{ t.nom }}</h3>
+                  <div class="note"><tb-icon name="star" [size]="14" /> {{ t.note_moyenne }} <span>/ 5</span></div></div>
+                @if (t.est_verifie) { <span class="badge badge-success">Vérifiée</span> } @else { <span class="badge badge-warning">À vérifier</span> }
               </div>
-              <h3 class="tc-nom">{{ t.nom }}</h3>
-              <div class="tc-note">
-                <span style="color:var(--gold)">{{ stars(+t.note_moyenne) }}</span>
-                <span style="font-size:12px;color:var(--text-2)">{{ t.note_moyenne }}/5</span>
-              </div>
-              <div class="tc-meta">
-                <span>&#128231; {{ t.email }}</span>
-                <span>&#128222; {{ t.telephone }}</span>
-                <span>&#128176; Commission {{ t.taux_commission }}%</span>
-              </div>
-              <div class="tc-act" (click)="$event.stopPropagation()">
+              <ul class="infos">
+                <li><tb-icon name="mail" [size]="15" /> {{ t.email }}</li>
+                <li><tb-icon name="phone" [size]="15" /> {{ t.telephone }}</li>
+                <li><tb-icon name="banknote" [size]="15" /> Commission {{ t.taux_commission }} %</li>
+              </ul>
+              <div class="actions" (click)="$event.stopPropagation()">
                 @if (!t.est_verifie) {
-                  <button class="btn btn-primary btn-sm" (click)="verifier(t)">&#10003; Vérifier</button>
+                  <button class="btn btn-primary btn-sm" (click)="verifier(t)"><tb-icon name="shield" [size]="15" /> Vérifier</button>
                 } @else {
-                  <button class="btn btn-ghost btn-sm" (click)="verifier(t, false)">Retirer vérif.</button>
+                  <button class="btn btn-ghost btn-sm" (click)="verifier(t, false)">Retirer la vérification</button>
                 }
-                <button class="btn btn-sm" [class.btn-danger]="t.est_actif" [class.btn-outline]="!t.est_actif" (click)="toggleActif(t)">
-                  {{ t.est_actif ? 'Désactiver' : 'Réactiver' }}
+                <span style="flex:1"></span>
+                @if (!t.est_actif) { <span class="badge badge-error">Inactive</span> }
+                <button class="icon-btn" [class.danger]="t.est_actif" [class.success]="!t.est_actif"
+                  [attr.data-tip]="t.est_actif ? 'Désactiver' : 'Réactiver'" (click)="toggleActif(t)">
+                  <tb-icon [name]="t.est_actif ? 'x-circle' : 'check-circle'" />
                 </button>
               </div>
-            </div>
+            </article>
           } @empty {
-            <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🚌</div><h3>Aucun transporteur</h3></div>
+            <div class="card empty-state" style="grid-column:1/-1"><div class="empty-icon"><tb-icon name="building" [size]="26" /></div><h3>Aucune compagnie</h3></div>
           }
         </div>
-        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
-          <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
-        </div>
+        @if (total() > pageSize) {
+          <div class="table-card"><app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" /></div>
+        }
       }
     </div>
-    @if (selected()) {
-      <div class="modal-backdrop" (click)="selected.set(null)">
-        <div class="modal" style="max-width:520px" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <div><div class="modal-title">{{ selected()!.nom }}</div><div style="font-size:13px;color:var(--text-2)">RCCM : {{ selected()!.rccm || '—' }}</div></div>
-            <button class="modal-close" (click)="selected.set(null)">&#215;</button>
-          </div>
-          <div class="modal-body">
-            <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ selected()!.email }}</span></div>
-            <div class="info-row"><span class="info-label">Téléphone</span><span class="info-value">{{ selected()!.telephone }}</span></div>
-            <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">{{ selected()!.adresse || '—' }}</span></div>
-            <div class="info-row"><span class="info-label">Commission</span><span class="info-value">{{ selected()!.taux_commission }}%</span></div>
-            <div class="info-row"><span class="info-label">Note</span><span class="info-value">{{ stars(+selected()!.note_moyenne) }} {{ selected()!.note_moyenne }}/5</span></div>
-            <div class="info-row"><span class="info-label">Partenaire depuis</span><span class="info-value">{{ selected()!.created_at | date:'dd/MM/yyyy' }}</span></div>
-          </div>
-          <div class="modal-footer"><button class="btn btn-ghost" (click)="selected.set(null)">Fermer</button></div>
+
+    @if (selected(); as t) {
+      <div class="drawer-backdrop" (click)="selected.set(null)"></div>
+      <aside class="drawer">
+        <div class="drawer-header">
+          <div class="cell-flex"><div class="logo">{{ t.nom[0] }}</div>
+            <div><div class="modal-title">{{ t.nom }}</div><div class="cell-sub">RCCM : {{ t.rccm || 'non renseigné' }}</div></div></div>
+          <button class="modal-close" (click)="selected.set(null)"><tb-icon name="x" /></button>
         </div>
-      </div>
+        <div class="drawer-body">
+          <div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ t.email }}</span></div>
+            <div class="info-row"><span class="info-label">Téléphone</span><span class="info-value">{{ t.telephone }}</span></div>
+            <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">{{ t.adresse || '—' }}</span></div>
+            <div class="info-row"><span class="info-label">Commission TamBour</span><span class="info-value">{{ t.taux_commission }} %</span></div>
+            <div class="info-row"><span class="info-label">Note des voyageurs</span><span class="info-value text-gold">★ {{ t.note_moyenne }} / 5</span></div>
+            <div class="info-row"><span class="info-label">Partenaire depuis</span><span class="info-value">{{ t.created_at | date:'d MMMM yyyy' }}</span></div>
+          </div>
+        </div>
+        <div class="drawer-footer"><button class="btn btn-ghost" (click)="selected.set(null)">Fermer</button></div>
+      </aside>
     }
   `,
   styles: [`
-    .tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
-    .tc{background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm);}
-    .tc:hover{box-shadow:var(--shadow-md);border-color:var(--primary);transform:translateY(-2px);}
-    .tc-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-    .tc-lg{width:44px;height:44px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;}
-    .tc-nom{font-size:16px;font-weight:700;margin-bottom:6px;}
-    .tc-note{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
-    .tc-meta{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-2);margin-bottom:14px;}
-    .tc-act{display:flex;gap:6px;}
+    .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+    .carte{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:16px;
+      cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s;}
+    .carte:hover{border-color:#CFD8D3;box-shadow:var(--shadow-md);transform:translateY(-2px);}
+    .haut{display:flex;align-items:flex-start;gap:12px;}
+    .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--ink),#2B4A3E);color:#fff;font-size:20px;font-weight:800;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .titre{flex:1;min-width:0;}
+    .titre h3{font-size:17px;font-weight:800;}
+    .note{display:flex;align-items:center;gap:4px;color:var(--gold-dark);font-weight:700;font-size:13px;}
+    .note span{color:var(--text-3);font-weight:500;}
+    .infos{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text-2);}
+    .infos li{display:flex;align-items:center;gap:8px;}
+    .actions{display:flex;align-items:center;gap:8px;padding-top:14px;border-top:1px solid var(--divider);}
   `]
 })
 export class TransporteursComponent implements OnInit {

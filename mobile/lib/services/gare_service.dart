@@ -7,9 +7,7 @@ class GareService {
   Future<List<Gare>> getGares() async {
     try {
       final res = await ApiClient.instance.dio.get('/gares/', queryParameters: {'page_size': 200});
-      final data = res.data;
-      final liste = (data is Map && data['results'] is List) ? data['results'] as List
-        : (data is Map && data['data'] is List) ? data['data'] as List : const [];
+      final liste = res.data['data']['results'] as List;
       final gares = liste.map((g) => Gare.fromJson(g as Map<String, dynamic>)).toList();
       return gares.isEmpty ? Gare.mockGares() : gares;
     } catch (_) {

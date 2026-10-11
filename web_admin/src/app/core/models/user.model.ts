@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'support' | 'transporteur' | 'voyageur';
+export type UserRole = 'admin' | 'support' | 'transporteur' | 'voyageur' | 'chauffeur';
 
 export interface User {
   id: string;
@@ -13,6 +13,7 @@ export interface User {
   is_verified: boolean;
   is_active?: boolean;
   points_fidelite: number;
+  code_parrainage?: string;
   nb_voyages: number;
   notif_sms: boolean;
   notif_push: boolean;

@@ -16,12 +16,12 @@ from .serializers import (
 from .filters import TrajetFilter
 from authentication.permissions import EstAdminOuSupport
 from authentication.views import StandardPagination
-from tambour_backend.utils import success_response, error_response
+from tambour_backend.utils import success_response, error_response, EnveloppeMixin
 
 
 # ── Villes (public) ─────────────────────────────────────────────────────────
 
-class VilleViewSet(viewsets.ReadOnlyModelViewSet):
+class VilleViewSet(EnveloppeMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Ville.objects.filter(est_active=True)
     serializer_class = VilleSerializer
     permission_classes = [AllowAny]
@@ -36,7 +36,7 @@ class VilleViewSet(viewsets.ReadOnlyModelViewSet):
 
 # ── Gares (lecture publique, écriture admin) ──────────────────────────────
 
-class GareViewSet(viewsets.ModelViewSet):
+class GareViewSet(EnveloppeMixin, viewsets.ModelViewSet):
     serializer_class = GareSerializer
     filterset_fields = ['ville', 'est_principale', 'est_active']
     search_fields = ['nom', 'ville__nom', 'adresse']
@@ -92,7 +92,7 @@ class GareViewSet(viewsets.ModelViewSet):
 
 # ── Transporteurs (admin/support lecture+écriture) ─────────────────────────
 
-class TransporteurViewSet(viewsets.ModelViewSet):
+class TransporteurViewSet(EnveloppeMixin, viewsets.ModelViewSet):
     filterset_fields = ['est_verifie', 'est_actif']
     search_fields = ['nom', 'email', 'telephone']
     ordering_fields = ['nom', 'created_at', 'note_moyenne']
@@ -166,7 +166,8 @@ class RechercheTrajetView(APIView):
             ligne__depart_id=params['depart'],
             ligne__arrivee_id=params['arrivee'],
             heure_depart__date=params['date'],
-            statut__in=[Trajet.Statut.PLANIFIE, Trajet.Statut.EN_COURS]
+            heure_depart__gt=timezone.now(),
+            statut__in=[Trajet.Statut.PLANIFIE, Trajet.Statut.RETARDE]
         ).select_related(
             'ligne__depart', 'ligne__arrivee', 'bus', 'transporteur'
         ).prefetch_related(
@@ -186,7 +187,7 @@ class RechercheTrajetView(APIView):
         return trajets
 
 
-class TrajetViewSet(viewsets.ModelViewSet):
+class TrajetViewSet(EnveloppeMixin, viewsets.ModelViewSet):
     """
     GET    : public pour lecture (app Flutter)
     PATCH  : admin/support (tous trajets) ou transporteur (ses trajets)

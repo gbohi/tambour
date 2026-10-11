@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -11,113 +13,97 @@ import { User } from '../../core/models/user.model';
 @Component({
   selector: 'app-voyageurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
-        <div><h1 class="page-title">Voyageurs</h1><p class="page-subtitle">{{ total() }} voyageurs enregistrés</p></div>
-        <button class="btn btn-ghost btn-sm" (click)="exportCsv()">&#128229; CSV</button>
-      </div>
-      <div class="filters">
-        <div class="search-box">
-          <span class="search-icon">&#128269;</span>
-          <input type="text" class="form-control" placeholder="Nom, email, téléphone..."
-            [(ngModel)]="search" (ngModelChange)="search$.next($event)">
-        </div>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreVerif" (change)="onFiltreChange()">
-          <option value="">Email vérifié (tous)</option>
-          <option value="true">Vérifié</option>
-          <option value="false">Non vérifié</option>
-        </select>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreActif" (change)="onFiltreChange()">
-          <option value="">Statut (tous)</option>
-          <option value="true">Actifs</option>
-          <option value="false">Désactivés</option>
-        </select>
+        <div><h1 class="page-title">Voyageurs</h1><p class="page-subtitle">{{ total() | nb }} comptes voyageurs</p></div>
+        <button class="btn btn-secondary" (click)="exportCsv()"><tb-icon name="download" [size]="16" /> Exporter (CSV)</button>
       </div>
       <div class="table-card">
-        @if (loading()) {
-          <div style="padding:48px;text-align:center;color:var(--text-2)">&#9203; Chargement…</div>
-        } @else {
-          <div class="table-container">
-            <table>
-              <thead><tr>
-                <th>Voyageur</th><th>Contact</th><th>Voyages</th><th>Points</th>
-                <th>Vérifié</th><th>Statut</th><th>Inscrit le</th>
-                @if (auth.isAdmin()) { <th>Actions</th> }
-              </tr></thead>
-              <tbody>
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon"><tb-icon name="search" [size]="16" /></span>
+            <input type="text" class="form-control" placeholder="Nom, email, téléphone…" [(ngModel)]="search" (ngModelChange)="search$.next($event)">
+          </div>
+          <select class="form-control" [(ngModel)]="filtreVerif" (change)="onFiltreChange()">
+            <option value="">Email vérifié ou non</option><option value="true">Email vérifié</option><option value="false">Non vérifié</option>
+          </select>
+          <div class="segmented">
+            <button [class.active]="filtreActif === ''" (click)="filtreActif = ''; onFiltreChange()">Tous</button>
+            <button [class.active]="filtreActif === 'true'" (click)="filtreActif = 'true'; onFiltreChange()">Actifs</button>
+            <button [class.active]="filtreActif === 'false'" (click)="filtreActif = 'false'; onFiltreChange()">Désactivés</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Voyageur</th><th>Téléphone</th><th class="right">Voyages</th><th class="right">Points</th><th>Code parrain</th><th>Statut</th><th>Inscription</th><th></th></tr></thead>
+            <tbody>
+              @if (loading()) {
+                <tr><td colspan="8"><div class="loading-row"><span class="spinner"></span></div></td></tr>
+              } @else {
                 @for (u of voyageurs(); track u.id) {
                   <tr class="clickable" (click)="selected.set(u)">
-                    <td>
-                      <div style="display:flex;align-items:center;gap:10px">
-                        <div class="avatar">{{ u.initiales }}</div>
-                        <div>
-                          <div style="font-weight:600">{{ u.nom_complet }}</div>
-                          <div style="font-size:11px;color:var(--text-2)">{{ u.email }}</div>
-                        </div>
-                      </div>
-                    </td>
+                    <td><div class="cell-flex"><div class="avatar">{{ u.initiales }}</div>
+                      <div><div class="cell-main">{{ u.nom_complet }}</div><div class="cell-sub">{{ u.email }}
+                        @if (u.is_verified) { <tb-icon name="check-circle" [size]="12" class="text-success" /> }</div></div></div></td>
                     <td>{{ u.telephone || '—' }}</td>
-                    <td><strong>{{ u.nb_voyages }}</strong></td>
-                    <td><span class="badge badge-gold">&#11088; {{ u.points_fidelite }}</span></td>
-                    <td>
-                      @if (u.is_verified) { <span class="badge badge-success">&#10003; Vérifié</span> }
-                      @else { <span class="badge badge-warning">&#9203; En attente</span> }
-                    </td>
-                    <td>
-                      @if (u.is_active !== false) { <span class="badge badge-success">Actif</span> }
-                      @else { <span class="badge badge-error">Désactivé</span> }
-                    </td>
-                    <td style="color:var(--text-2)">{{ u.date_inscription | date:'dd/MM/yyyy' }}</td>
-                    @if (auth.isAdmin()) {
-                      <td (click)="$event.stopPropagation()">
-                        <button class="btn btn-sm"
-                          [class.btn-danger]="u.is_active !== false"
-                          [class.btn-outline]="u.is_active === false"
-                          (click)="toggleActif(u)">
-                          {{ u.is_active !== false ? 'Désactiver' : 'Réactiver' }}
+                    <td class="right">{{ u.nb_voyages | nb }}</td>
+                    <td class="right"><span class="text-gold" style="font-weight:700">{{ u.points_fidelite | nb }}</span></td>
+                    <td><span class="mono">{{ u.code_parrainage || '—' }}</span></td>
+                    <td><span class="badge" [ngClass]="u.is_active === false ? 'badge-error' : 'badge-success'">{{ u.is_active === false ? 'Désactivé' : 'Actif' }}</span></td>
+                    <td class="text-muted">{{ u.date_inscription | date:'d MMM yyyy' }}</td>
+                    <td class="right" (click)="$event.stopPropagation()">
+                      @if (auth.isAdmin()) {
+                        <button class="icon-btn" [class.danger]="u.is_active !== false" [class.success]="u.is_active === false"
+                          [attr.data-tip]="u.is_active === false ? 'Réactiver' : 'Désactiver'" (click)="toggleActif(u)">
+                          <tb-icon [name]="u.is_active === false ? 'check-circle' : 'x-circle'" />
                         </button>
-                      </td>
-                    }
+                      }
+                    </td>
                   </tr>
                 } @empty {
-                  <tr><td [attr.colspan]="auth.isAdmin() ? 8 : 7">
-                    <div class="empty-state"><div class="empty-icon">👥</div><h3>Aucun voyageur</h3><p>Modifiez les filtres.</p></div>
-                  </td></tr>
+                  <tr><td colspan="8"><div class="empty-state"><div class="empty-icon"><tb-icon name="users" [size]="26" /></div><h3>Aucun voyageur</h3></div></td></tr>
                 }
-              </tbody>
-            </table>
-          </div>
-          <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
-        }
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
       </div>
     </div>
-    @if (selected()) {
-      <div class="modal-backdrop" (click)="selected.set(null)">
-        <div class="modal" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="avatar avatar-lg">{{ selected()!.initiales }}</div>
-              <div><div class="modal-title">{{ selected()!.nom_complet }}</div><div style="font-size:13px;color:var(--text-2)">{{ selected()!.email }}</div></div>
-            </div>
-            <button class="modal-close" (click)="selected.set(null)">&#215;</button>
-          </div>
-          <div class="modal-body">
-            <div class="info-box" style="margin-bottom:16px;display:flex;gap:24px">
-              <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--primary)">{{ selected()!.nb_voyages }}</div><div style="font-size:11px;color:var(--text-2)">Voyages</div></div>
-              <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">{{ selected()!.points_fidelite }}</div><div style="font-size:11px;color:var(--text-2)">Points</div></div>
-            </div>
-            <div class="info-row"><span class="info-label">Téléphone</span><span class="info-value">{{ selected()!.telephone || '—' }}</span></div>
-            <div class="info-row"><span class="info-label">SMS</span><span class="info-value">{{ selected()!.notif_sms ? 'Activé' : 'Désactivé' }}</span></div>
-            <div class="info-row"><span class="info-label">Email notif.</span><span class="info-value">{{ selected()!.notif_email ? 'Activé' : 'Désactivé' }}</span></div>
-            <div class="info-row"><span class="info-label">Inscrit le</span><span class="info-value">{{ selected()!.date_inscription | date:'dd/MM/yyyy' }}</span></div>
-          </div>
-          <div class="modal-footer"><button class="btn btn-ghost" (click)="selected.set(null)">Fermer</button></div>
+
+    @if (selected(); as u) {
+      <div class="drawer-backdrop" (click)="selected.set(null)"></div>
+      <aside class="drawer">
+        <div class="drawer-header">
+          <div class="cell-flex"><div class="avatar avatar-lg">{{ u.initiales }}</div>
+            <div><div class="modal-title">{{ u.nom_complet }}</div><div class="cell-sub">{{ u.email }}</div></div></div>
+          <button class="modal-close" (click)="selected.set(null)"><tb-icon name="x" /></button>
         </div>
-      </div>
+        <div class="drawer-body">
+          <div class="kpis">
+            <div><b>{{ u.nb_voyages | nb }}</b><span>voyages</span></div>
+            <div><b class="text-gold">{{ u.points_fidelite | nb }}</b><span>points fidélité</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">Téléphone</span><span class="info-value">{{ u.telephone || '—' }}</span></div>
+            <div class="info-row"><span class="info-label">Code de parrainage</span><span class="info-value mono">{{ u.code_parrainage || '—' }}</span></div>
+            <div class="info-row"><span class="info-label">Email vérifié</span><span class="info-value">{{ u.is_verified ? 'Oui' : 'Non' }}</span></div>
+            <div class="info-row"><span class="info-label">Notifications SMS</span><span class="info-value">{{ u.notif_sms ? 'Activées' : 'Désactivées' }}</span></div>
+            <div class="info-row"><span class="info-label">Notifications email</span><span class="info-value">{{ u.notif_email ? 'Activées' : 'Désactivées' }}</span></div>
+            <div class="info-row"><span class="info-label">Inscrit le</span><span class="info-value">{{ u.date_inscription | date:'d MMMM yyyy' }}</span></div>
+          </div>
+        </div>
+        <div class="drawer-footer"><button class="btn btn-ghost" (click)="selected.set(null)">Fermer</button></div>
+      </aside>
     }
-  `
+  `,
+  styles: [`
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .kpis div{background:var(--surface-2);border-radius:14px;padding:16px;display:flex;flex-direction:column;}
+    .kpis b{font-size:26px;font-weight:800;} .kpis span{font-size:12px;color:var(--text-2);}
+  `]
 })
 export class VoyageursComponent implements OnInit {
   auth    = inject(AuthService);

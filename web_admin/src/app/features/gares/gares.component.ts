@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Gare, Ville } from '../../core/models/transport.model';
@@ -10,116 +12,101 @@ interface GareForm { nom: string; ville: string; adresse: string; latitude: numb
 @Component({
   selector: 'app-gares',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
-        <div><h1 class="page-title">Gares partenaires</h1><p class="page-subtitle">{{ total() }} gares &middot; {{ villes().length }} villes</p></div>
-        <button class="btn btn-primary" (click)="ouvrirCreer()">+ Ajouter une gare</button>
+        <div><h1 class="page-title">Gares</h1><p class="page-subtitle">{{ total() | nb }} gares dans {{ villes().length }} villes</p></div>
+        <button class="btn btn-primary" (click)="ouvrirCreer()"><tb-icon name="plus" [size]="18" /> Ajouter une gare</button>
       </div>
-      <div class="filters">
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreVille" (change)="load()">
-          <option value="">Toutes les villes</option>
-          @for (v of villes(); track v.id) { <option [value]="v.id">{{ v.nom }}</option> }
-        </select>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-          <input type="checkbox" [(ngModel)]="filtrePrincipale" (change)="load()"> Principales uniquement
-        </label>
-      </div>
-      @if (loading()) {
-        <div class="gg"><div class="skeleton-card" style="height:190px;border-radius:16px"></div></div>
-      } @else {
-        <div class="gg">
-          @for (g of gares(); track g.id) {
-            <div class="gc">
-              <div class="gc-hd">
-                <div class="gc-ico">&#128205;</div>
-                <div>
-                  @if (g.est_principale) { <span class="badge badge-gold" style="display:block;margin-bottom:4px">&#11088; Principale</span> }
-                  <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">{{ g.ville_nom }}</div>
-                </div>
-              </div>
-              <h3 style="font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.3">{{ g.nom }}</h3>
-              <div class="gc-meta">
-                <span>&#128205; {{ g.adresse }}</span>
-                <span>&#128336; {{ g.heures_ouverture }}</span>
-                @if (g.telephone) { <span>&#128222; {{ g.telephone }}</span> }
-              </div>
-              @if (g.compagnies.length > 0) {
-                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
-                  @for (c of g.compagnies.slice(0, 3); track $index) {
-                    <span class="badge badge-neutral" style="font-size:10px">{{ c }}</span>
-                  }
-                  @if (g.compagnies.length > 3) {
-                    <span class="badge badge-neutral" style="font-size:10px">+{{ g.compagnies.length - 3 }}</span>
-                  }
-                </div>
-              }
-              <button class="btn btn-ghost btn-sm" style="width:100%" (click)="ouvrirModifier(g)">&#9999; Modifier</button>
-            </div>
-          } @empty {
-            <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📍</div><h3>Aucune gare</h3><p>Ajoutez la première gare partenaire.</p></div>
-          }
+      <div class="table-card">
+        <div class="toolbar">
+          <select class="form-control" [(ngModel)]="filtreVille" (change)="load()">
+            <option value="">Toutes les villes</option>
+            @for (v of villes(); track v.id) { <option [value]="v.id">{{ v.nom }}</option> }
+          </select>
+          <label class="case"><input type="checkbox" [(ngModel)]="filtrePrincipale" (change)="load()"> Gares principales</label>
         </div>
-      }
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Gare</th><th>Adresse</th><th>Horaires</th><th>Compagnies</th><th class="right"></th></tr></thead>
+            <tbody>
+              @if (loading()) {
+                <tr><td colspan="5"><div class="loading-row"><span class="spinner"></span></div></td></tr>
+              } @else {
+                @for (g of gares(); track g.id) {
+                  <tr>
+                    <td><div class="cell-flex"><div class="pin" [class.principale]="g.est_principale"><tb-icon name="map-pin" [size]="18" /></div>
+                      <div><div class="cell-main">{{ g.nom }}</div>
+                        <div class="cell-sub">{{ g.ville_nom }}@if (g.est_principale) { · <span class="text-gold">gare principale</span> }</div></div></div></td>
+                    <td><div style="max-width:280px">{{ g.adresse || '—' }}</div>@if (g.telephone) { <div class="cell-sub">{{ g.telephone }}</div> }</td>
+                    <td><span class="chip"><tb-icon name="clock" [size]="13" /> {{ g.heures_ouverture }}</span></td>
+                    <td>
+                      <div class="compagnies">
+                        @for (c of g.compagnies.slice(0, 2); track $index) { <span class="chip">{{ c }}</span> }
+                        @if (g.compagnies.length > 2) { <span class="chip">+{{ g.compagnies.length - 2 }}</span> }
+                        @if (g.compagnies.length === 0) { <span class="text-hint">—</span> }
+                      </div>
+                    </td>
+                    <td class="right">
+                      <div class="row-actions">
+                        <a class="icon-btn" data-tip="Voir sur la carte" target="_blank" rel="noopener"
+                          [href]="'https://www.google.com/maps?q=' + g.latitude + ',' + g.longitude"><tb-icon name="globe" /></a>
+                        <button class="icon-btn" data-tip="Modifier" (click)="ouvrirModifier(g)"><tb-icon name="edit" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5"><div class="empty-state"><div class="empty-icon"><tb-icon name="map-pin" [size]="26" /></div>
+                    <h3>Aucune gare</h3><p>Ajoutez la première gare.</p></div></td></tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+
     @if (showForm()) {
       <div class="modal-backdrop" (click)="showForm.set(false)">
-        <div class="modal" style="max-width:540px" (click)="$event.stopPropagation()">
+        <div class="modal" style="max-width:560px" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <div class="modal-title">{{ editGare() ? 'Modifier : ' + editGare()!.nom : 'Nouvelle gare' }}</div>
-            <button class="modal-close" (click)="showForm.set(false)">&#215;</button>
+            <div class="modal-title">{{ editGare() ? 'Modifier la gare' : 'Nouvelle gare' }}</div>
+            <button class="modal-close" (click)="showForm.set(false)"><tb-icon name="x" /></button>
           </div>
-          <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
-            <div class="form-group"><label class="form-label">Nom *</label>
-              <input type="text" class="form-control" [(ngModel)]="form.nom" placeholder="Ex: Gare d'Adjame Nord">
+          <div class="modal-body">
+            <div class="form-group"><label class="form-label">Nom de la gare</label>
+              <input type="text" class="form-control" [(ngModel)]="form.nom" placeholder="Ex. : Gare d'Adjamé Nord"></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Ville</label>
+                <select class="form-control" [(ngModel)]="form.ville"><option value="">Choisir…</option>
+                  @for (v of villes(); track v.id) { <option [value]="v.id">{{ v.nom }}</option> }</select></div>
+              <div class="form-group"><label class="form-label">Téléphone</label><input type="text" class="form-control" [(ngModel)]="form.telephone"></div>
             </div>
-            <div class="form-group"><label class="form-label">Ville *</label>
-              <select class="form-control" [(ngModel)]="form.ville">
-                <option value="">Sélectionner</option>
-                @for (v of villes(); track v.id) { <option [value]="v.id">{{ v.nom }}</option> }
-              </select>
+            <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-control" [(ngModel)]="form.adresse" rows="2"></textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Latitude</label><input type="number" class="form-control" [(ngModel)]="form.latitude" step="0.0001"></div>
+              <div class="form-group"><label class="form-label">Longitude</label><input type="number" class="form-control" [(ngModel)]="form.longitude" step="0.0001"></div>
             </div>
-            <div class="form-group"><label class="form-label">Adresse</label>
-              <textarea class="form-control" [(ngModel)]="form.adresse" rows="2"></textarea>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div class="form-group"><label class="form-label">Latitude</label>
-                <input type="number" class="form-control" [(ngModel)]="form.latitude" step="0.0001">
-              </div>
-              <div class="form-group"><label class="form-label">Longitude</label>
-                <input type="number" class="form-control" [(ngModel)]="form.longitude" step="0.0001">
-              </div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div class="form-group"><label class="form-label">Téléphone</label>
-                <input type="text" class="form-control" [(ngModel)]="form.telephone">
-              </div>
-              <div class="form-group"><label class="form-label">Horaires</label>
-                <input type="text" class="form-control" [(ngModel)]="form.heures_ouverture" placeholder="05h00 - 22h00">
-              </div>
-            </div>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
-              <input type="checkbox" [(ngModel)]="form.est_principale"> Gare principale
-            </label>
+            <span class="form-hint">Astuce : clic droit sur Google Maps › « Plus d'infos sur cet endroit » pour copier les coordonnées.</span>
+            <div class="form-group"><label class="form-label">Horaires d'ouverture</label>
+              <input type="text" class="form-control" [(ngModel)]="form.heures_ouverture" placeholder="05h00 - 22h00"></div>
+            <label class="case"><input type="checkbox" [(ngModel)]="form.est_principale"> Gare principale de la ville</label>
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" (click)="showForm.set(false)">Annuler</button>
-            <button class="btn btn-primary" (click)="sauvegarder()" [disabled]="!form.nom.trim() || !form.ville">
-              {{ editGare() ? 'Enregistrer' : 'Créer la gare' }}
-            </button>
+            <button class="btn btn-primary" (click)="sauvegarder()" [disabled]="!form.nom.trim() || !form.ville">{{ editGare() ? 'Enregistrer' : 'Créer la gare' }}</button>
           </div>
         </div>
       </div>
     }
   `,
   styles: [`
-    .gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
-    .gc{background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm);transition:all 0.15s;}
-    .gc:hover{box-shadow:var(--shadow-md);}
-    .gc-hd{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
-    .gc-ico{width:40px;height:40px;border-radius:10px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-    .gc-meta{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-2);margin-bottom:10px;}
+    .case{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2);cursor:pointer;}
+    .case input{accent-color:var(--primary);width:16px;height:16px;}
+    .pin{width:40px;height:40px;border-radius:12px;background:var(--surface-2);color:var(--text-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .pin.principale{background:var(--primary-light);color:var(--primary);}
+    .compagnies{display:flex;flex-wrap:wrap;gap:6px;}
   `]
 })
 export class GaresComponent implements OnInit {
@@ -161,7 +148,7 @@ export class GaresComponent implements OnInit {
     const g = this.editGare();
     const obs = g ? this.api.updateGare(g.id, this.form as Partial<Gare>) : this.api.createGare(this.form as Partial<Gare>);
     obs.subscribe({
-      next: () => { this.toast.success(g ? 'Gare mise a jour.' : 'Gare creee.'); this.showForm.set(false); this.load(); },
+      next: () => { this.toast.success(g ? 'Gare mise à jour.' : 'Gare créée.'); this.showForm.set(false); this.load(); },
       error: () => this.toast.error("Erreur lors de l'enregistrement.")
     });
   }

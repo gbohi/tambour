@@ -29,6 +29,7 @@ export interface Trajet {
   statut: 'planifie' | 'en_cours' | 'termine' | 'annule' | 'retarde';
   retard_minutes: number; note_moyenne: string; nombre_avis: number;
   places_disponibles: number; places_total: number;
+  chauffeur?: string | null; chauffeur_nom?: string | null;
 }
 
 export interface DashboardStats {

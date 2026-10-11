@@ -1,34 +1,47 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
+import { UiService } from '../../core/services/ui.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+
+const TITRES: Record<string, string> = {
+  '/dashboard': 'Tableau de bord', '/voyageurs': 'Voyageurs', '/transporteurs': 'Compagnies',
+  '/trajets': 'Trajets', '/reservations': 'Réservations', '/paiements': 'Paiements',
+  '/notifications': 'Notifications', '/gares': 'Gares', '/rapports': 'Rapports',
+  '/profil': 'Mon profil', '/support': 'Support client', '/chauffeurs': 'Chauffeurs',
+};
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink, IconComponent],
   template: `
     <header class="topbar">
-      <h2 class="topbar-title">{{ pageTitle() }}</h2>
-      <div class="topbar-right">
-        <button class="topbar-btn" routerLink="/notifications">
-          🔔
-          @if (nbNotifs() > 0) { <span class="notif-dot">{{ nbNotifs() }}</span> }
-        </button>
-        <div class="user-menu" (click)="menuOpen.set(!menuOpen())">
-          <div class="avatar">{{ auth.user()?.initiales }}</div>
-          <div class="user-info">
-            <span class="user-name">{{ auth.user()?.prenom }} {{ auth.user()?.nom }}</span>
-            <span class="user-role">{{ roleLabel() }}</span>
-          </div>
-          <span style="color:#aaa">&#9660;</span>
-          @if (menuOpen()) {
-            <div class="dropdown">
-              <a routerLink="/profil" class="dd-item">&#9881; Mon profil</a>
-              <div class="dd-sep"></div>
-              <button class="dd-item danger" (click)="auth.logout()">&#9166; Déconnexion</button>
+      <button class="icon-btn burger" (click)="ui.basculerMenu()" aria-label="Menu"><tb-icon name="menu" /></button>
+      <div class="fil">
+        <span class="racine">TamBour</span>
+        <tb-icon name="chevron-right" [size]="14" />
+        <span class="courant">{{ titre() }}</span>
+      </div>
+      <div class="droite">
+        <span class="date">{{ aujourdhui }}</span>
+        <a class="icon-btn" routerLink="/notifications" data-tip="Notifications">
+          <tb-icon name="bell" />
+          @if (nbNotifs() > 0) { <span class="pastille">{{ nbNotifs() > 9 ? '9+' : nbNotifs() }}</span> }
+        </a>
+        <div class="menu-user" (click)="$event.stopPropagation(); menuOuvert.set(!menuOuvert())">
+          <div class="avatar gold">{{ auth.user()?.initiales }}</div>
+          <tb-icon name="chevron-down" [size]="16" />
+          @if (menuOuvert()) {
+            <div class="dropdown" (click)="$event.stopPropagation()">
+              <div class="dd-tete">
+                <strong>{{ auth.user()?.prenom }} {{ auth.user()?.nom }}</strong>
+                <span>{{ auth.user()?.email }}</span>
+              </div>
+              <a routerLink="/profil" class="dd-item" (click)="menuOuvert.set(false)"><tb-icon name="user" [size]="16" /> Mon profil</a>
+              <button class="dd-item danger" (click)="auth.logout()"><tb-icon name="logout" [size]="16" /> Déconnexion</button>
             </div>
           }
         </div>
@@ -36,63 +49,56 @@ import { ApiService } from '../../core/services/api.service';
     </header>
   `,
   styles: [`
-    .topbar{height:var(--topbar-h);background:var(--surface);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow-sm);}
-    .topbar-title{font-size:17px;font-weight:700;color:var(--text-1);}
-    .topbar-right{display:flex;align-items:center;gap:8px;}
-    .topbar-btn{position:relative;background:var(--surface-2);border:none;border-radius:10px;width:38px;height:38px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-    .notif-dot{position:absolute;top:4px;right:4px;width:16px;height:16px;background:var(--error);color:#fff;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;}
-    .user-menu{display:flex;align-items:center;gap:10px;padding:6px 12px;border-radius:12px;cursor:pointer;position:relative;transition:background 0.15s;}
-    .user-menu:hover{background:var(--surface-2);}
-    .avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
-    .user-info{display:flex;flex-direction:column;}
-    .user-name{font-size:13px;font-weight:600;line-height:1.2;}
-    .user-role{font-size:11px;color:var(--text-2);}
-    .dropdown{position:absolute;top:calc(100% + 6px);right:0;min-width:180px;background:var(--surface);border:0.5px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;z-index:200;}
-    .dd-item{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:13px;font-weight:500;cursor:pointer;width:100%;background:none;border:none;font-family:'Outfit',sans-serif;text-decoration:none;color:var(--text-1);}
+    .topbar{height:var(--topbar-h);flex-shrink:0;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(12px);
+      border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 32px;position:sticky;top:0;z-index:50;}
+    .burger{display:none;}
+    .fil{display:flex;align-items:center;gap:8px;color:var(--text-3);font-size:14px;min-width:0;}
+    .fil .courant{color:var(--text-1);font-weight:700;white-space:nowrap;}
+    .droite{margin-left:auto;display:flex;align-items:center;gap:8px;}
+    .date{font-size:13px;color:var(--text-2);margin-right:6px;}
+    a.icon-btn{text-decoration:none;}
+    .pastille{position:absolute;top:3px;right:2px;min-width:16px;height:16px;padding:0 4px;background:var(--error);color:#fff;border-radius:8px;
+      font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+    .menu-user{position:relative;display:flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border-radius:999px;cursor:pointer;color:var(--text-2);border:1px solid var(--border);background:var(--surface);}
+    .menu-user:hover{background:var(--surface-2);}
+    .menu-user .avatar{width:32px;height:32px;font-size:12px;}
+    .dropdown{position:absolute;top:calc(100% + 8px);right:0;min-width:240px;background:var(--surface);border:1px solid var(--border);
+      border-radius:14px;box-shadow:var(--shadow-md);overflow:hidden;z-index:200;padding:6px;animation:slideUp .15s ease;}
+    .dd-tete{display:flex;flex-direction:column;padding:10px 12px 12px;border-bottom:1px solid var(--divider);margin-bottom:6px;}
+    .dd-tete strong{font-size:14px;color:var(--text-1);}
+    .dd-tete span{font-size:12px;color:var(--text-2);}
+    .dd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:14px;font-weight:500;cursor:pointer;width:100%;background:none;
+      border:none;text-decoration:none;color:var(--text-1);border-radius:9px;}
     .dd-item:hover{background:var(--surface-2);}
     .dd-item.danger{color:var(--error);}
-    .dd-sep{height:0.5px;background:var(--divider);margin:4px 0;}
+    @media (max-width:1024px){ .topbar{padding:0 16px;} .burger{display:inline-flex;} .date{display:none;} }
   `]
 })
 export class TopbarComponent {
-  auth     = inject(AuthService);
-  private api    = inject(ApiService);
+  auth = inject(AuthService);
+  ui = inject(UiService);
+  private api = inject(ApiService);
   private router = inject(Router);
-  menuOpen = signal(false);
+  menuOuvert = signal(false);
   nbNotifs = signal(0);
-  pageTitle = signal('TamBour Admin');
-
-  private readonly TITLES: Record<string, string> = {
-    '/dashboard': 'Tableau de bord', '/voyageurs': 'Voyageurs',
-    '/transporteurs': 'Transporteurs', '/trajets': 'Trajets',
-    '/reservations': 'Réservations', '/paiements': 'Paiements',
-    '/notifications': 'Notifications', '/gares': 'Gares',
-    '/rapports': 'Rapports & exports', '/profil': 'Mon profil',
-    '/support': 'Support client',
-  };
+  titre = signal('Tableau de bord');
+  aujourdhui = (d => d.charAt(0).toUpperCase() + d.slice(1))(
+    new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date()));
 
   constructor() {
-    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: unknown) => {
-      const nav = e as NavigationEnd;
-      const seg = '/' + (nav.urlAfterRedirects.split('/')[1] ?? '');
-      this.pageTitle.set(this.TITLES[seg] ?? 'TamBour Admin');
-      this.menuOpen.set(false);
+    this.majTitre(this.router.url);
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(e => {
+      this.majTitre((e as NavigationEnd).urlAfterRedirects);
+      this.menuOuvert.set(false);
     });
-    this.loadNotifs();
-  }
-
-  private loadNotifs(): void {
     this.api.getNotifications({ limit: '1' }).subscribe({
-      next: res => this.nbNotifs.set(res.data.nb_non_lues ?? 0),
-      error: () => {}
+      next: res => this.nbNotifs.set(res.data.nb_non_lues ?? 0), error: () => {},
     });
   }
 
-  roleLabel(): string {
-    const r = this.auth.role();
-    if (r === 'admin') return 'Admin';
-    if (r === 'support') return 'Support';
-    if (r === 'transporteur') return 'Transporteur';
-    return '';
+  @HostListener('document:click') fermer(): void { this.menuOuvert.set(false); }
+
+  private majTitre(url: string): void {
+    this.titre.set(TITRES['/' + (url.split('?')[0].split('/')[1] ?? '')] ?? 'TamBour Admin');
   }
 }

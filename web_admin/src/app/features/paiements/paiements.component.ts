@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
@@ -10,89 +12,70 @@ import { Paiement } from '../../core/models/reservation.model';
 @Component({
   selector: 'app-paiements',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
-        <div>
-          <h1 class="page-title">Paiements</h1>
-          <p class="page-subtitle">{{ total() }} transactions &middot; CA : <strong style="color:var(--primary)">{{ fmt(caTotal()) }} FCFA</strong></p>
-        </div>
-        <button class="btn btn-ghost btn-sm" (click)="exportCsv()">&#128229; CSV</button>
+        <div><h1 class="page-title">Paiements</h1>
+          <p class="page-subtitle">{{ total() | nb }} transactions · encaissé sur cette page : <b class="text-primary">{{ caTotal() | nb:'FCFA' }}</b></p></div>
+        <button class="btn btn-secondary" (click)="exportCsv()"><tb-icon name="download" [size]="16" /> Exporter (CSV)</button>
       </div>
-      <div class="kpi-grid">
-        <div class="kpi kpi-s"><div class="kpi-v">{{ nbSucces() }}</div><div class="kpi-l">&#10003; Réussis</div></div>
-        <div class="kpi kpi-w"><div class="kpi-v">{{ nbAttente() }}</div><div class="kpi-l">&#8987; En attente</div></div>
-        <div class="kpi kpi-e"><div class="kpi-v">{{ nbEchec() }}</div><div class="kpi-l">&#10005; Échoués</div></div>
-        <div class="kpi kpi-i"><div class="kpi-v">{{ nbRembourse() }}</div><div class="kpi-l">&#8617; Remboursés</div></div>
-      </div>
-      <div class="filters">
-        <div class="search-box">
-          <span class="search-icon">&#128269;</span>
-          <input type="text" class="form-control" placeholder="Référence, téléphone..."
-            [(ngModel)]="search" (ngModelChange)="search$.next($event)">
-        </div>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
-          <option value="">Tous statuts</option>
-          <option value="initie">Initié</option>
-          <option value="en_attente">En attente</option>
-          <option value="succes">Réussi</option>
-          <option value="echec">Échoué</option>
-          <option value="rembourse">Remboursé</option>
-        </select>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreMethode" (change)="onFiltreChange()">
-          <option value="">Toutes méthodes</option>
-          <option value="mtn_momo">MTN MoMo</option>
-          <option value="orange_money">Orange Money</option>
-          <option value="wave">Wave</option>
-          <option value="carte">Carte bancaire</option>
-        </select>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon"><tb-icon name="check-circle" /></div></div>
+          <div><div class="stat-value">{{ nbSucces() | nb }}</div><div class="stat-label">Réussis</div></div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon gold"><tb-icon name="clock" /></div></div>
+          <div><div class="stat-value">{{ nbAttente() | nb }}</div><div class="stat-label">En attente</div></div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon error"><tb-icon name="x-circle" /></div></div>
+          <div><div class="stat-value">{{ nbEchec() | nb }}</div><div class="stat-label">Échoués</div></div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon info"><tb-icon name="refresh" /></div></div>
+          <div><div class="stat-value">{{ nbRembourse() | nb }}</div><div class="stat-label">Remboursés</div></div></div>
       </div>
       <div class="table-card">
-        @if (loading()) {
-          <div style="padding:48px;text-align:center;color:var(--text-2)">&#9203; Chargement…</div>
-        } @else {
-          <div class="table-container">
-            <table>
-              <thead><tr>
-                <th>Référence</th><th>Méthode</th><th>Montant</th>
-                <th>Téléphone</th><th>Statut</th><th>Initié le</th><th>Confirmé le</th>
-              </tr></thead>
-              <tbody>
+        <div class="toolbar">
+          <div class="search-box"><span class="search-icon"><tb-icon name="search" [size]="16" /></span>
+            <input type="text" class="form-control" placeholder="Référence, téléphone…" [(ngModel)]="search" (ngModelChange)="search$.next($event)"></div>
+          <select class="form-control" [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
+            <option value="">Tous les statuts</option><option value="succes">Réussi</option><option value="en_attente">En attente</option>
+            <option value="initie">Initié</option><option value="echec">Échoué</option><option value="rembourse">Remboursé</option>
+          </select>
+          <div class="segmented">
+            <button [class.active]="filtreMethode === ''" (click)="filtreMethode = ''; onFiltreChange()">Tous</button>
+            @for (m of methodes; track m.code) {
+              <button [class.active]="filtreMethode === m.code" (click)="filtreMethode = m.code; onFiltreChange()"><i class="pastille" [style.background]="m.couleur"></i>{{ m.label }}</button>
+            }
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Référence</th><th>Moyen</th><th>Téléphone</th><th class="right">Montant</th><th>Statut</th><th>Date</th></tr></thead>
+            <tbody>
+              @if (loading()) {
+                <tr><td colspan="6"><div class="loading-row"><span class="spinner"></span></div></td></tr>
+              } @else {
                 @for (pm of paiements(); track pm.id) {
                   <tr>
-                    <td><code style="font-size:11px;background:var(--surface-2);padding:3px 7px;border-radius:5px;font-weight:700">{{ pm.reference }}</code></td>
-                    <td><div style="display:flex;align-items:center;gap:6px"><span>{{ methodeIcon(pm.methode) }}</span><span>{{ pm.methode_label }}</span></div></td>
-                    <td>
-                      <strong [style.color]="pm.statut === 'echec' ? 'var(--error)' : 'var(--primary)'">{{ fmt(pm.montant) }} FCFA</strong>
-                      @if (pm.montant_rembourse > 0) { <div style="font-size:11px;color:var(--error)">&minus;{{ fmt(pm.montant_rembourse) }} remboursé</div> }
-                    </td>
+                    <td><span class="mono cell-main">{{ pm.reference }}</span></td>
+                    <td><span class="methode"><i class="pastille" [style.background]="couleur(pm.methode)"></i>{{ pm.methode_label }}</span></td>
                     <td>{{ pm.telephone }}</td>
+                    <td class="right"><span class="amount" [class.text-error]="pm.statut === 'echec'">{{ pm.montant | nb:'F' }}</span>
+                      @if (pm.montant_rembourse > 0) { <div class="cell-sub text-error">− {{ pm.montant_rembourse | nb }} remboursé</div> }</td>
                     <td><span class="badge" [ngClass]="statutBadge(pm.statut)">{{ pm.statut_label }}</span></td>
-                    <td style="color:var(--text-2)">{{ pm.created_at | date:'dd/MM HH:mm' }}</td>
-                    <td style="color:var(--text-2)">{{ pm.confirme_le ? (pm.confirme_le | date:'dd/MM HH:mm') : '—' }}</td>
+                    <td class="text-muted">{{ (pm.confirme_le || pm.created_at) | date:'d MMM, HH:mm' }}</td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💳</div><h3>Aucune transaction</h3></div></td></tr>
+                  <tr><td colspan="6"><div class="empty-state"><div class="empty-icon"><tb-icon name="wallet" [size]="26" /></div><h3>Aucune transaction</h3></div></td></tr>
                 }
-              </tbody>
-            </table>
-          </div>
-          <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
-        }
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
       </div>
     </div>
   `,
   styles: [`
-    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-    .kpi{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow-sm);}
-    .kpi-v{font-size:28px;font-weight:800;margin-bottom:4px;}
-    .kpi-l{font-size:12px;color:var(--text-2);}
-    .kpi-s .kpi-v{color:var(--success);}
-    .kpi-w .kpi-v{color:var(--warning);}
-    .kpi-e .kpi-v{color:var(--error);}
-    .kpi-i .kpi-v{color:var(--info);}
-    @media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .pastille{display:inline-block;width:9px;height:9px;border-radius:3px;}
+    .methode{display:inline-flex;align-items:center;gap:8px;font-weight:600;}
   `]
 })
 export class PaiementsComponent implements OnInit {
@@ -128,8 +111,11 @@ export class PaiementsComponent implements OnInit {
       error: () => this.loading.set(false)
     });
   }
-  fmt(n: number): string { return n.toLocaleString('fr-FR'); }
-  methodeIcon(m: string): string { const r: Record<string,string> = { mtn_momo:'📱', orange_money:'🟠', wave:'🌊', carte:'💳' }; return r[m] ?? '💰'; }
+  readonly methodes = [
+    { code: 'orange_money', label: 'Orange', couleur: '#FF7900' }, { code: 'mtn_momo', label: 'MTN', couleur: '#FFCB05' },
+    { code: 'wave', label: 'Wave', couleur: '#1DC8F2' }, { code: 'carte', label: 'Carte', couleur: '#2563EB' },
+  ];
+  couleur(m: string): string { return this.methodes.find(x => x.code === m)?.couleur ?? '#0A7C4E'; }
   statutBadge(s: string): string { const r: Record<string,string> = { initie:'badge-neutral', en_attente:'badge-warning', succes:'badge-success', echec:'badge-error', rembourse:'badge-info', annule:'badge-neutral' }; return r[s] ?? 'badge-neutral'; }
   exportCsv(): void {
     const csv = ['Référence,Méthode,Montant,Téléphone,Statut,Date',

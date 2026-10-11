@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
@@ -11,7 +13,7 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
 @Component({
   selector: 'app-rapports',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
@@ -23,7 +25,7 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
 
       <!-- Sélecteur de période -->
       <div class="card" style="max-width:600px">
-        <h3 class="card-title" style="margin-bottom:14px">&#128197; Période du rapport</h3>
+        <h3 class="card-title" style="margin-bottom:14px">Période du rapport</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="form-group">
             <label class="form-label">Date de début</label>
@@ -34,27 +36,27 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
             <input type="date" class="form-control" [(ngModel)]="dateFin">
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:14px">
-          <button class="btn btn-ghost btn-sm" (click)="setPeriode('week')">Cette semaine</button>
-          <button class="btn btn-ghost btn-sm" (click)="setPeriode('month')">Ce mois</button>
-          <button class="btn btn-ghost btn-sm" (click)="setPeriode('quarter')">Ce trimestre</button>
-          <button class="btn btn-ghost btn-sm" (click)="setPeriode('year')">Cette année</button>
+        <div class="segmented" style="margin-top:14px">
+          <button (click)="setPeriode('week')">Cette semaine</button>
+          <button (click)="setPeriode('month')">Ce mois</button>
+          <button (click)="setPeriode('quarter')">Ce trimestre</button>
+          <button (click)="setPeriode('year')">Cette année</button>
         </div>
       </div>
 
       <!-- Exports disponibles -->
       <div>
-        <h3 style="margin-bottom:14px">Exports disponibles</h3>
+        <h3 class="card-title" style="margin-bottom:14px">Exports disponibles</h3>
         @if (exportErreur()) {
           <div style="background:var(--error-bg);border:1px solid rgba(217,64,64,0.2);border-radius:10px;padding:12px 16px;color:var(--error);font-size:13px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
-            <span>&#9888;</span><span>{{ exportErreur() }}</span>
-            <button class="btn btn-ghost btn-sm" style="margin-left:auto" (click)="exportErreur.set(null)">&#215;</button>
+            <tb-icon name="alert" [size]="16" /><span>{{ exportErreur() }}</span>
+            <button class="icon-btn" style="margin-left:auto" (click)="exportErreur.set(null)"><tb-icon name="x" [size]="16" /></button>
           </div>
         }
         <div class="eg">
           @for (e of exports; track e.type) {
             <div class="ec">
-              <div style="font-size:28px;flex-shrink:0">{{ e.icon }}</div>
+              <div class="ec-ico"><tb-icon [name]="e.icon" [size]="22" /></div>
               <div style="flex:1">
                 <div style="font-size:14px;font-weight:700">{{ e.label }}</div>
                 <div style="font-size:12px;color:var(--text-2);margin:3px 0">{{ e.desc }}</div>
@@ -65,9 +67,9 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
               <button class="btn btn-outline btn-sm" (click)="exporter(e)"
                 [disabled]="exportLoading() === e.type">
                 @if (exportLoading() === e.type) {
-                  <span class="spin">&#9696;</span> Export…
+                  <span class="spinner" style="width:14px;height:14px"></span> Export…
                 } @else {
-                  &#128229; Télécharger
+                  <tb-icon name="download" [size]="15" /> Télécharger
                 }
               </button>
             </div>
@@ -78,7 +80,7 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
       <!-- Versements transporteurs — données réelles -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">&#128176; Versements transporteurs</h3>
+          <h3 class="card-title">Versements aux compagnies</h3>
           <div style="display:flex;gap:8px;align-items:center">
             <select class="form-control" style="width:auto;height:32px;font-size:12px" [(ngModel)]="filtreStatutVers" (change)="loadVersements()">
               <option value="">Tous statuts</option>
@@ -87,16 +89,16 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
               <option value="annule">Annulés</option>
             </select>
             <button class="btn btn-ghost btn-sm" (click)="exportVersementsCsv()" [disabled]="versements().length === 0">
-              &#128229; CSV
+              <tb-icon name="download" [size]="15" /> CSV
             </button>
           </div>
         </div>
 
         @if (versLoading()) {
-          <div style="padding:32px;text-align:center;color:var(--text-2)">&#9203; Chargement…</div>
+          <div class="loading-row"><span class="spinner"></span></div>
         } @else if (versErreur()) {
           <div style="padding:24px;text-align:center;color:var(--error)">
-            <div style="font-size:20px;margin-bottom:8px">&#9888;</div>
+            <div style="margin-bottom:8px"><tb-icon name="alert" [size]="22" /></div>
             <div>{{ versErreur() }}</div>
             <button class="btn btn-ghost btn-sm" style="margin-top:12px" (click)="loadVersements()">Réessayer</button>
           </div>
@@ -121,9 +123,9 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
                     <td style="color:var(--text-2);font-size:12px">
                       {{ v.periode_debut | date:'dd/MM/yyyy' }} &rarr; {{ v.periode_fin | date:'dd/MM/yyyy' }}
                     </td>
-                    <td>{{ fmtN(v.montant_brut) }} F</td>
-                    <td style="color:var(--error)">&minus;{{ fmtN(v.montant_commission) }} F</td>
-                    <td><strong style="color:var(--primary)">{{ fmtN(v.montant_net) }} F</strong></td>
+                    <td>{{ v.montant_brut | nb:'F' }}</td>
+                    <td style="color:var(--error)">&minus;{{ v.montant_commission | nb:'F' }}</td>
+                    <td><strong style="color:var(--primary)">{{ v.montant_net | nb:'F' }}</strong></td>
                     <td>
                       <span class="badge"
                         [class.badge-success]="v.statut === 'traite'"
@@ -139,7 +141,7 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
                 } @empty {
                   <tr><td colspan="7">
                     <div class="empty-state" style="padding:40px">
-                      <div class="empty-icon">&#128176;</div>
+                      <div class="empty-icon"><tb-icon name="banknote" [size]="26" /></div>
                       <h3>Aucun versement</h3>
                       <p>Les versements sont calculés automatiquement le 1er de chaque mois.</p>
                     </div>
@@ -158,9 +160,9 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
           <!-- Totaux -->
           @if (versements().length > 0) {
             <div class="totaux">
-              <span>Total brut : <strong>{{ fmtN(totalBrut()) }} F</strong></span>
-              <span>Commissions : <strong style="color:var(--error)">&minus;{{ fmtN(totalCommission()) }} F</strong></span>
-              <span>Net total : <strong style="color:var(--primary)">{{ fmtN(totalNet()) }} F</strong></span>
+              <span>Total brut : <strong>{{ totalBrut() | nb:'F' }}</strong></span>
+              <span>Commissions : <strong style="color:var(--error)">&minus;{{ totalCommission() | nb:'F' }}</strong></span>
+              <span>Net total : <strong style="color:var(--primary)">{{ totalNet() | nb:'F' }}</strong></span>
             </div>
           }
         }
@@ -169,7 +171,8 @@ interface ExportConfig { type: string; label: string; icon: string; desc: string
   `,
   styles: [`
     .eg { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; }
-    .ec { background:var(--surface); border:0.5px solid var(--border); border-radius:14px; padding:16px 18px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow-sm); transition:box-shadow 0.15s; }
+    .ec { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow-xs); transition:box-shadow 0.15s; }
+    .ec-ico { width:46px; height:46px; border-radius:13px; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .ec:hover { box-shadow:var(--shadow-md); }
     .spin { display:inline-block; animation:spin 1s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
@@ -190,10 +193,10 @@ export class RapportsComponent implements OnInit {
   exportErreur  = signal<string | null>(null);
 
   readonly exports: ExportConfig[] = [
-    { type: 'reservations', label: 'Réservations',  icon: '🎫', desc: 'Toutes les réservations de la période sélectionnée.' },
-    { type: 'paiements',    label: 'Paiements',     icon: '💳', desc: 'Transactions CinetPay avec statuts et montants.' },
-    { type: 'voyageurs',    label: 'Voyageurs',     icon: '👥', desc: 'Base voyageurs complète avec points fidélité.' },
-    { type: 'trajets',      label: 'Trajets',       icon: '🚌', desc: 'Tous les trajets avec taux de remplissage.' },
+    { type: 'reservations', label: 'Réservations',  icon: 'ticket', desc: 'Toutes les réservations de la période sélectionnée.' },
+    { type: 'paiements',    label: 'Paiements',     icon: 'card', desc: 'Transactions Mobile Money et carte, avec statuts et montants.' },
+    { type: 'voyageurs',    label: 'Voyageurs',     icon: 'users', desc: 'Base voyageurs complète avec points fidélité.' },
+    { type: 'trajets',      label: 'Trajets',       icon: 'bus', desc: 'Tous les trajets avec taux de remplissage.' },
   ];
 
   // Versements

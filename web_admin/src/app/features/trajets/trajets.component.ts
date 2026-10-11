@@ -6,191 +6,303 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { Trajet } from '../../core/models/transport.model';
+import { User } from '../../core/models/user.model';
+
+type Periode = 'a_venir' | 'aujourdhui' | 'demain' | 'tous';
 
 @Component({
   selector: 'app-trajets',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
-        <div><h1 class="page-title">Trajets</h1><p class="page-subtitle">{{ total() }} trajets</p></div>
-        <div class="header-actions">
-          <input type="date" class="form-control btn-sm" [(ngModel)]="filtreDate" (change)="onFiltreChange()" style="width:auto">
-          <select class="form-control" [(ngModel)]="filtreStatut" (change)="onFiltreChange()" style="width:auto">
-            <option value="">Tous statuts</option>
-            <option value="planifie">Planifié</option>
-            <option value="en_cours">En cours</option>
-            <option value="termine">Terminé</option>
-            <option value="annule">Annulé</option>
-            <option value="retarde">Retardé</option>
-          </select>
+        <div><h1 class="page-title">Trajets</h1><p class="page-subtitle">{{ total() | nb }} départs correspondant aux filtres</p></div>
+        <div class="segmented">
+          @for (p of periodes; track p.code) {
+            <button [class.active]="periode === p.code" (click)="choisirPeriode(p.code)">{{ p.label }}</button>
+          }
         </div>
       </div>
-      <div class="filters">
-        <div class="search-box">
-          <span class="search-icon">&#128269;</span>
-          <input type="text" class="form-control" placeholder="Ville, compagnie..."
-            [(ngModel)]="search" (ngModelChange)="search$.next($event)">
-        </div>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreClasse" (change)="onFiltreChange()">
-          <option value="">Toutes classes</option>
-          <option value="standard">Standard</option>
-          <option value="confort">Confort</option>
-          <option value="vip">VIP</option>
-        </select>
-      </div>
+
       <div class="table-card">
-        @if (loading()) {
-          <div style="padding:48px;text-align:center;color:var(--text-2)">&#9203; Chargement…</div>
-        } @else {
-          <div class="table-container">
-            <table>
-              <thead><tr>
-                <th>Trajet</th><th>Compagnie</th><th>Départ</th><th>Classe</th>
-                <th>Prix</th><th>Places</th><th>Statut</th><th>Note</th>
-                @if (canManage()) { <th>Actions</th> }
-              </tr></thead>
-              <tbody>
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon"><tb-icon name="search" [size]="16" /></span>
+            <input type="text" class="form-control" placeholder="Ville ou compagnie…" [(ngModel)]="search" (ngModelChange)="search$.next($event)">
+          </div>
+          <select class="form-control" [(ngModel)]="filtreStatut" (change)="recharger()">
+            <option value="">Tous les statuts</option>
+            <option value="planifie">Planifié</option><option value="en_cours">En cours</option>
+            <option value="retarde">Retardé</option><option value="termine">Terminé</option><option value="annule">Annulé</option>
+          </select>
+          <select class="form-control" [(ngModel)]="filtreClasse" (change)="recharger()">
+            <option value="">Toutes les classes</option>
+            <option value="standard">Standard</option><option value="confort">Confort</option><option value="vip">VIP</option>
+          </select>
+          <label class="case"><input type="checkbox" [(ngModel)]="sansChauffeur" (change)="recharger()"> Sans chauffeur</label>
+          <span class="spacer"></span>
+          @if (periode === 'tous') {
+            <input type="date" class="form-control" [(ngModel)]="filtreDate" (change)="recharger()">
+          }
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead><tr>
+              <th>Départ</th><th>Trajet</th><th>Compagnie & car</th><th>Chauffeur</th>
+              <th>Remplissage</th><th class="right">Prix</th><th>Statut</th>
+              @if (peutGerer()) { <th class="right">Actions</th> }
+            </tr></thead>
+            <tbody>
+              @if (chargement()) {
+                <tr><td colspan="8"><div class="loading-row"><span class="spinner"></span></div></td></tr>
+              } @else {
                 @for (t of trajets(); track t.id) {
                   <tr>
+                    <td><div class="heure">{{ t.heure_depart | date:'HH:mm' }}</div><div class="cell-sub">{{ t.heure_depart | date:'EEE d MMM' }}</div></td>
                     <td>
-                      <div style="font-weight:600">{{ t.depart_nom }} &#8594; {{ t.arrivee_nom }}</div>
-                      <div style="font-size:11px;color:var(--text-2)">{{ t.bus_immatriculation }} &middot; {{ t.duree_label }}</div>
-                    </td>
-                    <td>{{ t.compagnie }}</td>
-                    <td>{{ t.heure_depart | date:'dd/MM HH:mm' }}</td>
-                    <td><span class="badge" [ngClass]="classBadge(t.bus_classe)">{{ t.bus_classe }}</span></td>
-                    <td>
-                      <strong style="color:var(--primary)">{{ t.prix_actuel | number:'1.0-0' }} F</strong>
-                      @if (t.est_en_promo) { <span class="badge badge-gold" style="margin-left:4px">Promo</span> }
+                      <div class="route">{{ t.depart_nom }} <span class="arrow"><tb-icon name="arrow-right" [size]="14" /></span> {{ t.arrivee_nom }}</div>
+                      <div class="cell-sub">{{ t.duree_label }}@if (+t.note_moyenne > 0) { · <span class="text-gold">★ {{ t.note_moyenne }}</span> }</div>
                     </td>
                     <td>
-                      <div class="pb"><div class="pbf" [style.width.%]="placesPct(t)" [style.background]="t.places_disponibles < 5 ? 'var(--error)' : 'var(--primary)'"></div></div>
-                      <div style="font-size:11px;color:var(--text-2)">{{ t.places_disponibles }}/{{ t.places_total }}</div>
+                      <div class="cell-main">{{ t.compagnie }}</div>
+                      <div class="cell-sub"><span class="mono">{{ t.bus_immatriculation }}</span> · <span [class]="'classe ' + t.bus_classe">{{ classeLabel(t.bus_classe) }}</span></div>
                     </td>
-                    <td><span class="badge" [ngClass]="statutBadge(t.statut)">{{ statutLabel(t.statut) }}</span></td>
                     <td>
-                      @if (+t.note_moyenne > 0) { <span style="color:var(--gold);font-weight:700">&#9733; {{ t.note_moyenne }}</span> }
-                      @else { <span class="text-hint">—</span> }
+                      @if (t.chauffeur_nom) {
+                        <button class="chauffeur" (click)="ouvrirAffectation(t)" [disabled]="!peutAffecter(t)">
+                          <span class="avatar mini">{{ initiales(t.chauffeur_nom) }}</span>{{ t.chauffeur_nom }}
+                        </button>
+                      } @else if (peutAffecter(t)) {
+                        <button class="btn btn-outline btn-sm" (click)="ouvrirAffectation(t)"><tb-icon name="plus" [size]="14" /> Affecter</button>
+                      } @else { <span class="text-hint">—</span> }
                     </td>
-                    @if (canManage()) {
-                      <td (click)="$event.stopPropagation()">
-                        <div style="display:flex;gap:4px">
-                          @if (t.statut === 'planifie' || t.statut === 'en_cours') {
-                            <button class="btn btn-ghost btn-sm" (click)="openRetard(t)">&#9200; Retard</button>
-                            <button class="btn btn-danger btn-sm" (click)="openAnnuler(t)">&#10005;</button>
+                    <td style="min-width:130px">
+                      <div class="progress" [class.warn]="remplissage(t) >= 85"><span [style.width.%]="remplissage(t)"></span></div>
+                      <div class="cell-sub">{{ t.places_total - t.places_disponibles }} / {{ t.places_total }} places</div>
+                    </td>
+                    <td class="right">
+                      <div class="amount">{{ t.prix_actuel | nb:'F' }}</div>
+                      @if (t.est_en_promo) { <div class="cell-sub"><s>{{ t.prix_fcfa | nb }}</s> <span class="text-gold">promo</span></div> }
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="statutBadge(t.statut)">{{ statutLabel(t.statut) }}</span>
+                      @if (t.retard_minutes > 0 && t.statut === 'retarde') { <div class="cell-sub">+{{ t.retard_minutes }} min</div> }
+                    </td>
+                    @if (peutGerer()) {
+                      <td class="right">
+                        <div class="row-actions">
+                          @if (t.statut === 'planifie' || t.statut === 'retarde' || t.statut === 'en_cours') {
+                            <button class="icon-btn" data-tip="Signaler un retard" (click)="ouvrirRetard(t)"><tb-icon name="clock" /></button>
+                            <button class="icon-btn danger" data-tip="Annuler le trajet" (click)="ouvrirAnnulation(t)"><tb-icon name="x-circle" /></button>
                           }
                         </div>
                       </td>
                     }
                   </tr>
                 } @empty {
-                  <tr><td [attr.colspan]="canManage() ? 9 : 8">
-                    <div class="empty-state"><div class="empty-icon">🚌</div><h3>Aucun trajet</h3><p>Modifiez les filtres.</p></div>
-                  </td></tr>
+                  <tr><td colspan="8"><div class="empty-state"><div class="empty-icon"><tb-icon name="route" [size]="26" /></div>
+                    <h3>Aucun trajet</h3><p>Modifiez la période ou les filtres.</p></div></td></tr>
                 }
-              </tbody>
-            </table>
-          </div>
-          <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
-        }
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="allerPage($event)" />
       </div>
     </div>
-    @if (trajetRetard()) {
-      <div class="modal-backdrop" (click)="trajetRetard.set(null)">
-        <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
-          <div class="modal-header"><div class="modal-title">&#9200; Signaler un retard</div><button class="modal-close" (click)="trajetRetard.set(null)">&#215;</button></div>
+
+    <!-- Affecter un chauffeur -->
+    @if (trajetAffectation(); as t) {
+      <div class="modal-backdrop" (click)="trajetAffectation.set(null)">
+        <div class="modal" style="max-width:460px" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div><div class="modal-title">Affecter un chauffeur</div>
+              <div class="cell-sub">{{ t.depart_nom }} → {{ t.arrivee_nom }} · {{ t.heure_depart | date:'EEE d MMM, HH:mm' }}</div></div>
+            <button class="modal-close" (click)="trajetAffectation.set(null)"><tb-icon name="x" /></button>
+          </div>
           <div class="modal-body">
-            <p style="color:var(--text-2);margin-bottom:16px">{{ trajetRetard()!.depart_nom }} &#8594; {{ trajetRetard()!.arrivee_nom }}</p>
-            <div class="form-group">
-              <label class="form-label">Durée du retard (minutes)</label>
-              <input type="number" class="form-control" [(ngModel)]="retardMin" min="5" max="480">
+            @if (chauffeurs().length === 0) {
+              <div class="info-box">Aucun compte chauffeur. Créez-en un depuis la page <b>Chauffeurs</b>.</div>
+            }
+            <div class="liste-choix">
+              @for (c of chauffeurs(); track c.id) {
+                <label class="choix" [class.actif]="chauffeurChoisi === c.id">
+                  <input type="radio" name="chauffeur" [value]="c.id" [(ngModel)]="chauffeurChoisi">
+                  <span class="avatar mini">{{ c.initiales }}</span>
+                  <span><b>{{ c.nom_complet }}</b><small>{{ c.telephone || c.email }}</small></span>
+                </label>
+              }
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" (click)="trajetRetard.set(null)">Annuler</button>
-            <button class="btn btn-primary" (click)="confirmerRetard()">Signaler</button>
+            @if (t.chauffeur) { <button class="btn btn-danger" (click)="affecter(null)">Retirer</button> }
+            <span style="flex:1"></span>
+            <button class="btn btn-ghost" (click)="trajetAffectation.set(null)">Annuler</button>
+            <button class="btn btn-primary" [disabled]="!chauffeurChoisi" (click)="affecter(chauffeurChoisi)">Affecter</button>
           </div>
         </div>
       </div>
     }
-    @if (trajetAnnuler()) {
-      <div class="modal-backdrop" (click)="trajetAnnuler.set(null)">
-        <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
-          <div class="modal-header"><div class="modal-title">&#10005; Annuler le trajet</div><button class="modal-close" (click)="trajetAnnuler.set(null)">&#215;</button></div>
+
+    <!-- Retard -->
+    @if (trajetRetard(); as t) {
+      <div class="modal-backdrop" (click)="trajetRetard.set(null)">
+        <div class="modal" style="max-width:440px" (click)="$event.stopPropagation()">
+          <div class="modal-header"><div><div class="modal-title">Signaler un retard</div>
+            <div class="cell-sub">{{ t.depart_nom }} → {{ t.arrivee_nom }} · départ {{ t.heure_depart | date:'HH:mm' }}</div></div>
+            <button class="modal-close" (click)="trajetRetard.set(null)"><tb-icon name="x" /></button></div>
           <div class="modal-body">
-            <div style="background:var(--error-bg);border:1px solid rgba(217,64,64,0.2);border-radius:10px;padding:12px;color:var(--error);font-size:13px;margin-bottom:16px">
-              &#9888; Cette action est irréversible. Les voyageurs seront remboursés.
-            </div>
             <div class="form-group">
-              <label class="form-label">Motif</label>
-              <textarea class="form-control" [(ngModel)]="motifAnnulation" rows="3" placeholder="Ex: Panne mécanique…"></textarea>
+              <label class="form-label">Retard estimé</label>
+              <div class="segmented">
+                @for (m of [15, 30, 45, 60, 90]; track m) { <button [class.active]="retardMin === m" (click)="retardMin = m">{{ m }} min</button> }
+              </div>
+            </div>
+            <p class="form-hint">Les voyageurs sont prévenus par SMS et notification.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" (click)="trajetRetard.set(null)">Annuler</button>
+            <button class="btn btn-primary" (click)="confirmerRetard()">Signaler le retard</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Annulation -->
+    @if (trajetAnnulation(); as t) {
+      <div class="modal-backdrop" (click)="trajetAnnulation.set(null)">
+        <div class="modal" style="max-width:460px" (click)="$event.stopPropagation()">
+          <div class="modal-header"><div><div class="modal-title">Annuler ce trajet ?</div>
+            <div class="cell-sub">{{ t.depart_nom }} → {{ t.arrivee_nom }} · {{ t.heure_depart | date:'EEE d MMM, HH:mm' }}</div></div>
+            <button class="modal-close" (click)="trajetAnnulation.set(null)"><tb-icon name="x" /></button></div>
+          <div class="modal-body">
+            <div class="danger-box"><tb-icon name="alert" [size]="18" /> Action irréversible : les voyageurs sont prévenus et remboursés.</div>
+            <div class="form-group">
+              <label class="form-label">Motif (communiqué aux voyageurs)</label>
+              <textarea class="form-control" [(ngModel)]="motifAnnulation" rows="3" placeholder="Ex. : panne mécanique"></textarea>
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" (click)="trajetAnnuler.set(null)">Annuler</button>
-            <button class="btn btn-danger" (click)="confirmerAnnulation()" [disabled]="!motifAnnulation">Confirmer</button>
+            <button class="btn btn-ghost" (click)="trajetAnnulation.set(null)">Retour</button>
+            <button class="btn btn-danger-solid btn" (click)="confirmerAnnulation()" [disabled]="!motifAnnulation.trim()">Annuler le trajet</button>
           </div>
         </div>
       </div>
     }
   `,
-  styles: [`.pb{height:5px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin-bottom:3px;}.pbf{height:100%;border-radius:3px;transition:width 0.4s;}`]
+  styles: [`
+    .heure{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+    .case{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2);cursor:pointer;}
+    .case input{accent-color:var(--primary);width:16px;height:16px;}
+    .classe{font-weight:600;}
+    .classe.vip{color:var(--gold-dark);} .classe.confort{color:var(--primary);}
+    .chauffeur{display:inline-flex;align-items:center;gap:8px;border:none;background:none;font-size:14px;font-weight:600;color:var(--text-1);cursor:pointer;padding:4px 8px 4px 4px;border-radius:999px;}
+    .chauffeur:hover:not(:disabled){background:var(--surface-2);}
+    .chauffeur:disabled{cursor:default;}
+    .avatar.mini{width:28px;height:28px;font-size:11px;}
+    .liste-choix{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;}
+    .choix{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;}
+    .choix:hover{background:var(--surface-2);}
+    .choix.actif{border-color:var(--primary);background:var(--primary-light);}
+    .choix input{display:none;}
+    .choix span:last-child{display:flex;flex-direction:column;}
+    .choix small{font-size:12px;color:var(--text-2);}
+    .danger-box{display:flex;gap:10px;align-items:center;background:var(--error-bg);color:var(--error);padding:12px 14px;border-radius:12px;font-size:13px;font-weight:500;}
+  `]
 })
 export class TrajetsComponent implements OnInit {
-  auth    = inject(AuthService);
-  private api   = inject(ApiService);
+  auth = inject(AuthService);
+  private api = inject(ApiService);
   private toast = inject(ToastService);
+
+  readonly periodes: { code: Periode; label: string }[] = [
+    { code: 'a_venir', label: 'À venir' }, { code: 'aujourdhui', label: "Aujourd'hui" },
+    { code: 'demain', label: 'Demain' }, { code: 'tous', label: 'Tous' },
+  ];
   trajets = signal<Trajet[]>([]);
-  total = signal(0); page = signal(1); loading = signal(false);
-  trajetRetard  = signal<Trajet | null>(null);
-  trajetAnnuler = signal<Trajet | null>(null);
-  search = ''; filtreStatut = ''; filtreDate = ''; filtreClasse = '';
-  retardMin = 30; motifAnnulation = '';
+  chauffeurs = signal<User[]>([]);
+  total = signal(0); page = signal(1); chargement = signal(false);
+  trajetRetard = signal<Trajet | null>(null);
+  trajetAnnulation = signal<Trajet | null>(null);
+  trajetAffectation = signal<Trajet | null>(null);
+  periode: Periode = 'a_venir';
+  search = ''; filtreStatut = ''; filtreDate = ''; filtreClasse = ''; sansChauffeur = false;
+  retardMin = 30; motifAnnulation = ''; chauffeurChoisi: string | null = null;
   readonly pageSize = 20;
   search$ = new Subject<string>();
 
   ngOnInit(): void {
-    this.search$.pipe(debounceTime(400), distinctUntilChanged()).subscribe(() => { this.page.set(1); this.load(); });
-    this.load();
+    this.search$.pipe(debounceTime(350), distinctUntilChanged()).subscribe(() => this.recharger());
+    this.charger();
+    if (this.auth.hasRole('admin', 'support')) {
+      this.api.getUtilisateurs({ role: 'chauffeur', is_active: 'true', page_size: 100 }).subscribe({
+        next: r => this.chauffeurs.set(r.data.results), error: () => {},
+      });
+    }
   }
-  canManage(): boolean { return this.auth.hasRole('admin','support','transporteur'); }
-  onFiltreChange(): void { this.page.set(1); this.load(); }
-  onPage(p: number): void { this.page.set(p); this.load(); }
-  load(): void {
-    this.loading.set(true);
-    const p: Record<string,string> = { page: String(this.page()) };
-    if (this.search)       p['search']  = this.search;
-    if (this.filtreStatut) p['statut']  = this.filtreStatut;
-    if (this.filtreDate)   p['date']    = this.filtreDate;
-    if (this.filtreClasse) p['classe']  = this.filtreClasse;
+
+  peutGerer(): boolean { return this.auth.hasRole('admin', 'support', 'transporteur'); }
+  peutAffecter(t: Trajet): boolean {
+    return this.auth.hasRole('admin', 'support') && ['planifie', 'retarde'].includes(t.statut);
+  }
+  choisirPeriode(p: Periode): void { this.periode = p; this.recharger(); }
+  recharger(): void { this.page.set(1); this.charger(); }
+  allerPage(p: number): void { this.page.set(p); this.charger(); }
+
+  charger(): void {
+    this.chargement.set(true);
+    const p: Record<string, string> = { page: String(this.page()), ordering: 'heure_depart' };
+    const jour = (decalage: number) => { const d = new Date(); d.setDate(d.getDate() + decalage); return d.toISOString().slice(0, 10); };
+    if (this.periode === 'a_venir') p['a_venir'] = 'true';
+    if (this.periode === 'aujourdhui') p['date'] = jour(0);
+    if (this.periode === 'demain') p['date'] = jour(1);
+    if (this.periode === 'tous') { p['ordering'] = '-heure_depart'; if (this.filtreDate) p['date'] = this.filtreDate; }
+    if (this.search) p['search'] = this.search;
+    if (this.filtreStatut) p['statut'] = this.filtreStatut;
+    if (this.filtreClasse) p['classe'] = this.filtreClasse;
+    if (this.sansChauffeur) p['sans_chauffeur'] = 'true';
     this.api.getTrajets(p).subscribe({
-      next: res => { this.trajets.set(res.data.results); this.total.set(res.data.count); this.loading.set(false); },
-      error: () => this.loading.set(false)
+      next: r => { this.trajets.set(r.data.results); this.total.set(r.data.count); this.chargement.set(false); },
+      error: () => { this.chargement.set(false); this.toast.error('Impossible de charger les trajets.'); },
     });
   }
-  openRetard(t: Trajet): void { this.trajetRetard.set(t); this.retardMin = 30; }
-  openAnnuler(t: Trajet): void { this.trajetAnnuler.set(t); this.motifAnnulation = ''; }
+
+  ouvrirAffectation(t: Trajet): void { this.chauffeurChoisi = t.chauffeur ?? null; this.trajetAffectation.set(t); }
+  affecter(id: string | null): void {
+    const t = this.trajetAffectation();
+    if (!t) return;
+    this.api.affecterChauffeur(t.id, id).subscribe({
+      next: () => { this.toast.success(id ? 'Chauffeur affecté.' : 'Chauffeur retiré.'); this.trajetAffectation.set(null); this.charger(); },
+      error: e => this.toast.error(e?.error?.message ?? 'Affectation impossible.'),
+    });
+  }
+  ouvrirRetard(t: Trajet): void { this.retardMin = 30; this.trajetRetard.set(t); }
+  ouvrirAnnulation(t: Trajet): void { this.motifAnnulation = ''; this.trajetAnnulation.set(t); }
   confirmerRetard(): void {
     const t = this.trajetRetard();
     if (!t) return;
     this.api.signalerRetard(t.id, this.retardMin).subscribe({
-      next: () => { this.toast.success('Retard signalé.'); this.trajetRetard.set(null); this.load(); },
-      error: () => this.toast.error("Erreur lors du signalement.")
+      next: () => { this.toast.success('Retard signalé aux voyageurs.'); this.trajetRetard.set(null); this.charger(); },
+      error: () => this.toast.error('Erreur lors du signalement.'),
     });
   }
   confirmerAnnulation(): void {
-    const t = this.trajetAnnuler();
+    const t = this.trajetAnnulation();
     if (!t) return;
     this.api.annulerTrajet(t.id, this.motifAnnulation).subscribe({
-      next: () => { this.toast.success('Trajet annulé.'); this.trajetAnnuler.set(null); this.load(); },
-      error: () => this.toast.error("Erreur lors de l'annulation.")
+      next: () => { this.toast.success('Trajet annulé.'); this.trajetAnnulation.set(null); this.charger(); },
+      error: () => this.toast.error("Erreur lors de l'annulation."),
     });
   }
-  placesPct(t: Trajet): number { return t.places_total ? (t.places_total-t.places_disponibles)/t.places_total*100 : 0; }
-  classBadge(c: string): string { const m: Record<string,string> = { vip:'badge-gold', confort:'badge-primary', standard:'badge-neutral' }; return m[c] ?? 'badge-neutral'; }
-  statutLabel(s: string): string { const m: Record<string,string> = { planifie:'Planifié', en_cours:'En cours', termine:'Terminé', annule:'Annulé', retarde:'Retardé' }; return m[s] ?? s; }
-  statutBadge(s: string): string { const m: Record<string,string> = { planifie:'badge-info', en_cours:'badge-success', termine:'badge-neutral', annule:'badge-error', retarde:'badge-warning' }; return m[s] ?? 'badge-neutral'; }
+
+  remplissage(t: Trajet): number { return t.places_total ? Math.round((t.places_total - t.places_disponibles) / t.places_total * 100) : 0; }
+  initiales(nom: string): string { return nom.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(); }
+  classeLabel(c: string): string { return ({ vip: 'VIP', confort: 'Confort', standard: 'Standard' } as Record<string, string>)[c] ?? c; }
+  statutLabel(s: string): string { return ({ planifie: 'Planifié', en_cours: 'En cours', termine: 'Terminé', annule: 'Annulé', retarde: 'Retardé' } as Record<string, string>)[s] ?? s; }
+  statutBadge(s: string): string { return ({ planifie: 'badge-info', en_cours: 'badge-success', termine: 'badge-neutral', annule: 'badge-error', retarde: 'badge-warning' } as Record<string, string>)[s] ?? 'badge-neutral'; }
 }

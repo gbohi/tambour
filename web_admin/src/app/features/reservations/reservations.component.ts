@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -11,185 +13,141 @@ import { Reservation, Passager, Billet } from '../../core/models/reservation.mod
 @Component({
   selector: 'app-reservations',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, IconComponent, NombrePipe],
   template: `
     <div class="page">
       <div class="page-header">
-        <div><h1 class="page-title">Réservations</h1><p class="page-subtitle">{{ total() }} réservations</p></div>
-        <button class="btn btn-ghost btn-sm" (click)="exportCsv()">&#128229; CSV</button>
+        <div><h1 class="page-title">Réservations</h1><p class="page-subtitle">{{ total() | nb }} réservations</p></div>
+        <button class="btn btn-secondary" (click)="exportCsv()"><tb-icon name="download" [size]="16" /> Exporter (CSV)</button>
       </div>
-      <div class="filters">
-        <div class="search-box">
-          <span class="search-icon">&#128269;</span>
-          <input type="text" class="form-control" placeholder="Référence, email..."
-            [(ngModel)]="search" (ngModelChange)="search$.next($event)">
-        </div>
-        <select class="form-control" style="width:auto" [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
-          <option value="">Tous statuts</option>
-          <option value="en_attente">En attente</option>
-          <option value="confirmee">Confirmée</option>
-          <option value="annulee">Annulée</option>
-          <option value="expiree">Expirée</option>
-          <option value="remboursee">Remboursée</option>
-        </select>
-        <input type="date" class="form-control" style="width:auto" [(ngModel)]="filtreDate" (change)="onFiltreChange()">
-      </div>
+
       <div class="table-card">
-        @if (loading()) {
-          <div style="padding:48px;text-align:center;color:var(--text-2)">&#9203; Chargement…</div>
-        } @else {
-          <div class="table-container">
-            <table>
-              <thead><tr>
-                <th>Référence</th><th>Trajet</th><th>Passagers</th>
-                <th>Montant</th><th>Statut</th><th>Date</th><th>Actions</th>
-              </tr></thead>
-              <tbody>
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon"><tb-icon name="search" [size]="16" /></span>
+            <input type="text" class="form-control" placeholder="Référence, nom, email…" [(ngModel)]="search" (ngModelChange)="search$.next($event)">
+          </div>
+          <div class="segmented">
+            @for (s of statuts; track s.code) {
+              <button [class.active]="filtreStatut === s.code" (click)="filtreStatut = s.code; onFiltreChange()">{{ s.label }}</button>
+            }
+          </div>
+          <span class="spacer"></span>
+          <input type="date" class="form-control" [(ngModel)]="filtreDate" (change)="onFiltreChange()" title="Date du voyage">
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Référence</th><th>Voyageur</th><th>Voyage</th><th>Passagers</th><th class="right">Montant</th><th>Statut</th><th class="right"></th></tr></thead>
+            <tbody>
+              @if (loading()) {
+                <tr><td colspan="7"><div class="loading-row"><span class="spinner"></span></div></td></tr>
+              } @else {
                 @for (r of reservations(); track r.id) {
                   <tr class="clickable" (click)="ouvrirDetail(r)">
-                    <td><code style="font-size:12px;background:var(--surface-2);padding:3px 7px;border-radius:5px;font-weight:700">{{ r.reference }}</code></td>
-                    <td>
-                      <div style="font-weight:600">{{ r.trajet_info.depart }} &#8594; {{ r.trajet_info.arrivee }}</div>
-                      <div style="font-size:11px;color:var(--text-2)">{{ r.trajet_info.heure_depart | date:'dd/MM HH:mm' }}</div>
-                    </td>
-                    <td>
-                      <span class="badge badge-neutral">{{ r.nb_passagers }} passager{{ r.nb_passagers > 1 ? 's' : '' }}</span>
-                      <div style="font-size:10px;color:var(--text-3);margin-top:3px">{{ r.nb_passagers }} billet{{ r.nb_passagers > 1 ? 's' : '' }}</div>
-                    </td>
-                    <td><strong style="color:var(--primary)">{{ r.montant_total | number:'1.0-0' }} FCFA</strong></td>
+                    <td><div class="mono cell-main">{{ r.reference }}</div><div class="cell-sub">{{ r.created_at | date:'d MMM, HH:mm' }}</div></td>
+                    <td><div class="cell-main">{{ r.user_info?.nom_complet }}</div><div class="cell-sub">{{ r.user_info?.telephone || r.user_info?.email }}</div></td>
+                    <td><div class="route">{{ r.trajet_info.depart }} <span class="arrow"><tb-icon name="arrow-right" [size]="14" /></span> {{ r.trajet_info.arrivee }}</div>
+                      <div class="cell-sub">{{ r.trajet_info.heure_depart | date:'EEE d MMM, HH:mm' }} · {{ r.trajet_info.compagnie }}</div></td>
+                    <td><span class="chip"><tb-icon name="users" [size]="14" /> {{ r.nb_passagers }}</span></td>
+                    <td class="right"><span class="amount">{{ r.montant_total | nb:'F' }}</span></td>
                     <td><span class="badge" [ngClass]="statutBadge(r.statut)">{{ statutLabel(r.statut) }}</span></td>
-                    <td style="color:var(--text-2)">{{ r.created_at | date:'dd/MM/yy HH:mm' }}</td>
-                    <td (click)="$event.stopPropagation()">
-                      <div style="display:flex;gap:4px">
-                        <button class="btn btn-ghost btn-sm" (click)="ouvrirDetail(r)">&#128269; Détail</button>
-                        @if (r.statut === 'confirmee') {
-                          <button class="btn btn-outline btn-sm" (click)="ouvrirBillets(r)">&#127915; Billets</button>
-                        }
+                    <td class="right" (click)="$event.stopPropagation()">
+                      <div class="row-actions">
+                        <button class="icon-btn" data-tip="Voir le détail" (click)="ouvrirDetail(r)"><tb-icon name="eye" /></button>
                         @if (r.peut_etre_annulee && auth.isAdminOrSupport()) {
-                          <button class="btn btn-danger btn-sm" (click)="ouvrirAnnuler(r)">&#10005;</button>
+                          <button class="icon-btn danger" data-tip="Annuler" (click)="ouvrirAnnuler(r)"><tb-icon name="x-circle" /></button>
                         }
                       </div>
                     </td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="7">
-                    <div class="empty-state"><div class="empty-icon">&#127915;</div><h3>Aucune réservation</h3><p>Modifiez les filtres.</p></div>
-                  </td></tr>
+                  <tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><tb-icon name="ticket" [size]="26" /></div>
+                    <h3>Aucune réservation</h3><p>Modifiez les filtres.</p></div></td></tr>
                 }
-              </tbody>
-            </table>
-          </div>
-          <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
-        }
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination [page]="page()" [total]="total()" [pageSize]="pageSize" (pageChange)="onPage($event)" />
       </div>
     </div>
 
-    <!-- Modal détail réservation -->
-    @if (selected()) {
-      <div class="modal-backdrop" (click)="closeDetail()">
-        <div class="modal" style="max-width:600px" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <div>
-              <div class="modal-title">{{ selected()!.reference }}</div>
-              <span class="badge" [ngClass]="statutBadge(selected()!.statut)">{{ statutLabel(selected()!.statut) }}</span>
-            </div>
-            <button class="modal-close" (click)="closeDetail()">&#215;</button>
+    @if (selected(); as r) {
+      <div class="drawer-backdrop" (click)="closeDetail()"></div>
+      <aside class="drawer">
+        <div class="drawer-header">
+          <div><div class="mono text-muted">{{ r.reference }}</div>
+            <div class="modal-title">{{ r.trajet_info.depart }} → {{ r.trajet_info.arrivee }}</div>
+            <div class="cell-sub">{{ r.trajet_info.heure_depart | date:'EEEE d MMMM yyyy, HH:mm' }} · {{ r.trajet_info.compagnie }}</div></div>
+          <button class="modal-close" (click)="closeDetail()"><tb-icon name="x" /></button>
+        </div>
+        <div class="drawer-body">
+          <div class="resume">
+            <div><span>Statut</span><span class="badge" [ngClass]="statutBadge(r.statut)">{{ statutLabel(r.statut) }}</span></div>
+            <div><span>Montant</span><b>{{ r.montant_total | nb:'FCFA' }}</b></div>
+            <div><span>Réservée le</span><b>{{ r.created_at | date:'d MMM yyyy, HH:mm' }}</b></div>
+            @if (r.montant_rembourse) { <div><span>Remboursé</span><b>{{ r.montant_rembourse | nb:'FCFA' }}</b></div> }
           </div>
-          <div class="modal-body">
-            <div class="info-box" style="margin-bottom:16px">
-              <div style="font-weight:700;font-size:15px">{{ selected()!.trajet_info.depart }} &#8594; {{ selected()!.trajet_info.arrivee }}</div>
-              <div style="font-size:12px;color:var(--primary);margin-top:4px">{{ selected()!.trajet_info.heure_depart | date:'dd MMMM yyyy HH:mm' }}</div>
-            </div>
-
-            <!-- Email payeur -->
-            @if (selected()!.email_payeur) {
-              <div style="background:var(--primary-light);border:1px solid rgba(10,124,78,0.15);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
-                <span>&#128231;</span>
-                <span style="font-size:12px;color:var(--primary)">Billets envoyés à : <strong>{{ selected()!.email_payeur }}</strong></span>
+          <div>
+            <div class="section-titre">Payeur</div>
+            <div class="payeur"><div class="avatar">{{ initiales(r.user_info?.nom_complet) }}</div>
+              <div><b>{{ r.user_info?.nom_complet }}</b><div class="cell-sub">{{ r.user_info?.telephone }} · {{ r.email_payeur || r.user_info?.email }}</div></div></div>
+          </div>
+          <div>
+            <div class="section-titre">Billets ({{ detail()?.passagers?.length ?? r.nb_passagers }})</div>
+            @if (detailLoading()) { <div class="loading-row"><span class="spinner"></span></div> }
+            @for (p of detail()?.passagers ?? []; track p.id) {
+              <div class="billet">
+                <div class="siege">{{ p.siege_numero }}</div>
+                <div class="qui"><b>{{ p.prenom }} {{ p.nom }}</b><span class="mono">{{ p.billet?.reference_billet }}</span></div>
+                @if (p.billet && !p.billet.est_valide) {
+                  <span class="badge badge-success">À bord</span>
+                } @else if (p.billet && r.statut === 'confirmee' && (auth.isAdminOrSupport() || auth.isTransporteur())) {
+                  <button class="btn btn-outline btn-sm" (click)="validerBillet(r.id, p.id)"><tb-icon name="check" [size]="14" /> Embarquer</button>
+                } @else { <span class="badge badge-neutral">Non embarqué</span> }
               </div>
             }
-
-            <!-- Liste passagers avec leurs billets -->
-            @if (detailLoading()) {
-              <div style="text-align:center;padding:16px;color:var(--text-2)">&#9203; Chargement des passagers…</div>
-            } @else if (detail()?.passagers?.length) {
-              <h4 style="font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">
-                {{ detail()!.passagers!.length }} Passager{{ detail()!.passagers!.length > 1 ? 's' : '' }} — {{ detail()!.passagers!.length }} Billet{{ detail()!.passagers!.length > 1 ? 's' : '' }}
-              </h4>
-              @for (p of detail()!.passagers!; track p.id) {
-                <div style="border:0.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                    <div style="display:flex;align-items:center;gap:10px">
-                      <div class="avatar" style="background:var(--primary)">{{ p.prenom[0] }}{{ p.nom[0] }}</div>
-                      <div>
-                        <div style="font-weight:700;font-size:14px">{{ p.prenom }} {{ p.nom }}</div>
-                        <div style="font-size:11px;color:var(--text-2)">{{ p.telephone }}</div>
-                        @if (p.email) {
-                          <div style="font-size:11px;color:var(--text-3)">&#128231; {{ p.email }}</div>
-                        }
-                      </div>
-                    </div>
-                    <span class="badge badge-primary">Siège {{ p.siege_numero }}</span>
-                  </div>
-                  <!-- Billet individuel -->
-                  @if (p.billet) {
-                    <div style="background:var(--surface-2);border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
-                      <div>
-                        <code style="font-size:11px;font-weight:700;color:var(--primary)">{{ p.billet.reference_billet }}</code>
-                        @if (!p.billet.est_valide) {
-                          <span class="badge badge-success" style="margin-left:6px;font-size:10px">&#10003; Utilisé</span>
-                        } @else {
-                          <span class="badge badge-warning" style="margin-left:6px;font-size:10px">En attente</span>
-                        }
-                      </div>
-                      @if (auth.isAdminOrSupport() || auth.isTransporteur()) {
-                        <button class="btn btn-ghost btn-sm"
-                          [disabled]="!p.billet.est_valide"
-                          (click)="validerBillet(selected()!.id, p.id)">
-                          &#128241; Valider QR
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            }
-
-            <div class="info-row"><span class="info-label">Montant total</span><span class="info-value" style="color:var(--primary);font-size:16px">{{ selected()!.montant_total | number:'1.0-0' }} FCFA</span></div>
-            <div class="info-row"><span class="info-label">Créée le</span><span class="info-value">{{ selected()!.created_at | date:'dd/MM/yyyy HH:mm' }}</span></div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-ghost" (click)="closeDetail()">Fermer</button>
-            @if (selected()!.peut_etre_annulee && auth.isAdminOrSupport()) {
-              <button class="btn btn-danger" (click)="ouvrirAnnuler(selected()!); closeDetail()">&#10005; Annuler</button>
-            }
           </div>
         </div>
-      </div>
+        <div class="drawer-footer">
+          @if (r.peut_etre_annulee && auth.isAdminOrSupport()) {
+            <button class="btn btn-danger" (click)="ouvrirAnnuler(r); closeDetail()"><tb-icon name="x-circle" [size]="16" /> Annuler la réservation</button>
+          }
+          <span style="flex:1"></span>
+          <button class="btn btn-ghost" (click)="closeDetail()">Fermer</button>
+        </div>
+      </aside>
     }
 
-    <!-- Modal annulation -->
-    @if (resAnnuler()) {
+    @if (resAnnuler(); as r) {
       <div class="modal-backdrop" (click)="resAnnuler.set(null)">
-        <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
-          <div class="modal-header"><div class="modal-title">Annuler {{ resAnnuler()!.reference }}</div><button class="modal-close" (click)="resAnnuler.set(null)">&#215;</button></div>
+        <div class="modal" style="max-width:460px" (click)="$event.stopPropagation()">
+          <div class="modal-header"><div><div class="modal-title">Annuler la réservation</div><div class="cell-sub mono">{{ r.reference }}</div></div>
+            <button class="modal-close" (click)="resAnnuler.set(null)"><tb-icon name="x" /></button></div>
           <div class="modal-body">
-            <div style="background:var(--warning-bg);border:1px solid rgba(245,166,35,0.3);border-radius:10px;padding:12px;color:var(--warning);font-size:13px;margin-bottom:16px">
-              &#9888; Remboursement éligible : <strong>{{ resAnnuler()!.montant_remboursable | number:'1.0-0' }} FCFA</strong><br>
-              <span style="font-size:11px">{{ resAnnuler()!.nb_passagers }} billet{{ resAnnuler()!.nb_passagers > 1 ? 's' : '' }} seront invalidés.</span>
-            </div>
+            <div class="info-box">Remboursement prévu : <b>{{ r.montant_remboursable | nb:'FCFA' }}</b> (selon le délai avant le départ).</div>
             <div class="form-group"><label class="form-label">Motif</label>
-              <textarea class="form-control" [(ngModel)]="motifAnnulation" rows="3" placeholder="Motif…"></textarea>
-            </div>
+              <textarea class="form-control" rows="3" [(ngModel)]="motifAnnulation" placeholder="Ex. : demande du client"></textarea></div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" (click)="resAnnuler.set(null)">Fermer</button>
-            <button class="btn btn-danger" (click)="confirmerAnnulation()" [disabled]="!motifAnnulation.trim()">Confirmer</button>
+            <button class="btn btn-ghost" (click)="resAnnuler.set(null)">Retour</button>
+            <button class="btn btn-danger-solid btn" (click)="confirmerAnnulation()">Confirmer l'annulation</button>
           </div>
         </div>
       </div>
     }
-  `
+  `,
+  styles: [`
+    .resume{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .resume > div{background:var(--surface-2);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px;}
+    .resume span:first-child{color:var(--text-2);font-size:12px;}
+    .resume b{font-size:15px;}
+    .payeur{display:flex;align-items:center;gap:12px;margin-top:10px;}
+    .billet{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-top:8px;}
+    .siege{width:42px;height:42px;border-radius:10px;background:var(--primary-light);color:var(--primary);font-weight:800;display:flex;align-items:center;justify-content:center;}
+    .qui{flex:1;display:flex;flex-direction:column;min-width:0;}
+    .qui span{font-size:12px;color:var(--text-2);}
+  `]
 })
 export class ReservationsComponent implements OnInit {
   auth    = inject(AuthService);
@@ -206,6 +164,11 @@ export class ReservationsComponent implements OnInit {
   resAnnuler    = signal<Reservation | null>(null);
   motifAnnulation = '';
   search = ''; filtreStatut = ''; filtreDate = '';
+  readonly statuts = [
+    { code: '', label: 'Toutes' }, { code: 'confirmee', label: 'Confirmées' },
+    { code: 'en_attente', label: 'En attente' }, { code: 'annulee', label: 'Annulées' },
+  ];
+  initiales(nom?: string): string { return (nom ?? '').split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(); }
   readonly pageSize = 20;
   search$ = new Subject<string>();
 

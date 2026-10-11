@@ -80,7 +80,8 @@ class _NoterAppScreenState extends ConsumerState<NoterAppScreen> {
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               for (var i = 1; i <= 5; i++)
                 IconButton(
-                  iconSize: 44,
+                  iconSize: 42, padding: const EdgeInsets.all(2),
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                   onPressed: () => setState(() => _note = i),
                   icon: Icon(i <= _note ? Icons.star_rounded : Icons.star_outline_rounded,
                     color: i <= _note ? TamBourColors.gold : TamBourColors.border),

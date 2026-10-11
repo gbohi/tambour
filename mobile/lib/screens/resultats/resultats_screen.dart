@@ -65,7 +65,7 @@ class _ResultatsScreenState extends ConsumerState<ResultatsScreen> {
       child: Container(height: 170, decoration: BoxDecoration(color: TamBourColors.border, borderRadius: BorderRadius.circular(16)))
         .animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.6))));
 
-  Widget _buildErreur(String message) => Center(child: Padding(padding: const EdgeInsets.all(32),
+  Widget _buildErreur(String message) => Center(child: SingleChildScrollView(padding: const EdgeInsets.all(32),
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Container(width: 72, height: 72, decoration: BoxDecoration(color: TamBourColors.error.withOpacity(0.1), shape: BoxShape.circle),
         child: const Icon(Icons.wifi_off_rounded, color: TamBourColors.error, size: 34)),
@@ -75,7 +75,7 @@ class _ResultatsScreenState extends ConsumerState<ResultatsScreen> {
       Text(message, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary)),
     ])));
 
-  Widget _buildVide() => Center(child: Padding(padding: const EdgeInsets.all(32),
+  Widget _buildVide() => Center(child: SingleChildScrollView(padding: const EdgeInsets.all(32),
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Container(width: 80, height: 80, decoration: BoxDecoration(color: TamBourColors.primaryLight, shape: BoxShape.circle),
         child: const Icon(Icons.directions_bus_rounded, color: TamBourColors.primary, size: 38)),
@@ -100,14 +100,13 @@ class _ResultatsHeader extends StatelessWidget {
           IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20), onPressed: () => Navigator.pop(context)),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Text(params.villeDepart.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+              Flexible(child: Text(params.villeDepart.nom, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white))),
               const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_forward_rounded, color: TamBourColors.gold, size: 16)),
-              Text(params.villeArrivee.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+              Flexible(child: Text(params.villeArrivee.nom, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white))),
             ]),
             const SizedBox(height: 4),
-            Row(children: [
+            Wrap(spacing: 8, runSpacing: 4, children: [
               _Chip(icon: Icons.calendar_today_rounded, label: dateLabel),
-              const SizedBox(width: 8),
               _Chip(icon: Icons.person_outline_rounded, label: '${params.nbPassagers} passager${params.nbPassagers > 1 ? 's' : ''}'),
             ]),
           ])),

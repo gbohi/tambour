@@ -44,14 +44,15 @@ class Trajet {
     arrivee: Ville.fromJson(json['arrivee'] as Map<String, dynamic>),
     heureDepart: DateTime.parse(json['heure_depart'] as String),
     heureArrivee: DateTime.parse(json['heure_arrivee_estimee'] as String),
-    prixFcfa: json['prix_fcfa'] as int,
+    prixFcfa: (json['prix_actuel'] ?? json['prix_fcfa']) as int,
     placesDisponibles: json['places_disponibles'] as int,
     placesTotal: json['places_total'] as int,
     compagnie: json['compagnie'] as String,
-    busImmatriculation: json['bus_immatriculation'] as String,
+    busImmatriculation: json['bus_immatriculation'] as String? ?? '',
     classe: ClasseBus.values.firstWhere((c) => c.name == json['bus_classe'], orElse: () => ClasseBus.standard),
-    amenities: List<String>.from(json['amenities'] as List),
-    note: (json['note_moyenne'] as num).toDouble(),
+    amenities: List<String>.from(json['amenities'] as List? ?? const []),
+    // DRF renvoie les décimaux sous forme de texte
+    note: double.tryParse('${json['note_moyenne']}') ?? 0,
     nombreAvis: json['nombre_avis'] as int,
   );
 

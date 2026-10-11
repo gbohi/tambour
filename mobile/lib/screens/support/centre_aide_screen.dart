@@ -60,9 +60,11 @@ class _CentreAideScreenState extends ConsumerState<CentreAideScreen> {
                   Padding(padding: const EdgeInsets.only(left: 4, bottom: 10, top: 4), child: Text(c.label,
                     style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700,
                       color: TamBourColors.textSecondary, letterSpacing: 0.5))),
-                  Container(
-                    decoration: BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: TamBourColors.border, width: 0.5)),
+                  // Material (et non Container coloré) : l'effet d'appui des questions reste visible
+                  Material(
+                    color: TamBourColors.surface,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: TamBourColors.border, width: 0.5)),
                     clipBehavior: Clip.antiAlias,
                     child: Column(children: [
                       for (final q in c.questions)

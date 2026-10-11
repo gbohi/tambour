@@ -244,12 +244,12 @@ class _BilletIndividuelCard extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Text(reservation.depart, style: const TextStyle(fontFamily: 'Outfit',
-                  fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.primaryDark)),
+                Flexible(child: Text(reservation.depart, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit',
+                  fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.primaryDark))),
                 const Padding(padding: EdgeInsets.symmetric(horizontal: 5),
                   child: Icon(Icons.arrow_forward_rounded, size: 12, color: TamBourColors.primary)),
-                Text(reservation.arrivee, style: const TextStyle(fontFamily: 'Outfit',
-                  fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.primaryDark)),
+                Flexible(child: Text(reservation.arrivee, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit',
+                  fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.primaryDark))),
               ]),
               Text(reservation.compagnie, style: const TextStyle(fontFamily: 'Outfit',
                 fontSize: 11, color: TamBourColors.primary)),
@@ -638,9 +638,8 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                       child: Row(children: [
                         const Icon(Icons.payments_rounded, color: TamBourColors.primary, size: 20),
                         const SizedBox(width: 8),
-                        const Text('Montant payé', style: TextStyle(
-                          fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.primary)),
-                        const Spacer(),
+                        const Expanded(child: Text('Montant payé', style: TextStyle(
+                          fontFamily: 'Outfit', fontSize: 13, color: TamBourColors.primary))),
                         Text('${fmt.format(r.prixParPassager)} FCFA',
                           style: const TextStyle(fontFamily: 'Outfit', fontSize: 17,
                             fontWeight: FontWeight.w800, color: TamBourColors.primary)),

@@ -219,11 +219,12 @@ class _StatCard extends StatelessWidget {
           children: [
             Icon(icon, color: highlight ? TamBourColors.gold : Colors.white70, size: 20),
             const SizedBox(width: 10),
-            Column(
+            Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   value,
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 18,
@@ -233,6 +234,7 @@ class _StatCard extends StatelessWidget {
                 ),
                 Text(
                   label,
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Outfit',
                     fontSize: 11,
@@ -240,7 +242,7 @@ class _StatCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
+            )),
           ],
         ),
       ),

@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme.dart';
 import '../../models/gare.dart';
+import '../../services/gare_service.dart';
+import '../../services/itineraire_service.dart';
+import '../../widgets/app_snackbar.dart';
+import 'departs_gare_screen.dart';
+import 'widgets/fiche_gare_bottom.dart';
 
 class GaresScreen extends StatefulWidget {
   const GaresScreen({super.key});
@@ -15,10 +21,15 @@ class GaresScreen extends StatefulWidget {
 class _GaresScreenState extends State<GaresScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tab;
-  final List<Gare> _gares = Gare.mockGares();
-  Gare? _gareSelectionnee;
   late final MapController _mapController;
-  bool _afficherCarte = true;
+  final _itineraireService = ItineraireService();
+  List<Gare> _gares = Gare.mockGares();
+  Gare? _gareSelectionnee;
+
+  // Itinéraire « Y aller »
+  LatLng? _position;
+  Itineraire? _itineraire;
+  bool _calculEnCours = false;
 
   static const LatLng _centreCi = LatLng(7.5400, -5.5471);
   static const double _zoomInitial = 6.5;
@@ -29,6 +40,7 @@ class _GaresScreenState extends State<GaresScreen>
     _tab = TabController(length: 2, vsync: this);
     _mapController = MapController();
     _tab.addListener(() => setState(() {}));
+    GareService().getGares().then((g) { if (mounted) setState(() => _gares = g); });
   }
 
   @override
@@ -39,13 +51,47 @@ class _GaresScreenState extends State<GaresScreen>
   }
 
   void _selectionnerGare(Gare gare) {
-    setState(() => _gareSelectionnee = gare);
-    _mapController.move(LatLng(gare.latitude, gare.longitude), 11.5);
-    if (_tab.index == 1) _tab.animateTo(0);
+    setState(() { _gareSelectionnee = gare; _itineraire = null; });
+    if (_tab.index == 1) _tab.index = 0;
+    _mapController.move(LatLng(gare.latitude, gare.longitude), 13);
+  }
+
+  void _fermerFiche() => setState(() { _gareSelectionnee = null; _itineraire = null; });
+
+  void _voirTrajets(Gare gare) => Navigator.push(context,
+    MaterialPageRoute(builder: (_) => DepartsGareScreen(gare: gare)));
+
+  Future<void> _yAller(Gare gare) async {
+    setState(() => _calculEnCours = true);
+    try {
+      final position = await _itineraireService.positionActuelle();
+      final arrivee = LatLng(gare.latitude, gare.longitude);
+      final it = await _itineraireService.calculer(position, arrivee);
+      if (!mounted || _gareSelectionnee?.id != gare.id) return;
+      setState(() { _position = position; _itineraire = it; });
+      _mapController.fitCamera(CameraFit.bounds(
+        bounds: LatLngBounds.fromPoints([position, arrivee, ...it.points]),
+        padding: const EdgeInsets.fromLTRB(48, 72, 48, 300)));
+    } on ItineraireException catch (e) {
+      if (mounted) AppSnackbar.erreur(context, e.message);
+    } catch (_) {
+      if (mounted) AppSnackbar.erreur(context, 'Position introuvable. Réessayez à l\'extérieur ou vérifiez le GPS.');
+    } finally {
+      if (mounted) setState(() => _calculEnCours = false);
+    }
+  }
+
+  /// Navigation guidée dans l'application de cartes du téléphone.
+  Future<void> _ouvrirGps(Gare gare) async {
+    final uri = Uri.parse('https://www.google.com/maps/dir/?api=1'
+      '&destination=${gare.latitude},${gare.longitude}&travelmode=driving');
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication).catchError((_) => false);
+    if (!ok && mounted) AppSnackbar.erreur(context, "Impossible d'ouvrir l'application de cartes.");
   }
 
   @override
   Widget build(BuildContext context) {
+    final gare = _gareSelectionnee;
     return Scaffold(
       backgroundColor: TamBourColors.background,
       body: Column(
@@ -53,21 +99,33 @@ class _GaresScreenState extends State<GaresScreen>
           _Header(nbGares: _gares.length),
           _TabBar(controller: _tab),
           Expanded(
-            child: TabBarView(
-              controller: _tab,
-              physics: const NeverScrollableScrollPhysics(),
+            // IndexedStack (et non TabBarView) : la carte reste en mémoire quand on affiche la liste,
+            // sinon son contrôleur serait détruit puis réutilisé.
+            child: IndexedStack(
+              index: _tab.index,
               children: [
                 _CarteView(
                   gares: _gares,
-                  gareSelectionnee: _gareSelectionnee,
+                  gareSelectionnee: gare,
                   mapController: _mapController,
                   onGareSelect: _selectionnerGare,
                   centreCi: _centreCi,
                   zoomInitial: _zoomInitial,
+                  position: _position,
+                  itineraire: _itineraire,
+                  fiche: gare == null ? null : FicheGareBottom(
+                    gare: gare,
+                    itineraire: _itineraire,
+                    calculEnCours: _calculEnCours,
+                    onVoirTrajets: () => _voirTrajets(gare),
+                    onYAller: () => _yAller(gare),
+                    onOuvrirGps: () => _ouvrirGps(gare),
+                    onFermer: _fermerFiche,
+                  ),
                 ),
                 _ListeView(
                   gares: _gares,
-                  gareSelectionnee: _gareSelectionnee,
+                  gareSelectionnee: gare,
                   onGareSelect: _selectionnerGare,
                 ),
               ],
@@ -171,6 +229,9 @@ class _CarteView extends StatelessWidget {
   final ValueChanged<Gare> onGareSelect;
   final LatLng centreCi;
   final double zoomInitial;
+  final LatLng? position;
+  final Itineraire? itineraire;
+  final Widget? fiche;
 
   const _CarteView({
     required this.gares,
@@ -179,10 +240,14 @@ class _CarteView extends StatelessWidget {
     required this.onGareSelect,
     required this.centreCi,
     required this.zoomInitial,
+    this.position,
+    this.itineraire,
+    this.fiche,
   });
 
   @override
   Widget build(BuildContext context) {
+    final it = itineraire;
     return Stack(
       children: [
         FlutterMap(
@@ -191,7 +256,7 @@ class _CarteView extends StatelessWidget {
             initialCenter: centreCi,
             initialZoom: zoomInitial,
             minZoom: 5.0,
-            maxZoom: 16.0,
+            maxZoom: 18.0,
           ),
           children: [
             // Tuiles OpenStreetMap — gratuit, pas de clé API
@@ -200,20 +265,32 @@ class _CarteView extends StatelessWidget {
               userAgentPackageName: 'ci.tambour.app',
               maxZoom: 19,
             ),
+            if (it != null)
+              PolylineLayer(polylines: [
+                Polyline(points: it.points, strokeWidth: 5, color: TamBourColors.primary,
+                  borderStrokeWidth: 2, borderColor: Colors.white,
+                  isDotted: it.estimation),
+              ]),
             MarkerLayer(
-              markers: gares.map((gare) {
-                final estSel = gareSelectionnee?.id == gare.id;
-                return Marker(
-                  point: LatLng(gare.latitude, gare.longitude),
-                  width: estSel ? 56 : 44,
-                  height: estSel ? 72 : 58,
-                  alignment: Alignment.bottomCenter,
-                  child: GestureDetector(
-                    onTap: () => onGareSelect(gare),
-                    child: _Marqueur(gare: gare, estSelectionne: estSel),
-                  ),
-                );
-              }).toList(),
+              markers: [
+                ...gares.map((gare) {
+                  final estSel = gareSelectionnee?.id == gare.id;
+                  return Marker(
+                    point: LatLng(gare.latitude, gare.longitude),
+                    width: estSel ? 96 : 44,
+                    height: estSel ? 84 : 58,
+                    alignment: Alignment.topCenter,
+                    child: GestureDetector(
+                      onTap: () => onGareSelect(gare),
+                      // FittedBox : le marqueur ne déborde jamais de sa zone, quelle que soit la taille du texte
+                      child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.topCenter,
+                        child: _Marqueur(gare: gare, estSelectionne: estSel)),
+                    ),
+                  );
+                }),
+                if (position != null && it != null)
+                  Marker(point: position!, width: 24, height: 24, child: const _PointUtilisateur()),
+              ],
             ),
           ],
         ),
@@ -232,7 +309,7 @@ class _CarteView extends StatelessWidget {
                 border: Border.all(color: TamBourColors.border, width: 0.5),
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))],
               ),
-              child: const Icon(Icons.my_location_rounded,
+              child: const Icon(Icons.zoom_out_map_rounded,
                   color: TamBourColors.primary, size: 20),
             ),
           ),
@@ -268,21 +345,29 @@ class _CarteView extends StatelessWidget {
           ),
         ),
 
-        // Fiche gare sélectionnée
-        if (gareSelectionnee != null)
+        // Fiche gare sélectionnée (défilable si l'écran est petit)
+        if (fiche != null)
           Positioned(
-            bottom: 16, left: 16, right: 16,
-            child: _FicheGare(
-              gare: gareSelectionnee!,
-              onNaviguer: () => mapController.move(
-                LatLng(gareSelectionnee!.latitude, gareSelectionnee!.longitude),
-                13,
-              ),
+            bottom: 12, left: 12, right: 12,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.55),
+              child: SingleChildScrollView(child: fiche!),
             ).animate().slideY(begin: 0.3, end: 0, duration: 300.ms, curve: Curves.easeOut).fadeIn(duration: 300.ms),
           ),
       ],
     );
   }
+}
+
+class _PointUtilisateur extends StatelessWidget {
+  const _PointUtilisateur();
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      color: const Color(0xFF2F6FD6), shape: BoxShape.circle,
+      border: Border.all(color: Colors.white, width: 3),
+      boxShadow: [BoxShadow(color: const Color(0xFF2F6FD6).withOpacity(0.4), blurRadius: 10, spreadRadius: 2)]),
+  );
 }
 
 class _Marqueur extends StatelessWidget {
@@ -323,119 +408,11 @@ class _Marqueur extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(color: TamBourColors.primary, borderRadius: BorderRadius.circular(5)),
             child: Text(
-              gare.ville,
+              gare.ville, maxLines: 1,
               style: const TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white),
             ),
           ),
       ],
-    );
-  }
-}
-
-class _FicheGare extends StatelessWidget {
-  final Gare gare;
-  final VoidCallback onNaviguer;
-
-  const _FicheGare({required this.gare, required this.onNaviguer});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TamBourColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: TamBourColors.primary, width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 20, offset: const Offset(0, 6))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 46, height: 46,
-                decoration: BoxDecoration(color: TamBourColors.primary, borderRadius: BorderRadius.circular(13)),
-                child: const Icon(Icons.directions_bus_rounded, color: Colors.white, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(gare.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
-                    const SizedBox(height: 2),
-                    Row(children: [
-                      const Icon(Icons.access_time_rounded, size: 12, color: TamBourColors.textHint),
-                      const SizedBox(width: 4),
-                      Text(gare.heuresOuverture, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
-                    ]),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Icon(Icons.location_on_rounded, size: 13, color: TamBourColors.textHint),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  gare.adresse,
-                  style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary),
-                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          if (gare.compagnies.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              children: gare.compagnies.map((c) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(6)),
-                child: Text(c, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w600, color: TamBourColors.textSecondary)),
-              )).toList(),
-            ),
-          ],
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.search_rounded, size: 16),
-                  label: const Text('Voir les trajets'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: TamBourColors.primary,
-                    side: const BorderSide(color: TamBourColors.primary, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onNaviguer,
-                  icon: const Icon(Icons.navigation_rounded, size: 16),
-                  label: const Text('Y aller'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TamBourColors.primary, foregroundColor: Colors.white,
-                    elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

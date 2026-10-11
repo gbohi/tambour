@@ -46,10 +46,27 @@ class TrajetListSerializer(serializers.ModelSerializer):
     duree_label = serializers.ReadOnlyField()
     places_disponibles = serializers.SerializerMethodField()
     places_total = serializers.SerializerMethodField()
+    depart = serializers.SerializerMethodField()
+    arrivee = serializers.SerializerMethodField()
+    gare_depart = serializers.SerializerMethodField()
 
     class Meta:
         model = Trajet
-        fields = ['id', 'depart_nom', 'arrivee_nom', 'depart_region', 'arrivee_region', 'heure_depart', 'heure_arrivee_estimee', 'prix_fcfa', 'prix_promo_fcfa', 'prix_actuel', 'est_en_promo', 'duree_label', 'compagnie', 'bus_immatriculation', 'bus_classe', 'amenities', 'statut', 'retard_minutes', 'note_moyenne', 'nombre_avis', 'places_disponibles', 'places_total']
+        fields = ['id', 'depart', 'arrivee', 'gare_depart', 'depart_nom', 'arrivee_nom', 'depart_region', 'arrivee_region', 'heure_depart', 'heure_arrivee_estimee', 'prix_fcfa', 'prix_promo_fcfa', 'prix_actuel', 'est_en_promo', 'duree_label', 'compagnie', 'bus_immatriculation', 'bus_classe', 'amenities', 'statut', 'retard_minutes', 'note_moyenne', 'nombre_avis', 'places_disponibles', 'places_total']
+
+    @staticmethod
+    def _ville(v):
+        return {'id': str(v.id), 'nom': v.nom, 'region': v.region, 'code_iata': v.code_iata}
+
+    def get_depart(self, obj):
+        return self._ville(obj.ligne.depart)
+
+    def get_arrivee(self, obj):
+        return self._ville(obj.ligne.arrivee)
+
+    def get_gare_depart(self, obj):
+        g = obj.ligne.gare_depart
+        return {'id': str(g.id), 'nom': g.nom} if g else None
 
     def get_places_disponibles(self, obj):
         return obj.sieges.filter(statut=Siege.Statut.LIBRE).count()

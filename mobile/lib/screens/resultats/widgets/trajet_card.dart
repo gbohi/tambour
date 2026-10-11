@@ -40,7 +40,7 @@ class TrajetCard extends StatelessWidget {
               child: const Icon(Icons.directions_bus_rounded, color: TamBourColors.primary, size: 20)),
             const SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(trajet.compagnie, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
+              Text(trajet.compagnie, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
               Text(trajet.busImmatriculation, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint)),
             ])),
             Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: _classeBg, borderRadius: BorderRadius.circular(20)),
@@ -54,7 +54,7 @@ class TrajetCard extends StatelessWidget {
           Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), child: Row(children: [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(_heure(trajet.heureDepart), style: const TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w800, color: TamBourColors.textPrimary)),
-              Text(trajet.depart.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
+              Text(trajet.depart.nom, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
             ]),
             Expanded(child: Column(children: [
               Text(trajet.dureeLabel, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
@@ -75,33 +75,45 @@ class TrajetCard extends StatelessWidget {
             ]),
           ])),
           if (trajet.amenities.isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Row(children: trajet.amenities.take(4).map((a) => _AmenityChip(amenity: a)).toList())),
+            child: Wrap(spacing: 0, runSpacing: 6, children: trajet.amenities.take(4).map((a) => _AmenityChip(amenity: a)).toList())),
           const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
-          Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: Row(children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Container(width: 8, height: 8, decoration: BoxDecoration(color: trajet.presqueComplet ? TamBourColors.error : TamBourColors.success, shape: BoxShape.circle)),
-                const SizedBox(width: 5),
-                Text(trajet.presqueComplet ? '${trajet.placesDisponibles} places restantes !' : '${trajet.placesDisponibles} places',
-                  style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w600, color: trajet.presqueComplet ? TamBourColors.error : TamBourColors.success)),
-              ]),
-              const SizedBox(height: 2),
-              Text('${trajet.nombreAvis} avis', style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint)),
-            ]),
-            const Spacer(),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              RichText(text: TextSpan(children: [
-                TextSpan(text: '${formatter.format(prixTotal)} ', style: const TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w800, color: TamBourColors.primary)),
-                const TextSpan(text: 'FCFA', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w500, color: TamBourColors.textSecondary)),
+          Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 14), child: LayoutBuilder(builder: (context, c) {
+            // Sur les petits écrans, le bouton « Réserver » devient une flèche (toute la carte reste cliquable)
+            final compact = c.maxWidth < 320;
+            return Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Container(width: 8, height: 8, decoration: BoxDecoration(color: trajet.presqueComplet ? TamBourColors.error : TamBourColors.success, shape: BoxShape.circle)),
+                  const SizedBox(width: 5),
+                  Flexible(child: Text(trajet.presqueComplet ? '${trajet.placesDisponibles} places restantes !' : '${trajet.placesDisponibles} places',
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w600, color: trajet.presqueComplet ? TamBourColors.error : TamBourColors.success))),
+                ]),
+                const SizedBox(height: 2),
+                Text('${trajet.nombreAvis} avis', style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint)),
               ])),
-              if (nbPassagers > 1) Text('${formatter.format(trajet.prixFcfa)} F/pers.', style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint)),
-            ]),
-            const SizedBox(width: 12),
-            ElevatedButton(
-              onPressed: () => _reserver(context),
-              style: ElevatedButton.styleFrom(backgroundColor: TamBourColors.primary, foregroundColor: Colors.white, minimumSize: const Size(88, 40), maximumSize: const Size(100, 40), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 16), textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700)),
-              child: const Text('Réserver')),
-          ])),
+              const SizedBox(width: 8),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                RichText(text: TextSpan(children: [
+                  TextSpan(text: '${formatter.format(prixTotal)} ', style: const TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w800, color: TamBourColors.primary)),
+                  const TextSpan(text: 'FCFA', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w500, color: TamBourColors.textSecondary)),
+                ]), textScaler: MediaQuery.textScalerOf(context)),
+                if (nbPassagers > 1) Text('${formatter.format(trajet.prixFcfa)} F/pers.', style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint)),
+              ]),
+              const SizedBox(width: 10),
+              if (compact)
+                IconButton.filled(
+                  onPressed: () => _reserver(context),
+                  style: IconButton.styleFrom(backgroundColor: TamBourColors.primary, foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 20))
+              else
+                ElevatedButton(
+                  onPressed: () => _reserver(context),
+                  style: ElevatedButton.styleFrom(backgroundColor: TamBourColors.primary, foregroundColor: Colors.white, minimumSize: const Size(88, 40), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 16), textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700)),
+                  child: const Text('Réserver')),
+            ]);
+          })),
         ]),
       ).animate().fadeIn(delay: Duration(milliseconds: 100 + index * 80), duration: 400.ms).slideY(begin: 0.08, end: 0),
     );

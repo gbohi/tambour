@@ -21,8 +21,9 @@ class Gare {
   factory Gare.fromJson(Map<String, dynamic> json) => Gare(
     id: json['id'] as String, nom: json['nom'] as String,
     ville: json['ville_nom'] as String, adresse: json['adresse'] as String,
-    latitude: (json['latitude'] as num).toDouble(),
-    longitude: (json['longitude'] as num).toDouble(),
+    // DRF renvoie les décimaux sous forme de texte
+    latitude: double.parse('${json['latitude']}'),
+    longitude: double.parse('${json['longitude']}'),
     telephone: json['telephone'] as String? ?? '',
     heuresOuverture: json['heures_ouverture'] as String? ?? '05h00 – 22h00',
     compagnies: List<String>.from(json['compagnies'] as List? ?? []),

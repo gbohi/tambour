@@ -42,7 +42,7 @@ class GareViewSet(viewsets.ModelViewSet):
     search_fields = ['nom', 'ville__nom', 'adresse']
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'proches', 'departs']:
             return [AllowAny()]
         return [IsAuthenticated(), EstAdminOuSupport()]
 
@@ -72,6 +72,22 @@ class GareViewSet(viewsets.ModelViewSet):
             distance_km=distance_sql).filter(distance_km__lte=rayon).order_by('distance_km')
         return success_response(
             data=self.get_serializer(gares, many=True, context={'request': request}).data)
+
+    @action(detail=True, methods=['get'], url_path='departs')
+    def departs(self, request, pk=None):
+        """Prochains départs (7 jours) depuis cette gare, ou depuis sa ville si la ligne n'a pas de gare."""
+        gare = self.get_object()
+        maintenant = timezone.now()
+        trajets = (Trajet.objects
+                   .filter(Q(ligne__gare_depart=gare) | Q(ligne__gare_depart__isnull=True, ligne__depart=gare.ville),
+                           heure_depart__gt=maintenant, heure_depart__lte=maintenant + timedelta(days=7),
+                           statut__in=[Trajet.Statut.PLANIFIE, Trajet.Statut.RETARDE])
+                   .select_related('ligne__depart', 'ligne__arrivee', 'ligne__gare_depart', 'transporteur', 'bus')
+                   .order_by('heure_depart')[:100])
+        return success_response(data={
+            'gare': self.get_serializer(gare).data,
+            'results': TrajetListSerializer(trajets, many=True, context={'request': request}).data,
+        })
 
 
 # ── Transporteurs (admin/support lecture+écriture) ─────────────────────────

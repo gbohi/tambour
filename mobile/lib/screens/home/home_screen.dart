@@ -293,7 +293,7 @@ class _VilleField extends StatelessWidget {
     return InkWell(
       onTap: onTap, borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 64, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        constraints: const BoxConstraints(minHeight: 64), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
         child: Row(
           children: [
@@ -304,7 +304,7 @@ class _VilleField extends StatelessWidget {
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
               const SizedBox(height: 2),
-              Text(ville?.nom ?? 'Choisir une ville', style: TextStyle(fontFamily: 'Outfit', fontSize: 15,
+              Text(ville?.nom ?? 'Choisir une ville', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Outfit', fontSize: 15,
                 fontWeight: ville != null ? FontWeight.w700 : FontWeight.w400,
                 color: ville != null ? TamBourColors.textPrimary : TamBourColors.textHint)),
             ])),
@@ -372,15 +372,15 @@ class _InfoChip extends StatelessWidget {
     return InkWell(
       onTap: onTap, borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 56, padding: const EdgeInsets.symmetric(horizontal: 12),
+        constraints: const BoxConstraints(minHeight: 56), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
         child: Row(children: [
           Icon(icon, size: 18, color: TamBourColors.primary),
-          const SizedBox(width: 10),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(label, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
-            Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
-          ]),
+          const SizedBox(width: 8),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
+            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
+          ])),
         ]),
       ),
     );
@@ -395,20 +395,22 @@ class _PassagersChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56, padding: const EdgeInsets.symmetric(horizontal: 12),
+      constraints: const BoxConstraints(minHeight: 56), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(color: TamBourColors.surfaceVariant, borderRadius: BorderRadius.circular(12)),
-      child: Row(children: [
-        const Icon(Icons.person_outline_rounded, size: 18, color: TamBourColors.primary),
-        const SizedBox(width: 6),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Text('Passagers', style: TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
-          Text('$count', style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
-        ]),
-        const Spacer(),
+      child: LayoutBuilder(builder: (context, c) => Row(children: [
+        // L'icône est masquée sur les petits écrans pour laisser la place aux boutons
+        if (c.maxWidth >= 140) ...[
+          const Icon(Icons.person_outline_rounded, size: 18, color: TamBourColors.primary),
+          const SizedBox(width: 6),
+        ],
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Text('Passagers', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Outfit', fontSize: 11, color: TamBourColors.textHint, fontWeight: FontWeight.w500)),
+          Text('$count', style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
+        ])),
         _CounterBtn(icon: Icons.remove, onTap: onDecrement),
         const SizedBox(width: 4),
         _CounterBtn(icon: Icons.add, onTap: onIncrement),
-      ]),
+      ])),
     );
   }
 }
@@ -475,7 +477,7 @@ class _VillePickerSheetState extends State<_VillePickerSheet> {
                 Icon(Icons.search_off_rounded, size: 48, color: TamBourColors.textHint),
                 const SizedBox(height: 12),
                 const Text('Aucune ville trouvée', style: TextStyle(fontFamily: 'Outfit', color: TamBourColors.textHint, fontSize: 15))]))
-            : ListView.separated(
+            : Material(type: MaterialType.transparency, child: ListView.separated(
                 controller: scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: _filtered.length,
@@ -492,7 +494,7 @@ class _VillePickerSheetState extends State<_VillePickerSheet> {
                     subtitle: Text(v.region, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
                     trailing: isSel ? const Icon(Icons.check_circle_rounded, color: TamBourColors.primary, size: 20) : null,
                     onTap: () => widget.onSelected(v));
-                })),
+                }))),
         ]),
       ),
     );

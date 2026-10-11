@@ -810,9 +810,15 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                       fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
                     pw.Text('DÉPART', style: const pw.TextStyle(fontSize: 9, color: PdfColors.white)),
                   ]),
-                  pw.Text('→', style: pw.TextStyle(fontSize: 22,
-                    fontWeight: pw.FontWeight.bold,
-                    color: const PdfColor.fromInt(0xFFF5A623))),
+                  // Flèche dessinée : la police standard du PDF n'a pas le glyphe « → ».
+                  pw.CustomPaint(size: const PdfPoint(24, 14), painter: (canvas, size) {
+                    const or = PdfColor.fromInt(0xFFF5A623);
+                    canvas
+                      ..setStrokeColor(or)..setLineWidth(2.4)
+                      ..moveTo(2, 7)..lineTo(17, 7)..strokePath()
+                      ..setFillColor(or)
+                      ..moveTo(23, 7)..lineTo(15, 13)..lineTo(15, 1)..closePath()..fillPath();
+                  }),
                   pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
                     pw.Text(r.arrivee, style: pw.TextStyle(
                       fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
@@ -837,7 +843,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                   _pdfInfo('Date/Heure',   dateFmt.format(r.date)),
                   _pdfInfo('Compagnie',    r.compagnie),
                   _pdfInfo('Montant',      '${fmt.format(r.prixParPassager)} FCFA'),
-                  _pdfInfo('Statut',       'Confirmé ✓'),
+                  _pdfInfo('Statut',       'Confirmé', coche: true),
                 ])),
               pw.SizedBox(width: 20),
               // QR
@@ -873,14 +879,23 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
     }
   }
 
-  pw.Widget _pdfInfo(String label, String value) => pw.Padding(
+  pw.Widget _pdfInfo(String label, String value, {bool coche = false}) => pw.Padding(
     padding: const pw.EdgeInsets.only(bottom: 8),
     child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
       pw.Text(label, style: pw.TextStyle(fontSize: 9,
         fontWeight: pw.FontWeight.bold, color: PdfColors.grey600)),
       pw.SizedBox(height: 2),
-      pw.Text(value, style: pw.TextStyle(fontSize: 12,
-        fontWeight: pw.FontWeight.bold)),
+      pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
+        pw.Text(value, style: pw.TextStyle(fontSize: 12,
+          fontWeight: pw.FontWeight.bold)),
+        // Coche dessinée (pas de glyphe « ✓ » dans la police standard).
+        if (coche) pw.Padding(padding: const pw.EdgeInsets.only(left: 6),
+          child: pw.CustomPaint(size: const PdfPoint(10, 9), painter: (canvas, size) {
+            canvas
+              ..setStrokeColor(const PdfColor.fromInt(0xFF0A7C4E))..setLineWidth(1.6)
+              ..moveTo(0.5, 4.5)..lineTo(3.5, 1.5)..lineTo(9.5, 8.5)..strokePath();
+          })),
+      ]),
     ]));
 }
 

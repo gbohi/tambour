@@ -59,7 +59,8 @@ type Onglet = 'billets' | 'fidelite' | 'profil';
               <div class="actions">
                 <span class="montant">{{ r.montant_total | nb:'F' }}</span>
                 <div class="boutons">
-                  @if (r.statut === 'confirmee') { <a class="btn btn-primaire btn-sm" [routerLink]="['/billets', r.id]"><tb-icon name="qr" [size]="16" /> Billets</a> }
+                  @if (r.statut === 'confirmee') { <a class="btn btn-primaire btn-sm" [routerLink]="['/billets', r.id]"><tb-icon name="qr" [size]="16" /> Billets</a>
+                    <button class="btn btn-contour btn-sm" (click)="pdf(r)" aria-label="Télécharger les billets en PDF"><tb-icon name="download" [size]="16" /> PDF</button> }
                   @if (r.peut_etre_notee) { <button class="btn btn-or btn-sm" (click)="ouvrirNote(r)"><tb-icon name="star" [size]="16" /> Noter</button> }
                   @if (r.peut_etre_annulee) { <button class="btn btn-contour btn-sm" (click)="aAnnuler.set(r)">Annuler</button> }
                 </div>
@@ -345,5 +346,10 @@ export class CompteComponent implements OnInit {
       { titre: 'Ils s\'inscrivent', texte: 'Vos amis téléchargent TamBour et saisissent votre code à l\'inscription.' },
       { titre: 'Vous êtes récompensés', texte: `${f.points_parrain} points pour vous, ${f.points_filleul} points de bienvenue pour votre ami.` },
     ];
+  }
+
+  async pdf(r: Reservation): Promise<void> {
+    const { telechargerBilletsPdf } = await import('../../core/billet-pdf');
+    telechargerBilletsPdf(r);
   }
 }

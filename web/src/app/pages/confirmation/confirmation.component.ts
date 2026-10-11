@@ -33,7 +33,9 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
             <span><tb-icon name="wallet" [size]="16" /> {{ r.montant_total | nb:'F' }}</span>
           </div>
           <div class="actions">
-            <button class="btn btn-blanc btn-sm" (click)="imprimer()"><tb-icon name="download" [size]="16" /> Télécharger / imprimer</button>
+            <button class="btn btn-primaire btn-sm" (click)="pdf(r)" [disabled]="generation()">
+              <tb-icon name="download" [size]="16" /> {{ r.passagers.length > 1 ? 'Télécharger les billets (PDF)' : 'Télécharger le billet (PDF)' }}</button>
+            <button class="btn btn-blanc btn-sm" (click)="imprimer()">Imprimer</button>
             <a routerLink="/compte" [queryParams]="{ onglet: 'billets' }" class="btn btn-contour btn-sm">Tous mes billets</a>
           </div>
         </div>
@@ -62,6 +64,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
               <div class="qr">
                 @if (qr()[p.id]) { <img [src]="qr()[p.id]" [alt]="'QR code du billet de ' + p.prenom"> } @else { <div class="squelette" style="width:150px;height:150px"></div> }
                 <span class="mono">{{ p.billet?.reference_billet }}</span>
+                <button class="btn btn-contour btn-sm pdf-un" (click)="pdf(r, p.id)" [disabled]="generation()"><tb-icon name="download" [size]="14" /> PDF</button>
                 @if (p.billet?.utilise_le) { <span class="pastille">Utilisé le {{ p.billet?.utilise_le | date:'d/MM à HH:mm' }}</span> }
               </div>
             </article>
@@ -107,13 +110,14 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .qr{padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
     .qr img{width:150px;height:150px;image-rendering:pixelated;}
     .qr .mono{font-size:12px;color:var(--texte-2);}
+    .pdf-un{padding:6px 12px;font-size:13px;}
     @media (max-width:600px){
       .billet{grid-template-columns:1fr;}
       .dechirure{width:auto;height:0;border-left:none;border-top:2px dashed var(--bord);margin:0 18px;}
     }
     @media print{
       :host ::ng-deep tb-entete,:host ::ng-deep tb-pied{display:none;}
-      .actions,.bravo{display:none;}
+      .actions,.bravo,.pdf-un{display:none;}
       .billet{break-inside:avoid;box-shadow:none;}
     }
   `],
@@ -125,6 +129,7 @@ export class ConfirmationComponent implements OnInit {
   qr = signal<Record<string, string>>({});
   erreur = signal(false);
   nouveau = false;
+  generation = signal(false);
 
   ngOnInit(): void {
     this.nouveau = this.route.snapshot.queryParamMap.get('nouveau') === '1';
@@ -144,4 +149,13 @@ export class ConfirmationComponent implements OnInit {
   }
 
   imprimer(): void { window.print(); }
+
+  /** PDF identique à celui de l'application mobile ; chargé à la demande pour alléger la page. */
+  async pdf(r: Reservation, passagerId?: string): Promise<void> {
+    this.generation.set(true);
+    try {
+      const { telechargerBilletsPdf } = await import('../../core/billet-pdf');
+      telechargerBilletsPdf(r, passagerId);
+    } finally { this.generation.set(false); }
+  }
 }

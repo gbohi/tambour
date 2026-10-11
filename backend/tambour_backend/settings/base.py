@@ -23,6 +23,7 @@ LOCAL_APPS = [
     'dashboard',   # KPI temps réel
     'rapports',    # Exports CSV admin
     'support',     # Centre d'aide, contact, réclamations, avis sur l'app
+    'chauffeur',   # Espace chauffeur : trajets, scan des billets
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

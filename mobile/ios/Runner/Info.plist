@@ -48,6 +48,8 @@
         <true/>
     </dict>
     <!-- Permission localisation GPS -->
+    <key>NSCameraUsageDescription</key>
+    <string>TamBour utilise l'appareil photo pour scanner les QR codes des billets (espace chauffeur).</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>TamBour utilise votre position pour trouver les gares proches de vous.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

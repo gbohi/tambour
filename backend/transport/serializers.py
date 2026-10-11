@@ -49,10 +49,11 @@ class TrajetListSerializer(serializers.ModelSerializer):
     depart = serializers.SerializerMethodField()
     arrivee = serializers.SerializerMethodField()
     gare_depart = serializers.SerializerMethodField()
+    chauffeur_nom = serializers.ReadOnlyField(source='chauffeur.nom_complet', default=None)
 
     class Meta:
         model = Trajet
-        fields = ['id', 'depart', 'arrivee', 'gare_depart', 'depart_nom', 'arrivee_nom', 'depart_region', 'arrivee_region', 'heure_depart', 'heure_arrivee_estimee', 'prix_fcfa', 'prix_promo_fcfa', 'prix_actuel', 'est_en_promo', 'duree_label', 'compagnie', 'bus_immatriculation', 'bus_classe', 'amenities', 'statut', 'retard_minutes', 'note_moyenne', 'nombre_avis', 'places_disponibles', 'places_total']
+        fields = ['id', 'depart', 'arrivee', 'gare_depart', 'chauffeur', 'chauffeur_nom', 'depart_nom', 'arrivee_nom', 'depart_region', 'arrivee_region', 'heure_depart', 'heure_arrivee_estimee', 'prix_fcfa', 'prix_promo_fcfa', 'prix_actuel', 'est_en_promo', 'duree_label', 'compagnie', 'bus_immatriculation', 'bus_classe', 'amenities', 'statut', 'retard_minutes', 'note_moyenne', 'nombre_avis', 'places_disponibles', 'places_total']
 
     @staticmethod
     def _ville(v):

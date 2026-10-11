@@ -70,6 +70,8 @@ class ReservationListSerializer(serializers.ModelSerializer):
     montant_remboursable = serializers.SerializerMethodField()
     trajet_info         = serializers.SerializerMethodField()
     user_info           = serializers.SerializerMethodField()
+    peut_etre_notee     = serializers.SerializerMethodField()
+    avis_note           = serializers.SerializerMethodField()
 
     class Meta:
         model  = Reservation
@@ -77,9 +79,16 @@ class ReservationListSerializer(serializers.ModelSerializer):
             'id', 'reference', 'trajet', 'trajet_info', 'user_info',
             'statut', 'montant_total', 'montant_rembourse',
             'nb_passagers', 'email_payeur',
-            'peut_etre_annulee', 'montant_remboursable',
+            'peut_etre_annulee', 'montant_remboursable', 'peut_etre_notee', 'avis_note',
             'created_at', 'updated_at',
         ]
+
+    def get_peut_etre_notee(self, obj):
+        return (obj.statut == Reservation.Statut.CONFIRMEE and not hasattr(obj, 'avis')
+                and obj.trajet.heure_depart <= timezone.now())
+
+    def get_avis_note(self, obj):
+        return obj.avis.note if hasattr(obj, 'avis') else None
 
     def get_montant_remboursable(self, obj):
         return obj.calculer_remboursement() if obj.statut == Reservation.Statut.CONFIRMEE else 0
@@ -93,6 +102,8 @@ class ReservationListSerializer(serializers.ModelSerializer):
             'heure_depart': t.heure_depart.isoformat(),
             'compagnie':   t.transporteur.nom,
             'prix_fcfa':   t.prix_fcfa,
+            'statut':      t.statut,
+            'heure_arrivee_estimee': t.heure_arrivee_estimee.isoformat(),
         }
 
     def get_user_info(self, obj):

@@ -264,6 +264,29 @@ class AdminUsersView(APIView):
             'results':  data,
         })
 
+    def post(self, request):
+        """Création d'un compte (chauffeur, transporteur, support…) par un administrateur."""
+        if request.user.role != 'admin':
+            return error_response('Action réservée aux administrateurs.', status_code=status.HTTP_403_FORBIDDEN)
+        data = request.data
+        email = (data.get('email') or '').strip().lower()
+        role = data.get('role') or User.Role.VOYAGEUR
+        manquants = [c for c in ('email', 'prenom', 'nom', 'password') if not (data.get(c) or '').strip()]
+        if manquants:
+            return error_response('Champs requis : ' + ', '.join(manquants) + '.')
+        if role not in User.Role.values:
+            return error_response('Rôle invalide.')
+        if User.objects.filter(email=email).exists():
+            return error_response('Un compte avec cet email existe déjà.')
+        if len(data['password']) < 8:
+            return error_response('Le mot de passe doit faire au moins 8 caractères.')
+        user = User.objects.create_user(
+            email=email, password=data['password'], prenom=data['prenom'].strip(), nom=data['nom'].strip(),
+            telephone=(data.get('telephone') or '').strip(), role=role, is_verified=True,
+            is_staff=role in (User.Role.ADMIN, User.Role.SUPPORT))
+        return success_response(data=UserDetailSerializer(user, context={'request': request}).data,
+                                message='Compte créé.', status_code=status.HTTP_201_CREATED)
+
 
 class AdminUserDetailView(APIView):
     """

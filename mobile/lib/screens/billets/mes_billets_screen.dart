@@ -8,14 +8,25 @@ import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme.dart';
+import '../../services/api_client.dart';
+import 'noter_trajet_sheet.dart';
 
 // ── Modèle mock passager par billet ──────────────────────────────────────────
 
 class _PassagerMock {
   final String prenom, nom, telephone, email, siege;
+  final String? qrData;       // fourni par l'API (sinon généré pour la démo)
+  final String? refBillet;
   const _PassagerMock({required this.prenom, required this.nom,
-    required this.telephone, this.email = '', required this.siege});
+    required this.telephone, this.email = '', required this.siege, this.qrData, this.refBillet});
   String get nomComplet => '$prenom $nom';
+
+  factory _PassagerMock.fromJson(Map<String, dynamic> j) => _PassagerMock(
+    prenom: j['prenom'] as String, nom: j['nom'] as String,
+    telephone: j['telephone'] as String? ?? '', email: j['email'] as String? ?? '',
+    siege: j['siege_numero'] as String? ?? '',
+    qrData: (j['billet'] as Map?)?['qr_data'] as String?,
+    refBillet: (j['billet'] as Map?)?['reference_billet'] as String?);
 }
 
 class _ReservationMock {
@@ -26,13 +37,35 @@ class _ReservationMock {
   final int prixParPassager;
   final String statut;
   final List<_PassagerMock> passagers;
+  final String? id;            // null pour les données de démonstration
+  final bool peutEtreNotee;
+  final int? avisNote;
 
   const _ReservationMock({
     required this.ref, required this.depart, required this.arrivee,
     required this.date, required this.compagnie,
     required this.prixParPassager, required this.statut,
-    required this.passagers,
+    required this.passagers, this.id, this.peutEtreNotee = false, this.avisNote,
   });
+
+  factory _ReservationMock.fromJson(Map<String, dynamic> j) {
+    final t = j['trajet_info'] as Map<String, dynamic>;
+    final passagers = (j['passagers'] as List? ?? [])
+      .map((p) => _PassagerMock.fromJson(p as Map<String, dynamic>)).toList();
+    final nb = (j['nb_passagers'] as int?) ?? passagers.length;
+    return _ReservationMock(
+      id: j['id'] as String, ref: j['reference'] as String,
+      depart: t['depart'] as String, arrivee: t['arrivee'] as String,
+      date: DateTime.parse(t['heure_depart'] as String).toLocal(),
+      compagnie: t['compagnie'] as String,
+      prixParPassager: nb > 0 ? (j['montant_total'] as int) ~/ nb : 0,
+      statut: t['statut'] == 'termine' && j['statut'] == 'confirmee' ? 'termine' : j['statut'] as String,
+      passagers: passagers,
+      peutEtreNotee: j['peut_etre_notee'] as bool? ?? false,
+      avisNote: j['avis_note'] as int?);
+  }
+
+  bool get estAVenir => date.isAfter(DateTime.now()) && statut == 'confirmee';
 
   int get montantTotal => prixParPassager * passagers.length;
   int get nbPassagers => passagers.length;
@@ -50,13 +83,36 @@ class _MesBilletsScreenState extends State<MesBilletsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tab;
 
+  List<_ReservationMock>? _api;  // null : API indisponible → démonstration
+
   @override
-  void initState() { super.initState(); _tab = TabController(length: 2, vsync: this); }
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 2, vsync: this);
+    _charger();
+  }
   @override
   void dispose() { _tab.dispose(); super.dispose(); }
 
-  // Données mock — 1 réservation = N passagers = N billets
-  List<_ReservationMock> get _aVenir => [
+  Future<void> _charger() async {
+    try {
+      final res = await ApiClient.instance.dio.get('/reservations/');
+      final liste = (res.data['data'] as List)
+        .map((r) => _ReservationMock.fromJson(r as Map<String, dynamic>))
+        .where((r) => r.statut != 'en_attente' && r.statut != 'expiree')
+        .toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+      if (mounted) setState(() => _api = liste);
+    } catch (_) {
+      // Non connecté ou hors ligne : billets de démonstration
+    }
+  }
+
+  List<_ReservationMock> get _aVenir => _api?.where((r) => r.estAVenir).toList() ?? _aVenirDemo;
+  List<_ReservationMock> get _passes => _api?.where((r) => !r.estAVenir).toList().reversed.toList() ?? _passesDemo;
+
+  // Données de démonstration — 1 réservation = N passagers = N billets
+  List<_ReservationMock> get _aVenirDemo => [
     _ReservationMock(
       ref: 'TB20260608001', depart: 'Abidjan', arrivee: 'Bouaké',
       date: DateTime.now().add(const Duration(days: 2, hours: 6)),
@@ -79,11 +135,11 @@ class _MesBilletsScreenState extends State<MesBilletsScreen>
       ]),
   ];
 
-  List<_ReservationMock> get _passes => [
+  List<_ReservationMock> get _passesDemo => [
     _ReservationMock(
       ref: 'TB20260501003', depart: 'Abidjan', arrivee: 'Yamoussoukro',
       date: DateTime.now().subtract(const Duration(days: 10)),
-      compagnie: 'Trans Ivoire', prixParPassager: 2800, statut: 'termine',
+      compagnie: 'Trans Ivoire', prixParPassager: 2800, statut: 'termine', peutEtreNotee: true,
       passagers: const [
         _PassagerMock(prenom: 'Fatoumata', nom: 'Coulibaly',
           telephone: '0102030405', siege: '3B'),
@@ -124,8 +180,8 @@ class _MesBilletsScreenState extends State<MesBilletsScreen>
           ])),
         ),
         Expanded(child: TabBarView(controller: _tab, children: [
-          _ReservationsList(reservations: _aVenir, estAVenir: true),
-          _ReservationsList(reservations: _passes, estAVenir: false),
+          _ReservationsList(reservations: _aVenir, estAVenir: true, onActualiser: _charger),
+          _ReservationsList(reservations: _passes, estAVenir: false, onActualiser: _charger),
         ])),
       ]),
     );
@@ -137,7 +193,8 @@ class _MesBilletsScreenState extends State<MesBilletsScreen>
 class _ReservationsList extends StatelessWidget {
   final List<_ReservationMock> reservations;
   final bool estAVenir;
-  const _ReservationsList({required this.reservations, required this.estAVenir});
+  final Future<void> Function() onActualiser;
+  const _ReservationsList({required this.reservations, required this.estAVenir, required this.onActualiser});
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +238,8 @@ class _ReservationsList extends StatelessWidget {
             passager:    b['passager']    as _PassagerMock,
             numeroBillet: (b['index'] as int) + 1,
             totalBillets:  b['total']    as int,
+            estAVenir: estAVenir,
+            onNote: onActualiser,
           ).animate()
             .fadeIn(delay: Duration(milliseconds: 100 + i * 70), duration: 350.ms)
             .slideY(begin: 0.06, end: 0));
@@ -194,10 +253,13 @@ class _BilletIndividuelCard extends StatelessWidget {
   final _ReservationMock reservation;
   final _PassagerMock passager;
   final int numeroBillet, totalBillets;
+  final bool estAVenir;
+  final Future<void> Function() onNote;
 
   const _BilletIndividuelCard({
     required this.reservation, required this.passager,
     required this.numeroBillet, required this.totalBillets,
+    required this.estAVenir, required this.onNote,
   });
 
   Color get _statutColor => switch (reservation.statut) {
@@ -212,11 +274,11 @@ class _BilletIndividuelCard extends StatelessWidget {
   };
 
   // Référence unique par passager : TB20260608001-P1
-  String get _refBillet => '${reservation.ref}-P$numeroBillet';
+  String get _refBillet => passager.refBillet ?? '${reservation.ref}-P$numeroBillet';
 
-  // QR unique par passager
-  String get _qrData =>
-    'TAMBOUR|${reservation.ref}|${reservation.depart}|${reservation.arrivee}|'
+  // QR unique par passager (même format que l'API : TAMBOUR|REF|N°|…), lu par l'app chauffeur
+  String get _qrData => passager.qrData ??
+    'TAMBOUR|${reservation.ref}|$numeroBillet|${reservation.depart}|${reservation.arrivee}|'
     '${reservation.date.toIso8601String()}|${passager.siege}|${passager.nomComplet}';
 
   @override
@@ -343,8 +405,34 @@ class _BilletIndividuelCard extends StatelessWidget {
               ],
             ]),
 
+            // ── Noter le trajet (une fois par réservation, sur le 1er billet) ──
+            if (!estAVenir && numeroBillet == 1 && (reservation.avisNote != null || reservation.peutEtreNotee)) ...[
+              const SizedBox(height: 12),
+              if (reservation.avisNote != null)
+                Row(children: [
+                  const Text('Votre note', style: TextStyle(fontFamily: 'Outfit', fontSize: 13,
+                    color: TamBourColors.textSecondary)),
+                  const SizedBox(width: 8),
+                  for (var i = 1; i <= 5; i++)
+                    Icon(i <= reservation.avisNote! ? Icons.star_rounded : Icons.star_outline_rounded,
+                      size: 18, color: TamBourColors.gold),
+                ])
+              else
+                SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                  onPressed: () => _noter(context),
+                  icon: const Icon(Icons.star_rounded, size: 18, color: TamBourColors.gold),
+                  label: const Text('Noter ce trajet'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: TamBourColors.textPrimary,
+                    side: const BorderSide(color: TamBourColors.gold, width: 1.5),
+                    backgroundColor: TamBourColors.goldLight,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700)))),
+            ],
+
             // ── Boutons Voir / Partager ───────────────────────────────────
-            if (reservation.statut == 'confirmee') ...[
+            if (estAVenir && reservation.statut == 'confirmee') ...[
               const SizedBox(height: 12),
               Row(children: [
                 Expanded(child: OutlinedButton.icon(
@@ -375,6 +463,12 @@ class _BilletIndividuelCard extends StatelessWidget {
           ])),
       ]),
     );
+  }
+
+  Future<void> _noter(BuildContext context) async {
+    final ok = await NoterTrajetSheet.ouvrir(context, reservationId: reservation.id,
+      trajet: '${reservation.depart} → ${reservation.arrivee}', compagnie: reservation.compagnie);
+    if (ok == true) await onNote();
   }
 
   // ── Ouvrir la fiche billet individuelle ──────────────────────────────────

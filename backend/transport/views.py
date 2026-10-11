@@ -248,8 +248,18 @@ class TrajetViewSet(viewsets.ModelViewSet):
                 return error_response('Permission refusee.',
                                       status_code=status.HTTP_403_FORBIDDEN)
 
-        allowed = ['statut', 'motif_annulation', 'retard_minutes']
+        allowed = ['statut', 'motif_annulation', 'retard_minutes', 'chauffeur']
         data = {k: v for k, v in request.data.items() if k in allowed}
+        if 'chauffeur' in data:
+            from authentication.models import User
+            chauffeur_id = data.pop('chauffeur')
+            if chauffeur_id:
+                chauffeur = User.objects.filter(id=chauffeur_id, role='chauffeur', is_active=True).first()
+                if not chauffeur:
+                    return error_response('Chauffeur introuvable.', status_code=status.HTTP_400_BAD_REQUEST)
+                data['chauffeur'] = chauffeur
+            else:
+                data['chauffeur'] = None
 
         for field, value in data.items():
             setattr(trajet, field, value)

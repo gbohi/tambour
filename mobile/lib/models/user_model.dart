@@ -9,13 +9,16 @@ class UserModel {
   final int pointsFidelite;
   final int nbVoyages;
   final String codeParrainage;
+  final String role;  // voyageur, chauffeur, transporteur, admin, support
 
   const UserModel({
     required this.id, required this.prenom, required this.nom,
     required this.email, required this.telephone, this.avatarUrl,
     required this.dateInscription, this.pointsFidelite = 0, this.nbVoyages = 0,
-    this.codeParrainage = '',
+    this.codeParrainage = '', this.role = 'voyageur',
   });
+
+  bool get estChauffeur => role == 'chauffeur';
 
   String get nomComplet => '$prenom $nom';
   String get initiales =>
@@ -25,7 +28,7 @@ class UserModel {
     UserModel(id: id, prenom: prenom ?? this.prenom, nom: nom ?? this.nom,
       email: email ?? this.email, telephone: telephone ?? this.telephone,
       avatarUrl: avatarUrl, dateInscription: dateInscription,
-      pointsFidelite: pointsFidelite, nbVoyages: nbVoyages, codeParrainage: codeParrainage);
+      pointsFidelite: pointsFidelite, nbVoyages: nbVoyages, codeParrainage: codeParrainage, role: role);
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
     id: json['id'] as String, prenom: json['prenom'] as String,
@@ -36,6 +39,7 @@ class UserModel {
     pointsFidelite: json['points_fidelite'] as int? ?? 0,
     nbVoyages: json['nb_voyages'] as int? ?? 0,
     codeParrainage: json['code_parrainage'] as String? ?? '',
+    role: json['role'] as String? ?? 'voyageur',
   );
 
   Map<String, dynamic> toJson() => {
@@ -43,6 +47,6 @@ class UserModel {
     'telephone': telephone, 'avatar_url': avatarUrl,
     'date_inscription': dateInscription.toIso8601String(),
     'points_fidelite': pointsFidelite, 'nb_voyages': nbVoyages,
-    'code_parrainage': codeParrainage,
+    'code_parrainage': codeParrainage, 'role': role,
   };
 }

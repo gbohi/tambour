@@ -20,6 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         VOYAGEUR = 'voyageur', 'Voyageur'
         TRANSPORTEUR = 'transporteur', 'Transporteur'
+        CHAUFFEUR = 'chauffeur', 'Chauffeur'
         ADMIN = 'admin', 'Administrateur'
         SUPPORT = 'support', 'Support'
 

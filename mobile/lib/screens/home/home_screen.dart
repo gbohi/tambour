@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../models/ligne_populaire.dart';
 import '../../models/ville.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/ligne_provider.dart';
 import '../../providers/recherche_provider.dart';
 import '../../widgets/ligne_card.dart';
@@ -22,6 +23,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Un compte chauffeur ouvre son espace dédié (session déjà active au lancement)
+    ref.listen(authProvider, (_, etat) {
+      if (etat.user?.estChauffeur == true) context.go('/chauffeur');
+    });
     return Scaffold(
       backgroundColor: TamBourColors.background,
       extendBodyBehindAppBar: true,

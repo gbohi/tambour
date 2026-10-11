@@ -12,6 +12,7 @@ import '../screens/gares/gares_screen.dart';
 import '../screens/profil/profil_edit_screen.dart';
 import '../screens/lignes/lignes_populaires_screen.dart';
 import '../screens/fidelite/fidelite_screen.dart';
+import '../screens/chauffeur/chauffeur_accueil_screen.dart';
 import '../screens/support/centre_aide_screen.dart';
 import '../screens/support/contact_support_screen.dart';
 import '../screens/support/noter_app_screen.dart';
@@ -57,6 +58,7 @@ final appRouter = GoRouter(
     GoRoute(path: '/profil/edit', builder: (_, __) => const ProfilEditScreen()),
     GoRoute(path: '/lignes-populaires', builder: (_, __) => const LignesPopulairesScreen()),
     GoRoute(path: '/fidelite', builder: (_, __) => const FideliteScreen()),
+    GoRoute(path: '/chauffeur', builder: (_, __) => const ChauffeurAccueilScreen()),
     GoRoute(path: '/aide', builder: (_, __) => const CentreAideScreen()),
     GoRoute(path: '/support', builder: (_, __) => const ContactSupportScreen()),
     GoRoute(path: '/noter', builder: (_, __) => const NoterAppScreen()),

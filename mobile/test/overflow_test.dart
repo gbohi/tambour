@@ -21,7 +21,11 @@ import 'package:tambour/screens/billet/billet_screen.dart';
 import 'package:tambour/screens/billets/mes_billets_screen.dart';
 import 'package:tambour/screens/compte/compte_screen.dart';
 import 'package:tambour/screens/fidelite/fidelite_screen.dart';
+import 'package:tambour/models/chauffeur.dart';
 import 'package:tambour/models/gare.dart';
+import 'package:tambour/screens/chauffeur/chauffeur_accueil_screen.dart';
+import 'package:tambour/screens/chauffeur/chauffeur_trajet_screen.dart';
+import 'package:tambour/services/chauffeur_service.dart';
 import 'package:tambour/screens/gares/departs_gare_screen.dart';
 import 'package:tambour/screens/gares/gares_screen.dart';
 import 'package:tambour/screens/home/home_screen.dart';
@@ -88,7 +92,30 @@ final reclamationsDemo = [
     statut: StatutReclamation.resolue, statutLabel: 'Résolue', date: DateTime(2026, 10, 3)),
 ];
 
+TrajetChauffeur trajetChauffeur(String statut) => TrajetChauffeur(
+  id: 't1', depart: 'Yamoussoukro', arrivee: 'San-Pédro', gareDepart: 'Gare Routière de Yamoussoukro Centre',
+  heureDepart: DateTime.now().add(const Duration(hours: 2)),
+  heureArriveeEstimee: DateTime.now().add(const Duration(hours: 6)),
+  statut: statut, statutLabel: statut == 'termine' ? 'Terminé' : statut == 'en_cours' ? 'En cours' : 'Planifié',
+  compagnie: 'Trans Ivoire', busImmatriculation: 'AB-2341-CI', placesTotal: 54, nbPassagers: 38, nbEmbarques: 12,
+  passagers: [
+    for (var i = 0; i < 10; i++)
+      PassagerChauffeur(id: '$i', nomComplet: 'Kouadio Jean-Baptiste N\'Guessan $i', telephone: '0707070707',
+        siege: '${i + 1}A', reservation: 'TB202610123456', referenceBillet: 'TB202610123456-P${i + 1}',
+        embarque: i.isEven, embarqueLe: i.isEven ? DateTime.now() : null),
+  ]);
+
+class FauxChauffeurService extends ChauffeurService {
+  @override
+  Future<List<TrajetChauffeur>> mesTrajets({bool historique = false}) async =>
+    historique ? [trajetChauffeur('termine'), trajetChauffeur('annule')] : [trajetChauffeur('planifie'), trajetChauffeur('en_cours')];
+  @override
+  Future<TrajetChauffeur> trajet(String id) async => trajetChauffeur('en_cours');
+}
+
 final ecrans = <String, Widget Function()>{
+  'Chauffeur › mes trajets': () => ChauffeurAccueilScreen(service: FauxChauffeurService()),
+  'Chauffeur › trajet': () => ChauffeurTrajetScreen(trajetId: 't1', service: FauxChauffeurService()),
   'Accueil': () => const HomeScreen(),
   'Connexion / inscription': () => const AuthScreen(),
   'Résultats': () => ResultatsScreen(params: params),
@@ -126,6 +153,16 @@ final interactions = <String, (Widget Function(), Future<void> Function(WidgetTe
       await t.pump(const Duration(milliseconds: 300));
     }
     await t.tap(find.text(Gare.mockGares().first.nom).first);
+  }),
+  'Mes billets › noter un trajet': (() => const MesBilletsScreen(), (t) async {
+    await t.tap(find.textContaining('Passés'));
+    for (var i = 0; i < 4; i++) {
+      await t.pump(const Duration(milliseconds: 300));
+    }
+    await t.tap(find.text('Noter ce trajet'));
+  }),
+  'Chauffeur › historique': (() => ChauffeurAccueilScreen(service: FauxChauffeurService()), (t) async {
+    await t.tap(find.text('Historique'));
   }),
   'Mes billets › passés': (() => const MesBilletsScreen(), (t) async {
     await t.tap(find.textContaining('Passés'));

@@ -144,9 +144,11 @@ class ReservationViewSet(viewsets.GenericViewSet):
                 'results':  data,
             })
 
+        # Voyageur : billets complets (passagers, QR) pour l'application
         return success_response(
-            data=ReservationListSerializer(
-                qs, many=True, context={'request': request}).data)
+            data=ReservationDetailSerializer(
+                qs.prefetch_related('passagers__siege', 'passagers__billet'),
+                many=True, context={'request': request}).data)
 
     # ── Détail réservation ────────────────────────────────────────────────────
     def retrieve(self, request, pk=None):

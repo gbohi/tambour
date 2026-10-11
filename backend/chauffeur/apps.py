@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class ChauffeurConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'chauffeur'
+    verbose_name = 'Espace chauffeur'

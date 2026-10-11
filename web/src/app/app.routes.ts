@@ -10,6 +10,7 @@ export const routes: Routes = [
   { path: 'compte', canActivate: [connecteGuard], loadComponent: () => import('./pages/compte/compte.component').then(m => m.CompteComponent), title: 'Mon compte — TamBour' },
   { path: 'gares', loadComponent: () => import('./pages/gares/gares.component').then(m => m.GaresComponent), title: 'Gares — TamBour' },
   { path: 'destinations', loadComponent: () => import('./pages/destinations/destinations.component').then(m => m.DestinationsComponent), title: 'Destinations — TamBour' },
+  { path: 'infos/:page', loadComponent: () => import('./pages/infos/infos.component').then(m => m.InfosComponent), title: 'Informations — TamBour' },
   { path: 'aide', loadComponent: () => import('./pages/aide/aide.component').then(m => m.AideComponent), title: "Centre d'aide — TamBour" },
   { path: '**', redirectTo: '' },
 ];

@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
 import { ApiService } from '../../core/api.service';
+import { Itineraire, ItineraireService, distanceLabel, dureeLabel } from '../../core/itineraire.service';
 import { Gare, Trajet } from '../../core/models';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
@@ -30,10 +31,27 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
               @if (g.telephone) { <a class="pastille" [href]="'tel:' + g.telephone"><tb-icon name="phone" [size]="14" /> {{ g.telephone }}</a> }
             </div>
             <div class="boutons">
-              <a class="btn btn-primaire btn-sm" target="_blank" rel="noopener"
-                [href]="'https://www.google.com/maps/dir/?api=1&destination=' + g.latitude + ',' + g.longitude"><tb-icon name="route" [size]="16" /> Itinéraire</a>
+              <button class="btn btn-contour btn-sm" (click)="voirTrajets()"><tb-icon name="bus" [size]="16" /> Voir les trajets</button>
+              <button class="btn btn-primaire btn-sm" (click)="yAller(g)" [disabled]="calcul()">
+                @if (calcul()) { <span class="spinner blanc"></span> Calcul… } @else { <tb-icon name="navigation" [size]="16" /> Y aller }
+              </button>
             </div>
-            <h3>Prochains départs</h3>
+            @if (erreurItin()) { <div class="alerte erreur"><tb-icon name="alert" [size]="18" /> {{ erreurItin() }}</div> }
+            @if (itin(); as it) {
+              <div class="itin">
+                <div class="itin-tete"><b>Itinéraire depuis votre position</b>
+                  <button class="fermer" (click)="effacerItin()" aria-label="Effacer l'itinéraire"><tb-icon name="x" [size]="16" /></button></div>
+                <div class="modes">
+                  <div class="mode"><span class="ico"><tb-icon name="car" [size]="18" /></span><div><b>{{ duree(it.dureeVoitureS) }}</b><small>en voiture / taxi</small></div></div>
+                  <div class="mode"><span class="ico marche"><tb-icon name="walk" [size]="18" /></span><div><b>{{ duree(it.distanceMetres / 1.25) }}</b><small>à pied</small></div></div>
+                  <div class="mode"><span class="ico dist"><tb-icon name="route" [size]="18" /></span><div><b>{{ distance(it.distanceMetres) }}</b><small>distance</small></div></div>
+                </div>
+                @if (it.estimation) { <p class="note"><tb-icon name="info" [size]="14" /> Estimation à vol d'oiseau : le calcul routier est indisponible.</p> }
+                <a class="lien-ext" target="_blank" rel="noopener" [href]="'https://www.google.com/maps/dir/?api=1&destination=' + g.latitude + ',' + g.longitude">
+                  Ouvrir le guidage dans Google Maps <tb-icon name="external" [size]="14" /></a>
+              </div>
+            }
+            <h3 #ancreDeparts>Prochains départs</h3>
             @if (chargementDeparts()) { <div class="squelette" style="height:200px"></div> }
             @for (t of departs(); track t.id) {
               <button class="depart" (click)="reserver(t)">
@@ -84,6 +102,16 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .depart:hover{border-color:var(--vert);}
     .depart .h,.depart .d{display:flex;flex-direction:column;}
     .depart .h b{font-size:18px;}
+    .itin{border:1px solid var(--bord);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,#F4FAF7,#fff);animation:monte .25s;}
+    .itin-tete{display:flex;justify-content:space-between;align-items:center;}
+    .fermer{border:none;background:var(--surface-2);width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--texte-2);}
+    .modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+    .mode{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;background:#fff;border:1px solid var(--bord);}
+    .mode div{display:flex;flex-direction:column;} .mode b{font-size:16px;} .mode small{font-size:12px;color:var(--texte-2);}
+    .ico{width:32px;height:32px;border-radius:10px;background:var(--vert-clair);color:var(--vert);display:flex;align-items:center;justify-content:center;}
+    .ico.marche{background:#EAF2FF;color:#2F7BF6;} .ico.dist{background:var(--or-clair);color:var(--or-fonce);}
+    .note{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--texte-2);}
+    .lien-ext{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--vert);}
     .carte-zone{position:relative;}
     .carte-leaflet{position:absolute;inset:0;}
     @media (max-width:900px){.carte-leaflet{position:relative;height:45vh;}}
@@ -91,7 +119,10 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 })
 export class GaresComponent implements AfterViewInit, OnDestroy {
   @ViewChild('carte') private conteneurCarte!: ElementRef<HTMLDivElement>;
+  @ViewChild('ancreDeparts') private ancreDeparts?: ElementRef<HTMLElement>;
   private api = inject(ApiService);
+  private itineraires = inject(ItineraireService);
+  private couchesItin?: L.LayerGroup;
   private router = inject(Router);
   private carte?: L.Map;
   private marqueurs = new Map<string, L.Marker>();
@@ -100,6 +131,11 @@ export class GaresComponent implements AfterViewInit, OnDestroy {
   choisie = signal<Gare | null>(null);
   departs = signal<Trajet[]>([]);
   chargementDeparts = signal(false);
+  itin = signal<Itineraire | null>(null);
+  calcul = signal(false);
+  erreurItin = signal('');
+  readonly duree = dureeLabel;
+  readonly distance = distanceLabel;
   filtre = signal('');
   villes = computed(() => [...new Set(this.gares().map(g => g.ville_nom))]);
   filtrees = computed(() => {
@@ -126,6 +162,7 @@ export class GaresComponent implements AfterViewInit, OnDestroy {
   }
 
   choisir(g: Gare | null): void {
+    this.effacerItin();
     this.choisie.set(g);
     if (!g) return;
     this.carte?.flyTo([+g.latitude, +g.longitude], 14, { duration: .8 });
@@ -136,6 +173,30 @@ export class GaresComponent implements AfterViewInit, OnDestroy {
       error: () => this.chargementDeparts.set(false),
     });
   }
+
+  voirTrajets(): void { this.ancreDeparts?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+  /** Trace le chemin de la position de l'utilisateur jusqu'à la gare, avec durée et distance. */
+  async yAller(g: Gare): Promise<void> {
+    this.erreurItin.set(''); this.calcul.set(true);
+    try {
+      const moi = await this.itineraires.positionActuelle();
+      const gare = { lat: +g.latitude, lng: +g.longitude };
+      const it = await this.itineraires.calculer(moi, gare);
+      if (this.choisie()?.id !== g.id || !this.carte) return;
+      this.couchesItin?.remove();
+      const ligne = L.polyline(it.points, { color: '#0A7C4E', weight: 6, opacity: .9, dashArray: it.estimation ? '8 10' : undefined, lineCap: 'round' });
+      const halo = L.polyline(it.points, { color: '#fff', weight: 10, opacity: .9 });
+      const moiMarqueur = L.marker([moi.lat, moi.lng], { icon: L.divIcon({ className: '', iconSize: [20, 20], iconAnchor: [10, 10], html: '<div class="marqueur-moi"></div>' }), title: 'Vous êtes ici' });
+      this.couchesItin = L.layerGroup([halo, ligne, moiMarqueur]).addTo(this.carte);
+      this.carte.fitBounds(ligne.getBounds(), { padding: [60, 60] });
+      this.itin.set(it);
+    } catch (e) {
+      this.erreurItin.set((e as Error).message);
+    } finally { this.calcul.set(false); }
+  }
+
+  effacerItin(): void { this.couchesItin?.remove(); this.couchesItin = undefined; this.itin.set(null); this.erreurItin.set(''); }
 
   reserver(t: Trajet): void { this.router.navigate(['/reservation', t.id], { queryParams: { passagers: 1 } }); }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { LignePopulaire } from '../../core/models';
 import { demain } from '../../core/recherche';
@@ -14,8 +14,9 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     <section class="tete">
       <div class="conteneur">
         <span class="surtitre">Destinations</span>
-        <h1 class="titre-section">Toutes nos lignes</h1>
+        <h1 class="titre-section">{{ vers() ? 'Car pour ' + vers() : 'Toutes nos lignes' }}</h1>
         <p class="intro">Choisissez une ligne pour voir les départs de demain.</p>
+        @if (vers()) { <button class="puce-vers" (click)="toutes()">Vers {{ vers() }} <tb-icon name="x" [size]="14" /></button> }
         <div class="recherche"><tb-icon name="search" [size]="18" />
           <input class="entree" placeholder="Rechercher une ville…" [value]="filtre()" (input)="filtre.set($any($event.target).value)"></div>
       </div>
@@ -40,6 +41,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     </div>
   `,
   styles: [`
+    .puce-vers{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;margin-top:12px;border:none;border-radius:999px;padding:8px 14px;background:var(--or);color:var(--encre);font-weight:700;cursor:pointer;}
     .tete{background:#fff;border-bottom:1px solid var(--bord);padding:56px 0 32px;}
     .recherche{position:relative;max-width:420px;margin-top:24px;}
     .recherche tb-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--texte-3);}
@@ -59,17 +61,25 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 export class DestinationsComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  vers = signal('');
   lignes = signal<LignePopulaire[]>([]);
   filtre = signal('');
   parDepart = computed(() => {
     const q = this.filtre().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const vers = this.vers();
     const groupes = new Map<string, LignePopulaire[]>();
     this.lignes()
+      .filter(l => !vers || l.arrivee === vers)
       .filter(l => !q || `${l.depart} ${l.arrivee}`.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q))
       .forEach(l => groupes.set(l.depart, [...(groupes.get(l.depart) ?? []), l]));
     return [...groupes.entries()].map(([ville, lignes]) => ({ ville, lignes })).sort((a, b) => b.lignes.length - a.lignes.length);
   });
-  ngOnInit(): void { this.api.lignesPopulaires().subscribe(l => this.lignes.set(l)); }
+  ngOnInit(): void {
+    this.api.lignesPopulaires().subscribe(l => this.lignes.set(l));
+    this.route.queryParamMap.subscribe(q => this.vers.set(q.get('ville') ?? ''));
+  }
+  toutes(): void { this.router.navigate(['/destinations']); }
   voir(l: LignePopulaire): void {
     this.router.navigate(['/recherche'], { queryParams: { depart: l.depart_id, arrivee: l.arrivee_id, date: demain(), passagers: 1 } });
   }

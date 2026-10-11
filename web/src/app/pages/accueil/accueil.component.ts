@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LignePopulaire, CategorieFAQ } from '../../core/models';
+import { MOBILE_MONEY } from '../../core/paiements';
 import { demain } from '../../core/recherche';
 import { FormulaireRechercheComponent } from '../../shared/components/formulaire-recherche.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
@@ -21,7 +22,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
         <path d="M200 -40 C 260 160, 120 260, 300 420" class="fin" />
       </svg>
       <div class="conteneur hero-contenu">
-        <span class="badge-hero"><tb-icon name="sparkles" [size]="16" /> Nouveau : payez avec Wave, Orange Money et MTN</span>
+        <span class="badge-hero"><span class="mini-logos">@for (m of mobileMoney; track m.code) { <img [src]="m.logo" [alt]="m.label" width="22" height="22"> }</span> Payez avec Orange Money, Wave, MTN MoMo ou Moov Money</span>
         <h1>Voyagez partout en<br><span>Côte d'Ivoire</span>, simplement.</h1>
         <p>Comparez les départs des meilleures compagnies, réservez en 2 minutes et embarquez avec votre billet sur le téléphone.</p>
         <tb-recherche />
@@ -143,6 +144,8 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .confiance{background:#fff;border-bottom:1px solid var(--bord);}
     .grille-confiance{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:28px 24px;}
     @media (max-width:900px){.grille-confiance{grid-template-columns:1fr 1fr;}}
+    .mini-logos{display:inline-flex;gap:4px;}
+    .mini-logos img{width:22px;height:22px;object-fit:contain;}
     .atout{display:flex;align-items:center;gap:14px;}
     .atout .ico{width:48px;height:48px;border-radius:14px;background:var(--vert-clair);color:var(--vert);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .atout b{display:block;font-size:16px;} .atout small{color:var(--texte-2);font-size:14px;}
@@ -213,8 +216,9 @@ export class AccueilComponent implements OnInit {
   lignes = signal<LignePopulaire[]>([]);
   questions = signal<{ question: string; reponse: string }[]>([]);
 
+  readonly mobileMoney = MOBILE_MONEY;
   readonly atouts = [
-    { icone: 'wallet', titre: 'Mobile Money', texte: 'Orange, MTN, Wave ou carte' },
+    { icone: 'wallet', titre: 'Mobile Money', texte: 'Orange, Wave, MTN, Moov ou carte' },
     { icone: 'qr', titre: 'Billet sur mobile', texte: 'QR code, pas d\'impression' },
     { icone: 'seat', titre: 'Siège garanti', texte: 'Attribué dès le paiement' },
     { icone: 'headset', titre: 'Support 7j/7', texte: 'Par téléphone et WhatsApp' },

@@ -183,7 +183,7 @@ class Command(BaseCommand):
         res.confirmer()
         Paiement.objects.create(
             reservation=res, user=user, montant=res.montant_total, statut=Paiement.Statut.SUCCES,
-            methode=random.choice(['orange_money', 'mtn_momo', 'wave', 'wave', 'carte']),
+            methode=random.choice(['orange_money', 'mtn_momo', 'moov_money', 'wave', 'wave', 'carte']),
             telephone=user.telephone or '0700000000', confirme_le=timezone.now(),
             reference=f'PAY{res.reference}')
         user.nb_voyages += 1

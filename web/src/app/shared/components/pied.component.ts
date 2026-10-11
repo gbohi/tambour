@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { LignePopulaire } from '../../core/models';
+import { MOBILE_MONEY } from '../../core/paiements';
 import { demain } from '../../core/recherche';
 import { IconComponent } from './icon/icon.component';
 
@@ -81,7 +82,10 @@ const LIGNES_DEFAUT = ['Abidjan - Bouaké', 'Abidjan - Yamoussoukro', 'Abidjan -
           <a routerLink="/infos/mentions-legales">Mentions légales</a>
           <a routerLink="/infos/cookies">Cookies</a>
         </div>
-        <div class="paiements"><span style="--c:#FF7900">Orange Money</span><span style="--c:#FFCB05">MTN MoMo</span><span style="--c:#1DC8F2">Wave</span><span style="--c:#9FB3FF">Visa</span></div>
+        <div class="paiements" aria-label="Moyens de paiement acceptés">
+          @for (m of mobileMoney; track m.code) { <img [src]="m.logo" [alt]="m.label" [title]="m.label" width="34" height="34"> }
+          <span class="carte-pay" title="Visa, Mastercard"><tb-icon name="card" [size]="18" /></span>
+        </div>
         <span class="copy">© {{ annee }} TamBour · Abidjan, Côte d'Ivoire</span>
       </div>
     </footer>
@@ -112,8 +116,9 @@ const LIGNES_DEFAUT = ['Abidjan - Bouaké', 'Abidjan - Yamoussoukro', 'Abidjan -
     .logo small{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--or);font-weight:600;margin-top:3px;}
     .legal{display:flex;gap:6px 20px;flex-wrap:wrap;}
     .legal a:hover{color:#fff;}
-    .paiements{display:flex;flex-wrap:wrap;gap:6px;}
-    .paiements span{font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--c);}
+    .paiements{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+    .paiements img{width:34px;height:34px;object-fit:contain;}
+    .carte-pay{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;display:flex;align-items:center;justify-content:center;}
     .copy{font-size:13px;opacity:.7;}
   `],
 })
@@ -122,6 +127,7 @@ export class PiedComponent implements OnInit {
   annee = new Date().getFullYear();
   dateDemain = demain();
   readonly villes = VILLES_PHARES;
+  readonly mobileMoney = MOBILE_MONEY;
   readonly lignesDefaut = LIGNES_DEFAUT;
   lignes = signal<LignePopulaire[]>([]);
   readonly reseaux = [

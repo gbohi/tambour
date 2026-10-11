@@ -28,7 +28,7 @@ class CategorieFAQ {
         'réservation sont placés le plus près possible les uns des autres.'),
     ]),
     CategorieFAQ('paiement', 'Paiement', [
-      QuestionFAQ('Quels moyens de paiement sont acceptés ?', 'MTN Mobile Money, Orange Money, Wave et carte bancaire.'),
+      QuestionFAQ('Quels moyens de paiement sont acceptés ?', 'Orange Money, MTN Mobile Money, Moov Money, Wave et carte bancaire (Visa, Mastercard).'),
       QuestionFAQ("J'ai été débité mais je n'ai pas reçu mon billet",
         "Patientez quelques minutes puis ouvrez « Mes billets ». Sinon, faites une réclamation depuis « Mon compte »."),
     ]),

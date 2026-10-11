@@ -74,10 +74,11 @@ class _PaiementScreenState extends ConsumerState<PaiementScreen> {
               const SizedBox(height: 24),
               const Text('Choisissez votre moyen de paiement', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
               const SizedBox(height: 14),
-              ...[ (MethodePaiement.mtnMomo, 'MTN Mobile Money', const Color(0xFFFFCC00), const Color(0xFF5C4500), Icons.signal_cellular_alt_rounded),
-                   (MethodePaiement.orangeMoney, 'Orange Money', const Color(0xFFFF6600), Colors.white, Icons.signal_cellular_alt_2_bar_rounded),
-                   (MethodePaiement.wave, 'Wave', const Color(0xFF1AC9E6), Colors.white, Icons.waves_rounded),
-              ].map((e) => Padding(padding: const EdgeInsets.only(bottom: 10), child: _MethodeCard(methode: e.$1, nom: e.$2, couleur: e.$3, textColor: e.$4, icon: e.$5, selected: state.methodeSelectionnee == e.$1, onTap: () => ref.read(paiementProvider.notifier).selectionnerMethode(e.$1)))),
+              // Mobile Money uniquement dans l'app (la carte reste disponible sur le site web)
+              ...MethodePaiement.values.where((m) => m.logo != null).map((m) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _MethodeCard(methode: m, selected: state.methodeSelectionnee == m,
+                  onTap: () => ref.read(paiementProvider.notifier).selectionnerMethode(m)))),
               if (state.methodeSelectionnee != null) ...[
                 const SizedBox(height: 14),
                 _TelField(controller: _telCtrl, methode: state.methodeSelectionnee!),
@@ -164,28 +165,56 @@ class _Ligne extends StatelessWidget {
 }
 
 class _MethodeCard extends StatelessWidget {
-  final MethodePaiement methode; final String nom; final Color couleur, textColor; final IconData icon; final bool selected; final VoidCallback onTap;
-  const _MethodeCard({required this.methode, required this.nom, required this.couleur, required this.textColor, required this.icon, required this.selected, required this.onTap});
+  final MethodePaiement methode; final bool selected; final VoidCallback onTap;
+  const _MethodeCard({required this.methode, required this.selected, required this.onTap});
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(onTap: onTap, child: AnimatedContainer(duration: const Duration(milliseconds: 200), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: selected ? couleur.withOpacity(0.08) : TamBourColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: selected ? couleur : TamBourColors.border, width: selected ? 2 : 0.5)),
-      child: Row(children: [
-        Container(width: 44, height: 44, decoration: BoxDecoration(color: couleur, borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: textColor, size: 22)),
-        const SizedBox(width: 12),
-        Expanded(child: Text(nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary))),
-        AnimatedContainer(duration: const Duration(milliseconds: 200), width: 22, height: 22,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? couleur : Colors.transparent, border: Border.all(color: selected ? couleur : TamBourColors.border, width: 2)),
-          child: selected ? const Icon(Icons.check_rounded, color: Colors.white, size: 12) : null),
-      ])));
+    final couleur = methode.couleur;
+    return Semantics(
+      button: true, selected: selected, label: methode.nom,
+      child: GestureDetector(onTap: onTap, child: AnimatedContainer(duration: const Duration(milliseconds: 200), padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: selected ? couleur.withValues(alpha: 0.07) : TamBourColors.surface, borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: selected ? couleur : TamBourColors.border, width: selected ? 2 : 1)),
+        child: Row(children: [
+          LogoMethodePaiement(methode: methode, taille: 46),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(methode.nom, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
+            const SizedBox(height: 2),
+            Text(methode.description, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: TamBourColors.textSecondary)),
+          ])),
+          const SizedBox(width: 8),
+          AnimatedContainer(duration: const Duration(milliseconds: 200), width: 22, height: 22,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: selected ? TamBourColors.primary : Colors.transparent,
+              border: Border.all(color: selected ? TamBourColors.primary : TamBourColors.border, width: 2)),
+            child: selected ? const Icon(Icons.check_rounded, color: Colors.white, size: 13) : null),
+        ]))),
+    );
+  }
+}
+
+/// Logo officiel du moyen de paiement (icône carte pour la carte bancaire).
+class LogoMethodePaiement extends StatelessWidget {
+  final MethodePaiement methode; final double taille;
+  const LogoMethodePaiement({super.key, required this.methode, this.taille = 44});
+  @override
+  Widget build(BuildContext context) {
+    final logo = methode.logo;
+    if (logo == null) {
+      return Container(width: taille, height: taille,
+        decoration: BoxDecoration(color: methode.couleur, borderRadius: BorderRadius.circular(taille * 0.24)),
+        child: Icon(Icons.credit_card_rounded, color: Colors.white, size: taille * 0.5));
+    }
+    return Image.asset(logo, width: taille, height: taille, fit: BoxFit.contain, excludeFromSemantics: true);
   }
 }
 
 class _TelField extends StatelessWidget {
   final TextEditingController controller; final MethodePaiement methode;
   const _TelField({required this.controller, required this.methode});
-  String get _hint => methode == MethodePaiement.mtnMomo ? '05 00 00 00 00' : methode == MethodePaiement.orangeMoney ? '07 00 00 00 00' : '01 00 00 00 00';
-  String get _label => methode == MethodePaiement.mtnMomo ? 'Numéro MTN Mobile Money' : methode == MethodePaiement.orangeMoney ? 'Numéro Orange Money' : 'Numéro Wave';
+  String get _hint => methode.exempleNumero;
+  String get _label => 'Numéro ${methode.nom}';
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -206,8 +235,8 @@ class _TelField extends StatelessWidget {
 class _EnCours extends StatelessWidget {
   final MethodePaiement methode; final String telephone; final int montant, secondes;
   const _EnCours({required this.methode, required this.telephone, required this.montant, required this.secondes});
-  String get _nom => methode == MethodePaiement.mtnMomo ? 'MTN MoMo' : methode == MethodePaiement.orangeMoney ? 'Orange Money' : 'Wave';
-  Color get _color => methode == MethodePaiement.mtnMomo ? const Color(0xFFFFCC00) : methode == MethodePaiement.orangeMoney ? const Color(0xFFFF6600) : const Color(0xFF1AC9E6);
+  String get _nom => methode.nomCourt;
+  Color get _color => methode.couleur;
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat('#,###', 'fr_FR');
@@ -215,7 +244,7 @@ class _EnCours extends StatelessWidget {
     final timerColor = secondes > 60 ? TamBourColors.primary : secondes > 30 ? TamBourColors.gold : TamBourColors.error;
     final mins = secondes ~/ 60; final secs = secondes % 60;
     return Center(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
-      _Pulse(color: _color),
+      _Pulse(color: _color, methode: methode),
       const SizedBox(height: 32),
       Text('Confirmez sur $_nom', style: const TextStyle(fontFamily: 'Outfit', fontSize: 22, fontWeight: FontWeight.w800, color: TamBourColors.textPrimary), textAlign: TextAlign.center),
       const SizedBox(height: 12),
@@ -236,14 +265,14 @@ class _EnCours extends StatelessWidget {
 }
 
 class _Pulse extends StatelessWidget {
-  final Color color;
-  const _Pulse({required this.color});
+  final Color color; final MethodePaiement methode;
+  const _Pulse({required this.color, required this.methode});
   @override
   Widget build(BuildContext context) {
     return SizedBox(width: 100, height: 100, child: Stack(alignment: Alignment.center, children: [
       Container(width: 100, height: 100, decoration: BoxDecoration(color: color.withOpacity(0.12), shape: BoxShape.circle)).animate(onPlay: (c) => c.repeat()).scale(begin: const Offset(1,1), end: const Offset(1.2,1.2), duration: 1000.ms, curve: Curves.easeInOut).then().scale(begin: const Offset(1.2,1.2), end: const Offset(1,1), duration: 1000.ms, curve: Curves.easeInOut),
       Container(width: 72, height: 72, decoration: BoxDecoration(color: color.withOpacity(0.2), shape: BoxShape.circle)),
-      Container(width: 52, height: 52, decoration: BoxDecoration(color: color, shape: BoxShape.circle), child: const Icon(Icons.phone_android_rounded, color: Colors.white, size: 26)),
+      LogoMethodePaiement(methode: methode, taille: 56),
     ]));
   }
 }

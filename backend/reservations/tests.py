@@ -77,6 +77,22 @@ class ParcoursCompletTests(TestCase):
         self.assertTrue(user.mouvements_points.filter(motif='voyage').exists())
 
 
+    def test_payer_avec_moov_money(self):
+        from django.test import override_settings
+        from paiements.models import Paiement
+        user = creer_user()
+        trajet = creer_trajet(prix=3000)
+        c = APIClient()
+        c.force_authenticate(user)
+        res_id = c.post('/api/v1/reservations/', {'trajet_id': str(trajet.id), 'passagers': passagers(1)},
+                        format='json').json()['data']['id']
+        with override_settings(PAIEMENT_SIMULATION=True):
+            r = c.post('/api/v1/paiements/initier/', {'reservation_id': res_id, 'methode': 'moov_money',
+                                                       'telephone': '0101010101'}, format='json')
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(Paiement.objects.get(reservation_id=res_id).methode, 'moov_money')
+        self.assertEqual(Reservation.objects.get(pk=res_id).statut, Reservation.Statut.CONFIRMEE)
+
 class RechercheTrajetTests(TestCase):
     """La recherche publique ne doit pas être captée par la route détail du routeur DRF."""
 

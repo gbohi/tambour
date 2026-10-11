@@ -6,13 +6,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { DashboardStats, Trajet } from '../../core/models/transport.model';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
+import { infoMethode } from '../../shared/paiements/paiements';
 
-const METHODES: Record<string, { label: string; couleur: string }> = {
-  orange_money: { label: 'Orange Money', couleur: '#FF7900' },
-  mtn_momo:     { label: 'MTN MoMo',     couleur: '#FFCB05' },
-  wave:         { label: 'Wave',         couleur: '#1DC8F2' },
-  carte:        { label: 'Carte bancaire', couleur: '#2563EB' },
-};
 
 @Component({
   selector: 'app-dashboard',
@@ -105,7 +100,7 @@ const METHODES: Record<string, { label: string; couleur: string }> = {
               <div class="donut" [style.background]="donut()"><div class="trou"><strong>{{ totalPaiements() | nb }}</strong><span>FCFA</span></div></div>
               <ul class="legende">
                 @for (p of paiements(); track p.methode) {
-                  <li><i [style.background]="p.couleur"></i><span>{{ p.label }}</span><b>{{ p.pct }} %</b></li>
+                  <li><i [style.background]="p.couleur"></i>@if (p.logo) { <img [src]="p.logo" alt=""> }<span>{{ p.label }}</span><b>{{ p.pct }} %</b></li>
                 }
               </ul>
             </div>
@@ -184,7 +179,8 @@ const METHODES: Record<string, { label: string; couleur: string }> = {
     .trou span{font-size:11px;color:var(--text-3);font-weight:600;}
     .legende{list-style:none;display:flex;flex-direction:column;gap:10px;min-width:180px;}
     .legende li{display:flex;align-items:center;gap:10px;font-size:14px;}
-    .legende i{width:10px;height:10px;border-radius:3px;}
+    .legende i{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+    .legende img{width:22px;height:22px;object-fit:contain;margin-left:-2px;}
     .legende b{margin-left:auto;}
     .heure{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
     .remplissage{display:flex;flex-direction:column;gap:6px;}
@@ -222,7 +218,7 @@ export class DashboardComponent implements OnInit {
   paiements = computed(() => {
     const liste = this.stats()?.methodes_paiement ?? [];
     const total = liste.reduce((s, p) => s + p.montant, 0) || 1;
-    return liste.map(p => ({ ...p, ...(METHODES[p.methode] ?? { label: p.methode, couleur: '#0F4A3B' }),
+    return liste.map(p => ({ ...p, ...infoMethode(p.methode),
       pct: Math.round(p.montant / total * 100) }));
   });
   totalPaiements = computed(() => this.paiements().reduce((s, p) => s + p.montant, 0));

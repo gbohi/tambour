@@ -7,15 +7,11 @@ import { ApiService, messageErreur } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
 import { MethodePaiement, PassagerSaisie, Trajet } from '../../core/models';
+import { METHODES_PAIEMENT } from '../../core/paiements';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 
-const METHODES: { code: MethodePaiement; label: string; detail: string; couleur: string; texte: string }[] = [
-  { code: 'orange_money', label: 'Orange Money', detail: 'Validation par code sur votre téléphone', couleur: '#FF7900', texte: '#fff' },
-  { code: 'mtn_momo', label: 'MTN Mobile Money', detail: 'Validation par code sur votre téléphone', couleur: '#FFCB05', texte: '#1A1A1A' },
-  { code: 'wave', label: 'Wave', detail: 'Confirmez dans l\'application Wave', couleur: '#1DC8F2', texte: '#fff' },
-  { code: 'carte', label: 'Carte bancaire', detail: 'Visa, Mastercard — paiement sécurisé', couleur: '#1E293B', texte: '#fff' },
-];
+
 
 @Component({
   selector: 'tb-reservation',
@@ -73,7 +69,8 @@ const METHODES: { code: MethodePaiement; label: string; detail: string; couleur:
                   @for (m of methodes; track m.code) {
                     <label class="methode" [class.choisie]="methode() === m.code">
                       <input type="radio" name="methode" [checked]="methode() === m.code" (change)="methode.set(m.code)">
-                      <span class="logo-pay" [style.background]="m.couleur" [style.color]="m.texte">{{ initialesMethode(m.label) }}</span>
+                      @if (m.logo) { <img class="logo-pay" [src]="m.logo" [alt]="m.label" width="48" height="48"> }
+                      @else { <span class="logo-pay carte"><tb-icon name="card" [size]="24" /></span> }
                       <span class="txt"><b>{{ m.label }}</b><small>{{ m.detail }}</small></span>
                       <span class="coche"><tb-icon name="check" [size]="16" /></span>
                     </label>
@@ -150,8 +147,10 @@ const METHODES: { code: MethodePaiement; label: string; detail: string; couleur:
     .methode{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--bord);border-radius:var(--r-lg);cursor:pointer;transition:border-color .15s,background .15s;}
     .methode:hover{border-color:#C8D2CD;}
     .methode.choisie{border-color:var(--vert);background:var(--vert-clair);}
+    .methode:last-child:nth-child(odd){grid-column:1/-1;}
     .methode input{position:absolute;opacity:0;}
-    .logo-pay{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;}
+    .logo-pay{width:48px;height:48px;object-fit:contain;flex-shrink:0;}
+    .logo-pay.carte{border-radius:12px;background:var(--encre);color:#fff;display:flex;align-items:center;justify-content:center;}
     .txt{display:flex;flex-direction:column;flex:1;}
     .txt small{font-size:13px;color:var(--texte-2);}
     .coche{width:24px;height:24px;border-radius:50%;border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;color:transparent;}
@@ -184,7 +183,7 @@ export class ReservationComponent implements OnInit {
   private router = inject(Router);
   private toast = inject(ToastService);
 
-  readonly methodes = METHODES;
+  readonly methodes = METHODES_PAIEMENT;
   trajet = signal<Trajet | null>(null);
   erreurChargement = signal('');
   etape = signal(1);
@@ -197,7 +196,7 @@ export class ReservationComponent implements OnInit {
   private trajetId = '';
 
   total = computed(() => (this.trajet()?.prix_actuel ?? 0) * this.nbPassagers());
-  methodeLabel = computed(() => METHODES.find(m => m.code === this.methode())?.label ?? '');
+  methodeLabel = computed(() => METHODES_PAIEMENT.find(m => m.code === this.methode())?.label ?? '');
 
   ngOnInit(): void {
     this.trajetId = this.route.snapshot.paramMap.get('trajetId') ?? '';
@@ -260,7 +259,6 @@ export class ReservationComponent implements OnInit {
     });
   }
 
-  initialesMethode(l: string): string { return l.split(' ').map(x => x[0]).join('').slice(0, 3).toUpperCase(); }
   classeLabel(c: string): string { return ({ standard: 'Standard', confort: 'Confort', vip: 'VIP' } as Record<string, string>)[c] ?? c; }
 
   // Brouillon conservé si le voyageur doit se connecter en cours de route

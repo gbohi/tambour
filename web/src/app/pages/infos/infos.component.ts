@@ -13,7 +13,7 @@ const PAGES: Record<string, PageInfo> = {
     intro: "TamBour rassemble les compagnies de car de Côte d'Ivoire sur une seule plateforme pour rendre le voyage interurbain simple, sûr et moderne.",
     sections: [
       { titre: 'Notre mission', texte: "Permettre à chacun de comparer les départs, de réserver en deux minutes et de voyager avec un billet sur son téléphone, sans file d'attente à la gare." },
-      { titre: 'Ce que nous proposons', points: ['Les horaires et les prix de plusieurs compagnies au même endroit', 'Le paiement par Orange Money, MTN MoMo, Wave ou carte bancaire', 'Un billet avec QR code, contrôlé par le chauffeur à l\'embarquement', 'Un programme de fidélité et de parrainage'] },
+      { titre: 'Ce que nous proposons', points: ['Les horaires et les prix de plusieurs compagnies au même endroit', 'Le paiement par Orange Money, Wave, MTN MoMo, Moov Money ou carte bancaire', 'Un billet avec QR code, contrôlé par le chauffeur à l\'embarquement', 'Un programme de fidélité et de parrainage'] },
       { titre: 'Nos valeurs', texte: 'Transparence des prix, ponctualité, sécurité des voyageurs et service client joignable 7 jours sur 7.' },
     ],
   },
@@ -58,7 +58,7 @@ const PAGES: Record<string, PageInfo> = {
     intro: 'Votre billet en 3 étapes, en moins de deux minutes.',
     sections: [
       { titre: '1. Recherchez', texte: 'Indiquez votre ville de départ, d\'arrivée, la date et le nombre de passagers, puis comparez les départs : horaires, prix, confort et avis.' },
-      { titre: '2. Payez', texte: 'Renseignez les voyageurs et payez par Orange Money, MTN MoMo, Wave ou carte bancaire. Les sièges sont attribués automatiquement, côte à côte.' },
+      { titre: '2. Payez', texte: 'Renseignez les voyageurs et payez par Orange Money, Wave, MTN MoMo, Moov Money ou carte bancaire. Les sièges sont attribués automatiquement, côte à côte.' },
       { titre: '3. Embarquez', texte: 'Vos billets apparaissent dans « Mes billets ». Présentez le QR code au chauffeur à l\'embarquement.' },
     ],
     action: { libelle: 'Rechercher un trajet', lien: '/' },

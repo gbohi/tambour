@@ -8,6 +8,7 @@ import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { Paiement } from '../../core/models/reservation.model';
+import { METHODES_PAIEMENT, infoMethode } from '../../shared/paiements/paiements';
 
 @Component({
   selector: 'app-paiements',
@@ -41,7 +42,8 @@ import { Paiement } from '../../core/models/reservation.model';
           <div class="segmented">
             <button [class.active]="filtreMethode === ''" (click)="filtreMethode = ''; onFiltreChange()">Tous</button>
             @for (m of methodes; track m.code) {
-              <button [class.active]="filtreMethode === m.code" (click)="filtreMethode = m.code; onFiltreChange()"><i class="pastille" [style.background]="m.couleur"></i>{{ m.label }}</button>
+              <button [class.active]="filtreMethode === m.code" (click)="filtreMethode = m.code; onFiltreChange()">
+                @if (m.logo) { <img class="logo-pm" [src]="m.logo" alt=""> } @else { <tb-icon name="card" [size]="16" /> }{{ m.court }}</button>
             }
           </div>
         </div>
@@ -55,7 +57,7 @@ import { Paiement } from '../../core/models/reservation.model';
                 @for (pm of paiements(); track pm.id) {
                   <tr>
                     <td><span class="mono cell-main">{{ pm.reference }}</span></td>
-                    <td><span class="methode"><i class="pastille" [style.background]="couleur(pm.methode)"></i>{{ pm.methode_label }}</span></td>
+                    <td><span class="methode">@if (info(pm.methode).logo; as logo) { <img class="logo-pm grand" [src]="logo" alt=""> } @else { <span class="logo-carte"><tb-icon name="card" [size]="15" /></span> }{{ info(pm.methode).label }}</span></td>
                     <td>{{ pm.telephone }}</td>
                     <td class="right"><span class="amount" [class.text-error]="pm.statut === 'echec'">{{ pm.montant | nb:'F' }}</span>
                       @if (pm.montant_rembourse > 0) { <div class="cell-sub text-error">− {{ pm.montant_rembourse | nb }} remboursé</div> }</td>
@@ -75,7 +77,10 @@ import { Paiement } from '../../core/models/reservation.model';
   `,
   styles: [`
     .pastille{display:inline-block;width:9px;height:9px;border-radius:3px;}
-    .methode{display:inline-flex;align-items:center;gap:8px;font-weight:600;}
+    .methode{display:inline-flex;align-items:center;gap:10px;font-weight:600;}
+    .logo-pm{width:18px;height:18px;object-fit:contain;}
+    .logo-pm.grand{width:26px;height:26px;}
+    .logo-carte{width:26px;height:26px;border-radius:7px;background:var(--surface-3);color:var(--text-2);display:inline-flex;align-items:center;justify-content:center;}
   `]
 })
 export class PaiementsComponent implements OnInit {
@@ -111,11 +116,8 @@ export class PaiementsComponent implements OnInit {
       error: () => this.loading.set(false)
     });
   }
-  readonly methodes = [
-    { code: 'orange_money', label: 'Orange', couleur: '#FF7900' }, { code: 'mtn_momo', label: 'MTN', couleur: '#FFCB05' },
-    { code: 'wave', label: 'Wave', couleur: '#1DC8F2' }, { code: 'carte', label: 'Carte', couleur: '#2563EB' },
-  ];
-  couleur(m: string): string { return this.methodes.find(x => x.code === m)?.couleur ?? '#0F4A3B'; }
+  readonly methodes = METHODES_PAIEMENT;
+  readonly info = infoMethode;
   statutBadge(s: string): string { const r: Record<string,string> = { initie:'badge-neutral', en_attente:'badge-warning', succes:'badge-success', echec:'badge-error', rembourse:'badge-info', annule:'badge-neutral' }; return r[s] ?? 'badge-neutral'; }
   exportCsv(): void {
     const csv = ['Référence,Méthode,Montant,Téléphone,Statut,Date',

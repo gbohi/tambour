@@ -54,4 +54,4 @@ export interface CategorieFAQ { code: string; label: string; questions: Question
 export interface InfosContact { telephone: string; whatsapp: string; email: string; horaires: string; }
 
 export interface PassagerSaisie { prenom: string; nom: string; telephone: string; email: string; }
-export type MethodePaiement = 'orange_money' | 'mtn_momo' | 'wave' | 'carte';
+export type MethodePaiement = 'orange_money' | 'mtn_momo' | 'moov_money' | 'wave' | 'carte';

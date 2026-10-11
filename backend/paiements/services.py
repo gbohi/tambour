@@ -70,6 +70,7 @@ class CinetPayService:
         return {
             'mtn_momo': 'MOBILE_MONEY',
             'orange_money': 'MOBILE_MONEY',
+            'moov_money': 'MOBILE_MONEY',
             'wave': 'WAVE',
             'carte': 'CREDIT_CARD',
         }.get(methode, 'ALL')

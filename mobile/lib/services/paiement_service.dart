@@ -10,12 +10,7 @@ class PaiementService {
     connectTimeout: const Duration(seconds: 30),
     receiveTimeout: const Duration(seconds: 30)));
 
-  String _methodeToApi(MethodePaiement methode) => switch (methode) {
-    MethodePaiement.mtnMomo => 'mtn_momo',
-    MethodePaiement.orangeMoney => 'orange_money',
-    MethodePaiement.wave => 'wave',
-    MethodePaiement.carte => 'carte',
-  };
+  String _methodeToApi(MethodePaiement methode) => methode.code;
 
   Future<Map<String, dynamic>> initierPaiement({
     required String reservationId,

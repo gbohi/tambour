@@ -12,7 +12,8 @@ Devise : **Voyagez au bon rythme**.
 | `icone-passager.svg` | Icône de l'application **TamBour** (fond crème). |
 | `icone-chauffeur.svg` | Icône de l'application **TamBour Pro** (fond vert, pastille PRO). |
 | `png/` | Exports PNG (icônes 512 px pour les stores, logos). |
-| `apercus/` | Captures des écrans de connexion des deux applications. |
+| `apercus/` | Captures d'écrans des applications mobiles. |
+| `paiements/` | Logos des moyens de paiement (Orange Money, Wave, MTN MoMo, Moov Money), 256 px. Marques de leurs propriétaires respectifs. |
 
 Aux petites tailles, composer **symbole + « TamBour » + devise en texte** (police Outfit) plutôt que d'utiliser le logo complet.
 

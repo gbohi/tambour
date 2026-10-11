@@ -7,16 +7,17 @@ class Paiement(models.Model):
     class Methode(models.TextChoices):
         MTN_MOMO = 'mtn_momo', 'MTN Mobile Money'
         ORANGE_MONEY = 'orange_money', 'Orange Money'
+        MOOV_MONEY = 'moov_money', 'Moov Money'
         WAVE = 'wave', 'Wave'
         CARTE = 'carte', 'Carte bancaire'
 
     class Statut(models.TextChoices):
-        INITIE = 'initie', 'Initie'
+        INITIE = 'initie', 'Initié'
         EN_ATTENTE = 'en_attente', 'En attente de confirmation'
-        SUCCES = 'succes', 'Succes'
-        ECHEC = 'echec', 'Echec'
-        REMBOURSE = 'rembourse', 'Rembourse'
-        ANNULE = 'annule', 'Annule'
+        SUCCES = 'succes', 'Succès'
+        ECHEC = 'echec', 'Échec'
+        REMBOURSE = 'rembourse', 'Remboursé'
+        ANNULE = 'annule', 'Annulé'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reservation = models.ForeignKey('reservations.Reservation', on_delete=models.CASCADE, related_name='paiements')
@@ -66,7 +67,7 @@ class Versement(models.Model):
     class Statut(models.TextChoices):
         EN_ATTENTE = 'en_attente', 'En attente'
         TRAITE = 'traite', 'Traite'
-        ECHEC = 'echec', 'Echec'
+        ECHEC = 'echec', 'Échec'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     transporteur = models.ForeignKey('transport.Transporteur', on_delete=models.CASCADE, related_name='versements')

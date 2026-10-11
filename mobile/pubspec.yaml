@@ -39,6 +39,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/paiements/
     - assets/fonts/
   # Police de la marque embarquée (hors ligne). Aussi utilisée par google_fonts, qui
   # privilégie les fichiers locaux portant le nom attendu (Outfit-Bold.ttf…).

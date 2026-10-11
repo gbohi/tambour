@@ -38,6 +38,7 @@ Réservation de transport interurbain en Côte d'Ivoire.
 | Chauffeur | chauffeur@tambour.ci | Chauffeur2026! |
 | Voyageur | voyageur@tambour.ci | Voyageur2026! |
 
+Moyens de paiement : Orange Money, Wave, MTN MoMo, Moov Money (via CinetPay) et carte bancaire (site web).
 Sans clé CinetPay, `PAIEMENT_SIMULATION` (actif par défaut) confirme les paiements immédiatement.
 
 ## Backend

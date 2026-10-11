@@ -159,7 +159,7 @@ class Ligne(models.Model):
         ordering = ['-est_populaire', 'depart__nom']
 
     def __str__(self):
-        return f'{self.depart.nom} -> {self.arrivee.nom}'
+        return f'{self.depart.nom} → {self.arrivee.nom}'
 
     @property
     def duree_label(self):

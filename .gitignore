@@ -32,3 +32,7 @@ mobile/ios/Flutter/flutter_export_environment.sh
 .DS_Store
 .idea/
 .vscode/
+web/node_modules/
+web/dist/
+web/.angular/
+web_admin/.angular/

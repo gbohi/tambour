@@ -9,7 +9,6 @@ import '../../models/trajet.dart';
 import '../../models/billet.dart';
 import '../../providers/passager_provider.dart';
 import '../../providers/recherche_provider.dart';
-import '../billets/mes_billets_screen.dart';
 
 class BilletScreen extends ConsumerWidget {
   final Trajet trajet;

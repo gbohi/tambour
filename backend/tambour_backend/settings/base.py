@@ -135,6 +135,8 @@ DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL', default='TamBour <noreply@tam
 CINETPAY_API_KEY   = config('CINETPAY_API_KEY', default='')
 CINETPAY_SITE_ID   = config('CINETPAY_SITE_ID', default='')
 CINETPAY_SECRET_KEY = config('CINETPAY_SECRET_KEY', default='')
+# Sans clés CinetPay (développement, démonstration), les paiements sont simulés et confirmés aussitôt
+PAIEMENT_SIMULATION = config('PAIEMENT_SIMULATION', default=not CINETPAY_API_KEY, cast=bool)
 CINETPAY_BASE_URL  = config('CINETPAY_BASE_URL', default='https://api-checkout.cinetpay.com/v2')
 
 AT_USERNAME  = config('AT_USERNAME', default='sandbox')

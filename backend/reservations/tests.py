@@ -50,3 +50,40 @@ class AttributionSiegesTests(TestCase):
         r = self.reserver(1)
         self.assertEqual(r.status_code, 201, r.content)
         self.assertEqual(Siege.objects.get(trajet=self.trajet, numero='1A').passagers.count(), 2)
+
+
+class ParcoursCompletTests(TestCase):
+    """Réservation → paiement (mode simulation) → billets confirmés, sièges occupés, points gagnés."""
+
+    def test_reserver_et_payer(self):
+        from django.test import override_settings
+        user = creer_user()
+        trajet = creer_trajet(prix=4000)
+        c = APIClient()
+        c.force_authenticate(user)
+        r = c.post('/api/v1/reservations/', {'trajet_id': str(trajet.id), 'passagers': passagers(2)}, format='json')
+        res_id = r.json()['data']['id']
+        with override_settings(PAIEMENT_SIMULATION=True):
+            r = c.post('/api/v1/paiements/initier/', {'reservation_id': res_id, 'methode': 'wave',
+                                                       'telephone': '0707070707'}, format='json')
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertTrue(r.json()['data']['simulation'])
+        res = Reservation.objects.get(pk=res_id)
+        self.assertEqual(res.statut, Reservation.Statut.CONFIRMEE)
+        self.assertEqual(res.billets.count(), 2)
+        self.assertEqual(Siege.objects.filter(trajet=trajet, statut=Siege.Statut.OCCUPE).count(), 2)
+        user.refresh_from_db()
+        self.assertEqual(user.points_fidelite, 8)  # 8 000 F → 8 points
+        self.assertTrue(user.mouvements_points.filter(motif='voyage').exists())
+
+
+class RechercheTrajetTests(TestCase):
+    """La recherche publique ne doit pas être captée par la route détail du routeur DRF."""
+
+    def test_recherche_publique(self):
+        trajet = creer_trajet()
+        r = APIClient().post('/api/v1/trajets/recherche/', {
+            'depart': str(trajet.ligne.depart_id), 'arrivee': str(trajet.ligne.arrivee_id),
+            'date': trajet.heure_depart.date().isoformat(), 'passagers': 1}, format='json')
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual([t['id'] for t in r.json()['data']['results']], [str(trajet.id)])

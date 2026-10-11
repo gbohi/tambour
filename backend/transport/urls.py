@@ -10,6 +10,6 @@ router.register('transporteurs', views.TransporteurViewSet, basename='transporte
 
 urlpatterns = [
     path('lignes/populaires/', views.LignesPopulairesView.as_view(), name='lignes-populaires'),
-    path('', include(router.urls)),
     path('trajets/recherche/', views.RechercheTrajetView.as_view(), name='trajets-recherche'),
+    path('', include(router.urls)),
 ]

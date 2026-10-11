@@ -1,0 +1,129 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TamBour — site voyageurs
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --vert:        #0A7C4E;
+  --vert-600:    #08693F;
+  --vert-900:    #052E1D;
+  --vert-clair:  #E9F7F0;
+  --vert-vif:    #19C37D;
+  --or:          #F5A623;
+  --or-fonce:    #B9740A;
+  --or-clair:    #FFF4DE;
+  --encre:       #0B1A14;
+  --texte:       #14211C;
+  --texte-2:     #5A6862;
+  --texte-3:     #94A09A;
+  --fond:        #F6F8F7;
+  --surface:     #FFFFFF;
+  --surface-2:   #F1F4F2;
+  --bord:        #E2E8E5;
+  --danger:      #D14343;
+  --danger-clair:#FDECEC;
+  --info:        #2563EB;
+  --ombre-1:     0 1px 2px rgba(11,26,20,.06);
+  --ombre-2:     0 10px 30px -10px rgba(11,26,20,.18);
+  --ombre-3:     0 30px 60px -20px rgba(11,26,20,.30);
+  --r-sm: 10px; --r: 14px; --r-lg: 20px; --r-xl: 28px;
+  --conteneur: 1200px;
+  --police: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--police);font-size:16px;line-height:1.5;color:var(--texte);background:var(--fond);-webkit-font-smoothing:antialiased;}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+::selection{background:rgba(10,124,78,.18);}
+
+.conteneur{width:100%;max-width:var(--conteneur);margin:0 auto;padding:0 24px;}
+@media (max-width:640px){.conteneur{padding:0 16px;}}
+.section{padding:88px 0;}
+@media (max-width:768px){.section{padding:56px 0;}}
+.surtitre{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--vert);}
+.titre-section{font-size:clamp(28px,3.4vw,42px);line-height:1.1;font-weight:800;letter-spacing:-.03em;margin:10px 0 14px;}
+.intro{font-size:18px;color:var(--texte-2);max-width:620px;}
+
+/* ── Boutons ──────────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;
+  font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap;transition:background .15s,box-shadow .15s,transform .08s,border-color .15s,color .15s;}
+.btn:active:not(:disabled){transform:translateY(1px);}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(10,124,78,.22);}
+.btn:disabled{opacity:.55;cursor:not-allowed;}
+.btn-primaire{background:var(--vert);color:#fff;box-shadow:0 8px 20px -8px rgba(10,124,78,.6);}
+.btn-primaire:not(:disabled):hover{background:var(--vert-600);}
+.btn-or{background:var(--or);color:var(--encre);box-shadow:0 8px 20px -8px rgba(245,166,35,.7);}
+.btn-or:not(:disabled):hover{background:#FFB738;}
+.btn-blanc{background:#fff;color:var(--encre);box-shadow:var(--ombre-1);border-color:var(--bord);}
+.btn-blanc:not(:disabled):hover{border-color:#C8D2CD;}
+.btn-contour{background:transparent;border-color:var(--bord);color:var(--texte);}
+.btn-contour:not(:disabled):hover{background:var(--surface-2);}
+.btn-texte{background:none;color:var(--vert);padding:0 4px;height:auto;}
+.btn-texte:hover{text-decoration:underline;}
+.btn-sm{height:38px;padding:0 16px;font-size:14px;}
+.btn-lg{height:58px;padding:0 30px;font-size:17px;}
+.btn-bloc{width:100%;}
+.btn-icone{width:42px;height:42px;padding:0;border-radius:50%;}
+
+/* ── Formulaires ──────────────────────────────────────────────────────────── */
+.champ{display:flex;flex-direction:column;gap:6px;}
+.champ label{font-size:14px;font-weight:600;}
+.champ .aide{font-size:13px;color:var(--texte-3);}
+.entree{width:100%;height:52px;padding:0 16px;border-radius:var(--r);border:1px solid var(--bord);background:#fff;outline:none;
+  transition:border-color .15s,box-shadow .15s;font-size:16px;}
+.entree:hover{border-color:#C8D2CD;}
+.entree:focus{border-color:var(--vert);box-shadow:0 0 0 4px rgba(10,124,78,.14);}
+.entree::placeholder{color:var(--texte-3);}
+textarea.entree{height:auto;padding:14px 16px;resize:vertical;line-height:1.5;}
+select.entree{appearance:none;cursor:pointer;padding-right:40px;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%235A6862' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;}
+.ligne-champs{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:640px){.ligne-champs{grid-template-columns:1fr;}}
+.erreur-champ{font-size:13px;color:var(--danger);}
+
+/* ── Cartes & divers ──────────────────────────────────────────────────────── */
+.carte{background:var(--surface);border:1px solid var(--bord);border-radius:var(--r-lg);padding:24px;box-shadow:var(--ombre-1);}
+.pastille{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--texte-2);}
+.pastille.vert{background:var(--vert-clair);color:var(--vert);}
+.pastille.or{background:var(--or-clair);color:var(--or-fonce);}
+.pastille.rouge{background:var(--danger-clair);color:var(--danger);}
+.pastille.bleu{background:#EBF2FF;color:var(--info);}
+.muted{color:var(--texte-2);}
+.hint{color:var(--texte-3);}
+.montant{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap;}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.01em;}
+.spinner{width:22px;height:22px;border:3px solid rgba(10,124,78,.18);border-top-color:var(--vert);border-radius:50%;animation:tourne .7s linear infinite;display:inline-block;}
+.spinner.blanc{border-color:rgba(255,255,255,.35);border-top-color:#fff;}
+.squelette{background:linear-gradient(90deg,var(--surface-2) 25%,#E7ECE9 50%,var(--surface-2) 75%);background-size:200% 100%;animation:miroir 1.3s infinite;border-radius:var(--r);}
+.vide{text-align:center;padding:56px 24px;color:var(--texte-2);display:flex;flex-direction:column;align-items:center;gap:10px;}
+.vide .icone-vide{width:64px;height:64px;border-radius:20px;background:var(--surface-2);color:var(--texte-3);display:flex;align-items:center;justify-content:center;}
+.vide h3{color:var(--texte);font-size:20px;}
+.alerte{display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:var(--r);font-size:14px;font-weight:500;}
+.alerte.erreur{background:var(--danger-clair);color:var(--danger);}
+.alerte.info{background:var(--vert-clair);color:var(--vert-600);}
+.alerte.or{background:var(--or-clair);color:var(--or-fonce);}
+
+/* Contrôle segmenté */
+.segment{display:inline-flex;background:var(--surface-2);border-radius:999px;padding:4px;gap:2px;}
+.segment button{border:none;background:none;height:38px;padding:0 18px;border-radius:999px;font-weight:600;color:var(--texte-2);cursor:pointer;font-size:14px;}
+.segment button.actif{background:#fff;color:var(--texte);box-shadow:var(--ombre-1);}
+
+/* Fenêtre */
+.voile{position:fixed;inset:0;background:rgba(11,26,20,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;animation:apparition .2s;}
+.fenetre{background:#fff;border-radius:var(--r-xl);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--ombre-3);animation:monte .25s cubic-bezier(.2,.8,.2,1);}
+.fenetre-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:24px 24px 0;}
+.fenetre-tete h3{font-size:22px;font-weight:800;letter-spacing:-.02em;}
+.fenetre-corps{padding:20px 24px 24px;display:flex;flex-direction:column;gap:16px;}
+
+@keyframes tourne{to{transform:rotate(360deg);}}
+@keyframes miroir{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+@keyframes apparition{from{opacity:0;}to{opacity:1;}}
+@keyframes monte{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+@keyframes flotte{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+/* Leaflet : marqueurs personnalisés */
+.marqueur-gare{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);
+  background:var(--vert);border:3px solid #fff;box-shadow:0 6px 14px -4px rgba(0,0,0,.4);}
+.marqueur-gare span{transform:rotate(45deg);color:#fff;font-weight:800;font-size:12px;}
+.marqueur-gare.principale{background:var(--or);}

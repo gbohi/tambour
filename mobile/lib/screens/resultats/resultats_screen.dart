@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
-import '../../models/trajet.dart';
 import '../../providers/recherche_provider.dart';
 import 'widgets/trajet_card.dart';
 import 'widgets/filtre_bar.dart';

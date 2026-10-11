@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
@@ -66,6 +67,16 @@ class InitierPaiementView(APIView):
             reservation=reservation, user=request.user,
             methode=data['methode'], montant=reservation.montant_total,
             telephone=data['telephone'], statut=Paiement.Statut.INITIE)
+
+        if settings.PAIEMENT_SIMULATION:
+            paiement.reference_operateur = 'SIMULATION'
+            paiement.save(update_fields=['reference_operateur'])
+            _confirmer_paiement(paiement)
+            paiement.refresh_from_db()
+            return success_response(
+                data={'paiement': PaiementSerializer(paiement).data, 'url_paiement': '', 'simulation': True,
+                      'message': 'Paiement simulé (mode démonstration) : réservation confirmée.'},
+                status_code=status.HTTP_201_CREATED)
 
         service = CinetPayService()
         try:

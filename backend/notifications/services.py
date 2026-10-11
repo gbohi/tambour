@@ -114,12 +114,12 @@ class NotificationService:
 
     @staticmethod
     def confirmation_reservation(user, reservation):
-        return NotificationService.creer(user=user, type_notif='confirmation', titre='Reservation confirmee !', message=f'Votre billet {reservation.reference} pour {reservation.trajet.ligne.depart.nom} -> {reservation.trajet.ligne.arrivee.nom} est confirme.', reservation_id=reservation.id, trajet_id=reservation.trajet.id)
+        return NotificationService.creer(user=user, type_notif='confirmation', titre='Réservation confirmée !', message=f'Votre billet {reservation.reference} pour {reservation.trajet.ligne.depart.nom} → {reservation.trajet.ligne.arrivee.nom} est confirmé.', reservation_id=reservation.id, trajet_id=reservation.trajet.id)
 
     @staticmethod
     def rappel_voyage(user, reservation):
-        return NotificationService.creer(user=user, type_notif='rappel', titre='Depart dans 2 heures', message=f'Votre bus {reservation.trajet.ligne.depart.nom} -> {reservation.trajet.ligne.arrivee.nom} part a {reservation.trajet.heure_depart.strftime("%H:%M")}. Soyez a la gare 30 min avant.', reservation_id=reservation.id, trajet_id=reservation.trajet.id)
+        return NotificationService.creer(user=user, type_notif='rappel', titre='Départ dans 2 heures', message=f'Votre bus {reservation.trajet.ligne.depart.nom} → {reservation.trajet.ligne.arrivee.nom} part à {reservation.trajet.heure_depart.strftime("%H:%M")}. Soyez à la gare 30 min avant.', reservation_id=reservation.id, trajet_id=reservation.trajet.id)
 
     @staticmethod
     def alerte_retard(user, reservation, retard_minutes):
-        return NotificationService.creer(user=user, type_notif='retard', titre='Retard signale', message=f'Le bus {reservation.trajet.ligne.depart.nom} -> {reservation.trajet.ligne.arrivee.nom} accuse un retard de {retard_minutes} minutes.', reservation_id=reservation.id, trajet_id=reservation.trajet.id, metadata={'retard_minutes': retard_minutes})
+        return NotificationService.creer(user=user, type_notif='retard', titre='Retard signalé', message=f'Le bus {reservation.trajet.ligne.depart.nom} → {reservation.trajet.ligne.arrivee.nom} accuse un retard de {retard_minutes} minutes.', reservation_id=reservation.id, trajet_id=reservation.trajet.id, metadata={'retard_minutes': retard_minutes})

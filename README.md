@@ -1,12 +1,13 @@
-# TamBour (TamBour)
+# TamBour
 
 Réservation de transport interurbain en Côte d'Ivoire.
 
 | Dossier | Techno | Rôle |
 |---|---|---|
 | `backend/` | Python 3.12 · Django 5 · DRF · JWT · PostgreSQL · Celery/Redis | API REST (`/api/v1/`, documentation sur `/api/docs/`) |
+| `web/` | Angular 17 | Site voyageurs (recherche, réservation, billets, compte) |
 | `web_admin/` | Angular 17 | Back-office d'administration |
-| `mobile/` | Flutter | Application voyageurs |
+| `mobile/` | Flutter | Application voyageurs **et** chauffeurs (selon le rôle du compte) |
 
 ## Fonctionnalités récentes
 
@@ -19,6 +20,25 @@ Réservation de transport interurbain en Côte d'Ivoire.
 - **Support** (`/api/v1/support/…`) : centre d'aide (FAQ modifiable dans l'admin Django), contact du support,
   réclamations suivies par référence, note de l'application. Traitement dans le web admin, page « Support client ».
 
+- **Application chauffeur** (même app mobile, compte au rôle `chauffeur`) : trajets du jour et à venir, historique,
+  liste des passagers, scan du QR code des billets (`/api/v1/chauffeur/scanner/`), démarrer / terminer un trajet.
+  L'admin affecte un chauffeur à un trajet depuis la page « Trajets ».
+- **Carte des gares** (mobile et web) : départs de la gare sélectionnée, itinéraire « Y aller » depuis la position
+  de l'utilisateur avec distance et durée estimées.
+- **Noter un trajet** : une fois le voyage effectué, depuis « Mes billets » (mobile et web).
+
+## Comptes de démonstration
+
+`python manage.py seed_demo` crée compagnies, cars, ~600 trajets (J-2 à J+7), réservations et les comptes :
+
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| Admin | admin@tambour.ci | Admin2026! |
+| Chauffeur | chauffeur@tambour.ci | Chauffeur2026! |
+| Voyageur | voyageur@tambour.ci | Voyageur2026! |
+
+Sans clé CinetPay, `PAIEMENT_SIMULATION` (actif par défaut) confirme les paiements immédiatement.
+
 ## Backend
 
 ```bash
@@ -28,12 +48,19 @@ pip install -r requirements.txt
 cp .env.example .env               # puis renseigner les valeurs
 python manage.py migrate
 python manage.py seed_donnees      # villes, gares, lignes de démo
+python manage.py seed_demo         # trajets, réservations, comptes de démo
 python manage.py createsuperuser
 python manage.py runserver
 python manage.py test --settings=tambour_backend.settings.base   # tests
 ```
 
 PostgreSQL et Redis doivent tourner en local (voir `.env`).
+
+## Site voyageurs
+
+```bash
+cd web && npm install && npm start          # http://localhost:4300 (proxy vers l'API)
+```
 
 ## Web admin
 

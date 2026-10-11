@@ -446,12 +446,10 @@ class _VillePickerSheet extends StatefulWidget {
 }
 
 class _VillePickerSheetState extends State<_VillePickerSheet> {
-  String _query = '';
   late List<Ville> _filtered;
   @override
   void initState() { super.initState(); _filtered = widget.villes; }
   void _filter(String q) => setState(() {
-    _query = q;
     _filtered = widget.villes.where((v) => v.nom.toLowerCase().contains(q.toLowerCase()) || v.region.toLowerCase().contains(q.toLowerCase())).toList();
   });
   @override

@@ -225,7 +225,7 @@ class TrajetViewSet(EnveloppeMixin, viewsets.ModelViewSet):
         # Public → uniquement futurs et actifs
         return Trajet.objects.filter(
             heure_depart__gte=timezone.now(),
-            statut__in=[Trajet.Statut.PLANIFIE, Trajet.Statut.EN_COURS]
+            statut__in=[Trajet.Statut.PLANIFIE, Trajet.Statut.RETARDE]
         ).select_related('ligne__depart', 'ligne__arrivee', 'bus', 'transporteur')
 
     def get_serializer_class(self):

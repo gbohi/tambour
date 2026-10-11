@@ -6,11 +6,11 @@ import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../models/ligne_populaire.dart';
 import '../../models/ville.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/ligne_provider.dart';
 import '../../providers/recherche_provider.dart';
 import '../../widgets/ligne_card.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/logo_tambour.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -23,10 +23,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Un compte chauffeur ouvre son espace dédié (session déjà active au lancement)
-    ref.listen(authProvider, (_, etat) {
-      if (etat.user?.estChauffeur == true) context.go('/chauffeur');
-    });
     return Scaffold(
       backgroundColor: TamBourColors.background,
       extendBodyBehindAppBar: true,
@@ -114,12 +110,7 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          RichText(
-            text: const TextSpan(children: [
-              TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
-              TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
-            ]),
-          ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.2, end: 0),
+          const LogoTamBour(taille: 24).animate().fadeIn(duration: 400.ms).slideX(begin: -0.2, end: 0),
           const Spacer(),
           _IconBtn(icon: Icons.notifications_outlined, onTap: () => context.push('/notifications')).animate().fadeIn(delay: 200.ms),
           const SizedBox(width: 8),

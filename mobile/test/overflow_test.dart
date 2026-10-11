@@ -39,6 +39,7 @@ import 'package:tambour/screens/support/centre_aide_screen.dart';
 import 'package:tambour/screens/support/contact_support_screen.dart';
 import 'package:tambour/screens/support/noter_app_screen.dart';
 import 'package:tambour/screens/support/reclamations_screen.dart';
+import 'package:tambour/screens/chauffeur/connexion_chauffeur_screen.dart';
 
 class Config {
   final Size taille;
@@ -115,6 +116,7 @@ class FauxChauffeurService extends ChauffeurService {
 
 final ecrans = <String, Widget Function()>{
   'Chauffeur › mes trajets': () => ChauffeurAccueilScreen(service: FauxChauffeurService()),
+  'TamBour Pro › connexion': () => const ConnexionChauffeurScreen(),
   'Chauffeur › trajet': () => ChauffeurTrajetScreen(trajetId: 't1', service: FauxChauffeurService()),
   'Accueil': () => const HomeScreen(),
   'Connexion / inscription': () => const AuthScreen(),

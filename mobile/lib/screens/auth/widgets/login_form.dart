@@ -25,8 +25,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     if (!_formKey.currentState!.validate()) return;
     final ok = await ref.read(authProvider.notifier).login(email: _emailCtrl.text.trim(), motDePasse: _mdpCtrl.text);
     if (ok && mounted) {
-      // Les chauffeurs arrivent directement sur leur espace
-      context.go(ref.read(authProvider).user?.estChauffeur == true ? '/chauffeur' : '/');
+      context.go('/');
     }
   }
 

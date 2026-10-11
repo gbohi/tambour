@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
+import '../core/variante.dart';
 import '../services/auth_service.dart';
 
 enum AuthStatut { initial, chargement, connecte, deconnecte, erreur }
@@ -28,6 +29,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       if (await _service.estConnecte) {
         final user = await _service.getProfile();
+        if (!AppVariante.accepte(user)) {
+          // Session d'un compte destiné à l'autre application : on repart de zéro.
+          await _service.deconnecter();
+          state = const AuthState(statut: AuthStatut.deconnecte);
+          return;
+        }
         state = state.copyWith(statut: AuthStatut.connecte, user: user);
       } else {
         state = state.copyWith(statut: AuthStatut.deconnecte);
@@ -42,6 +49,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _service.login(email: email, motDePasse: motDePasse);
       final user = await _service.getProfile();
+      if (!AppVariante.accepte(user)) {
+        await _service.deconnecter();
+        state = AuthState(statut: AuthStatut.erreur, erreur: AppVariante.messageRefus);
+        return false;
+      }
       state = state.copyWith(statut: AuthStatut.connecte, user: user);
       return true;
     } on AuthException catch (e) {

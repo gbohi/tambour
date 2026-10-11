@@ -9,6 +9,7 @@ import '../../models/trajet.dart';
 import '../../models/billet.dart';
 import '../../providers/passager_provider.dart';
 import '../../providers/recherche_provider.dart';
+import '../../widgets/logo_tambour.dart';
 
 class BilletScreen extends ConsumerWidget {
   final Trajet trajet;
@@ -168,12 +169,7 @@ class _BilletIndividuel extends StatelessWidget {
           child: Column(children: [
             // Logo + numéro billet
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              RichText(text: const TextSpan(children: [
-                TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit',
-                  fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
-                TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit',
-                  fontSize: 16, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
-              ])),
+              const LogoTamBour(taille: 16),
               if (b.totalBillets > 1)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),

@@ -7,7 +7,9 @@ class TamBourColors {
   static const Color primary = Color(0xFF0A7C4E);
   static const Color primaryDark = Color(0xFF075C39);
   static const Color primaryLight = Color(0xFFF0FBF6);
-  static const Color gold = Color(0xFFF5A623);
+  /// Vert et or du logo TamBour.
+  static const Color marque = Color(0xFF0F4A3B);
+  static const Color gold = Color(0xFFF2A93B);
   static const Color goldLight = Color(0xFFFFF8EC);
   static const Color background = Color(0xFFFAFAF8);
   static const Color surface = Color(0xFFFFFFFF);
@@ -18,7 +20,7 @@ class TamBourColors {
   static const Color border = Color(0xFFE8E8E6);
   static const Color success = Color(0xFF0A7C4E);
   static const Color error = Color(0xFFD94040);
-  static const Color warning = Color(0xFFF5A623);
+  static const Color warning = Color(0xFFF2A93B);
   static const Color divider = Color(0xFFF0F0EE);
 }
 

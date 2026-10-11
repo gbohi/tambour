@@ -13,7 +13,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
   template: `
     <div class="ecran">
       <section class="visuel">
-        <div class="marque"><span class="logo"><tb-icon name="bus" [size]="22" [stroke]="2.2" /></span><span>Tam<b>Bour</b></span></div>
+        <div class="marque"><img src="assets/marque/tambour-symbole-clair.svg" alt="" width="34" height="48"><span><b>TamBour</b><small>Voyagez au bon rythme</small></span></div>
         <div class="accroche">
           <h1>Pilotez tout le réseau,<br>en temps réel.</h1>
           <p>Trajets, réservations, chauffeurs, paiements et service client : l'espace d'administration de TamBour.</p>
@@ -61,8 +61,10 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                  linear-gradient(160deg,#063D27 0%,#0A7C4E 60%,#0B8F59 100%);}
     .visuel::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;pointer-events:none;}
     .marque{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:800;letter-spacing:-.02em;position:relative;z-index:1;}
-    .marque b{color:var(--gold);}
-    .logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+    .marque img{height:48px;width:auto;display:block;}
+    .marque span{display:flex;flex-direction:column;line-height:1.05;}
+    .marque b{font-size:26px;font-weight:700;}
+    .marque small{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:4px;}
     .accroche{position:relative;z-index:1;max-width:460px;}
     .accroche h1{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.03em;margin-bottom:16px;}
     .accroche p{font-size:16px;opacity:.85;line-height:1.6;margin-bottom:28px;}

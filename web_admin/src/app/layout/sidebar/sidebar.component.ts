@@ -37,8 +37,8 @@ const SECTIONS: NavSection[] = [
     @if (ui.menuOuvert()) { <div class="voile" (click)="ui.fermerMenu()"></div> }
     <aside class="sidebar" [class.ouvert]="ui.menuOuvert()">
       <a routerLink="/dashboard" class="marque" (click)="ui.fermerMenu()">
-        <span class="logo"><tb-icon name="bus" [size]="20" [stroke]="2.2" /></span>
-        <span class="nom">Tam<b>Bour</b></span>
+        <img class="symbole" src="assets/marque/tambour-symbole.svg" alt="" width="25" height="36">
+        <span class="nom">TamBour</span>
         <span class="tag">Admin</span>
       </a>
 
@@ -72,10 +72,8 @@ const SECTIONS: NavSection[] = [
     .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
       display:flex;flex-direction:column;z-index:100;transition:transform .25s cubic-bezier(.2,.8,.2,1);}
     .marque{display:flex;align-items:center;gap:10px;padding:20px 20px 18px;text-decoration:none;color:var(--text-1);}
-    .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--primary),#13A86E);color:#fff;
-      display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px -4px rgba(10,124,78,.55);}
-    .nom{font-size:20px;font-weight:800;letter-spacing:-.02em;}
-    .nom b{color:var(--gold);font-weight:800;}
+    .symbole{height:36px;width:auto;display:block;}
+    .nom{font-size:21px;font-weight:700;letter-spacing:-.02em;color:var(--marque);}
     .tag{margin-left:auto;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:3px 8px;border-radius:6px;}
     .nav{flex:1;overflow-y:auto;padding:4px 12px 12px;display:flex;flex-direction:column;gap:2px;}
     .section{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;padding:16px 12px 6px;}

@@ -8,7 +8,7 @@ import { Passager, Reservation } from './models';
  * Une page par passager.
  */
 const VERT: [number, number, number] = [10, 124, 78];      // #0A7C4E
-const OR: [number, number, number] = [245, 166, 35];       // #F5A623
+const OR: [number, number, number] = [242, 169, 59];       // #F2A93B (logo)
 const ENCRE: [number, number, number] = [26, 26, 26];      // #1A1A1A
 const GRIS_300: [number, number, number] = [224, 224, 224];
 const GRIS_600: [number, number, number] = [117, 117, 117];
@@ -54,7 +54,7 @@ function dessinerQr(doc: jsPDF, data: string, x: number, y: number, taille: numb
   }
 }
 
-function pageBillet(doc: jsPDF, r: Reservation, p: Passager, numero: number, total: number): void {
+function pageBillet(doc: jsPDF, r: Reservation, p: Passager, numero: number, total: number, logo: string | null): void {
   const t = r.trajet_info;
   const l = LARGEUR - 2 * MARGE;
 
@@ -64,7 +64,10 @@ function pageBillet(doc: jsPDF, r: Reservation, p: Passager, numero: number, tot
   doc.roundedRect(MARGE, MARGE, l, hTete, 12, 12, 'F');
   const xi = MARGE + 20, xd = MARGE + l - 20;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(255, 255, 255);
-  doc.text('TamBour', xi, MARGE + 20 + 22);
+  // Symbole du logo (30 pt de haut) puis le nom, comme dans l'application
+  const decalage = logo ? 21.3 + 7 : 0;
+  if (logo) doc.addImage(logo, 'PNG', xi, MARGE + 17, 21.3, 30);
+  doc.text('TamBour', xi + decalage, MARGE + 20 + 22);
   if (total > 1) {
     const libelle = `Billet ${numero}/${total}`;
     doc.setFontSize(11);
@@ -125,14 +128,26 @@ function pageBillet(doc: jsPDF, r: Reservation, p: Passager, numero: number, tot
   doc.text('Support : support@tambour.ci', MARGE, yPied + 8 + 22);
 }
 
+async function chargerLogo(): Promise<string | null> {
+  try {
+    const blob = await (await fetch('assets/marque/symbole-clair.png')).blob();
+    return await new Promise<string>((ok, ko) => {
+      const lecteur = new FileReader();
+      lecteur.onload = () => ok(lecteur.result as string); lecteur.onerror = ko;
+      lecteur.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
 /** Génère et télécharge le PDF : tous les passagers, ou un seul si `passagerId` est fourni. */
-export function telechargerBilletsPdf(r: Reservation, passagerId?: string): void {
+export async function telechargerBilletsPdf(r: Reservation, passagerId?: string): Promise<void> {
+  const logo = await chargerLogo();
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const tous = [...r.passagers].sort((a, b) => a.ordre - b.ordre);
   const cibles = passagerId ? tous.filter(p => p.id === passagerId) : tous;
   cibles.forEach((p, i) => {
     if (i > 0) doc.addPage();
-    pageBillet(doc, r, p, tous.indexOf(p) + 1, tous.length);
+    pageBillet(doc, r, p, tous.indexOf(p) + 1, tous.length, logo);
   });
   doc.setProperties({ title: `Billet TamBour ${r.reference}`, author: 'TamBour' });
   const suffixe = passagerId && cibles[0] ? `-P${tous.indexOf(cibles[0]) + 1}` : '';

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FAFAF8</color>
+    <!-- Fond de l'écran de lancement : crème du logo (TamBour) -->
+    <color name="ic_launcher_background">#FAF7EF</color>
 </resources>

@@ -350,6 +350,6 @@ export class CompteComponent implements OnInit {
 
   async pdf(r: Reservation): Promise<void> {
     const { telechargerBilletsPdf } = await import('../../core/billet-pdf');
-    telechargerBilletsPdf(r);
+    await telechargerBilletsPdf(r);
   }
 }

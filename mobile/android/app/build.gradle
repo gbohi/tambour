@@ -19,6 +19,22 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
+    // Deux applications à partir du même code :
+    //   passager  → « TamBour »      (ci.tambour.app)      flutter run --flavor passager
+    //   chauffeur → « TamBour Pro »  (ci.tambour.pro)      flutter run --flavor chauffeur -t lib/main_chauffeur.dart
+    flavorDimensions "application"
+    productFlavors {
+        passager {
+            dimension "application"
+            applicationId "ci.tambour.app"
+            manifestPlaceholders = [appName: "TamBour"]
+        }
+        chauffeur {
+            dimension "application"
+            applicationId "ci.tambour.pro"
+            manifestPlaceholders = [appName: "TamBour Pro"]
+        }
+    }
     buildTypes {
         release { signingConfig signingConfigs.debug }
     }

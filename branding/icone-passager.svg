@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="337 249 360 360">
+  <rect x="337" y="249" width="360" height="360" fill="#FAF7EF"/>
+  <g transform="translate(517 429) scale(.92) translate(-517 -414)">
+  <!-- Peau du tambour -->
+  <ellipse cx="517" cy="311" rx="90" ry="23" fill="#F2A93B"/>
+  <!-- Fût du tambour -->
+  <path d="M427 327 Q517 366 607 327 C607 395 566 433 544 447 L490 447 C468 433 427 395 427 327 Z" fill="#0F4A3B"/>
+  <!-- Motif (rythme) -->
+  <path d="M452 366 L468 410 L484 366 L500 410 L516 366 L532 410 L548 366 L564 410 L580 366" fill="none" stroke="#FAF7EF" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Pied : la route -->
+  <path d="M497 455 L537 455 Q543 520 598 545 L436 545 Q491 520 497 455 Z" fill="#0F4A3B"/>
+  <rect x="514.5" y="470" width="5" height="10" fill="#F2A93B"/>
+  <rect x="514" y="491" width="6" height="13" fill="#F2A93B"/>
+  <rect x="513.5" y="516" width="7" height="16" fill="#F2A93B"/>
+</g>
+  
+</svg>

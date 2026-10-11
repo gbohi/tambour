@@ -44,7 +44,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
           @for (p of r.passagers; track p.id) {
             <article class="billet">
               <div class="haut">
-                <div class="marque">Tam<b>Bour</b></div>
+                <div class="marque"><img src="assets/marque/tambour-symbole-clair.svg" alt="" height="24">TamBour</div>
                 <span class="pastille" [class.vert]="r.statut === 'confirmee'">{{ r.statut === 'confirmee' ? 'Valide' : r.statut }}</span>
               </div>
               <div class="corps">
@@ -95,7 +95,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     @media (max-width:600px){.billets{grid-template-columns:1fr;}}
     .billet{display:grid;grid-template-columns:1fr auto auto;background:#fff;border-radius:var(--r-xl);box-shadow:var(--ombre-2);overflow:hidden;border:1px solid var(--bord);}
     .haut{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:var(--encre);color:#fff;}
-    .marque{font-weight:800;font-size:18px;} .marque b{color:var(--or);}
+    .marque{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px;} .marque img{height:24px;width:auto;}
     .corps{padding:22px;display:flex;flex-direction:column;gap:18px;}
     .trajet{display:flex;justify-content:space-between;align-items:center;gap:12px;}
     .trajet tb-icon{color:var(--or);}
@@ -155,7 +155,7 @@ export class ConfirmationComponent implements OnInit {
     this.generation.set(true);
     try {
       const { telechargerBilletsPdf } = await import('../../core/billet-pdf');
-      telechargerBilletsPdf(r, passagerId);
+      await telechargerBilletsPdf(r, passagerId);
     } finally { this.generation.set(false); }
   }
 }

@@ -13,8 +13,9 @@ import { NombrePipe } from '../pipes/nombre.pipe';
     <header class="entete" [class.transparent]="transparent()" [class.ombre]="defile()">
       <div class="conteneur barre">
         <a routerLink="/" class="logo" aria-label="TamBour, accueil">
-          <span class="pict"><tb-icon name="bus" [size]="20" [stroke]="2.3" /></span>
-          <span class="nom">Tam<b>Bour</b></span>
+          <img class="symbole fonce" src="assets/marque/tambour-symbole.svg" alt="" width="27" height="38">
+          <img class="symbole clair" src="assets/marque/tambour-symbole-clair.svg" alt="" width="27" height="38">
+          <span class="nom">TamBour</span>
         </a>
         <nav class="liens" [class.ouvert]="menu()">
           <a routerLink="/destinations" routerLinkActive="actif" (click)="menu.set(false)">Destinations</a>
@@ -52,8 +53,9 @@ import { NombrePipe } from '../pipes/nombre.pipe';
     .logo{display:flex;align-items:center;gap:10px;}
     .pict{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--vert),var(--vert-vif));color:#fff;display:flex;align-items:center;justify-content:center;
       box-shadow:0 8px 18px -6px rgba(10,124,78,.6);}
-    .nom{font-size:23px;font-weight:800;letter-spacing:-.03em;color:var(--encre);}
-    .nom b{color:var(--or);}
+    .symbole{height:38px;width:auto;display:block;}
+    .symbole.clair{display:none;}
+    .nom{font-size:25px;font-weight:700;letter-spacing:-.02em;color:var(--marque);}
     .liens{display:flex;gap:6px;}
     .liens a{padding:8px 14px;border-radius:999px;font-weight:600;color:var(--texte-2);transition:background .15s,color .15s;}
     .liens a:hover{background:var(--surface-2);color:var(--texte);}
@@ -68,6 +70,8 @@ import { NombrePipe } from '../pipes/nombre.pipe';
     .burger{display:none;border:none;background:var(--surface-2);width:42px;height:42px;border-radius:12px;cursor:pointer;align-items:center;justify-content:center;}
     /* Sur le hero (page d'accueil, avant défilement) : texte blanc */
     .transparent:not(.ombre) .nom{color:#fff;}
+    .transparent:not(.ombre) .symbole.fonce{display:none;}
+    .transparent:not(.ombre) .symbole.clair{display:block;}
     .transparent:not(.ombre) .liens a{color:rgba(255,255,255,.85);}
     .transparent:not(.ombre) .liens a:hover{background:rgba(255,255,255,.12);color:#fff;}
     .transparent:not(.ombre) .billets,.transparent:not(.ombre) .connexion{background:rgba(255,255,255,.14);color:#fff;}

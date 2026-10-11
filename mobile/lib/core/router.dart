@@ -12,7 +12,7 @@ import '../screens/gares/gares_screen.dart';
 import '../screens/profil/profil_edit_screen.dart';
 import '../screens/lignes/lignes_populaires_screen.dart';
 import '../screens/fidelite/fidelite_screen.dart';
-import '../screens/chauffeur/chauffeur_accueil_screen.dart';
+import '../screens/chauffeur/chauffeur_racine.dart';
 import '../screens/support/centre_aide_screen.dart';
 import '../screens/support/contact_support_screen.dart';
 import '../screens/support/noter_app_screen.dart';
@@ -21,7 +21,8 @@ import '../providers/recherche_provider.dart';
 import '../models/paiement.dart';
 import '../models/trajet.dart';
 
-final appRouter = GoRouter(
+/// Application voyageurs « TamBour ».
+GoRouter creerRouteurPassager() => GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
@@ -58,10 +59,19 @@ final appRouter = GoRouter(
     GoRoute(path: '/profil/edit', builder: (_, __) => const ProfilEditScreen()),
     GoRoute(path: '/lignes-populaires', builder: (_, __) => const LignesPopulairesScreen()),
     GoRoute(path: '/fidelite', builder: (_, __) => const FideliteScreen()),
-    GoRoute(path: '/chauffeur', builder: (_, __) => const ChauffeurAccueilScreen()),
     GoRoute(path: '/aide', builder: (_, __) => const CentreAideScreen()),
     GoRoute(path: '/support', builder: (_, __) => const ContactSupportScreen()),
     GoRoute(path: '/noter', builder: (_, __) => const NoterAppScreen()),
     GoRoute(path: '/reclamations', builder: (_, __) => const ReclamationsScreen()),
+  ],
+);
+
+/// Application chauffeurs « TamBour Pro » : connexion puis espace chauffeur, rien d'autre.
+GoRouter creerRouteurChauffeur() => GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (_, __) => const ChauffeurRacine()),
+    // La déconnexion renvoie sur /auth : même écran racine, qui affiche la connexion.
+    GoRoute(path: '/auth', builder: (_, __) => const ChauffeurRacine()),
   ],
 );

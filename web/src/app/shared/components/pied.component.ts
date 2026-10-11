@@ -74,7 +74,7 @@ const LIGNES_DEFAUT = ['Abidjan - Bouaké', 'Abidjan - Yamoussoukro', 'Abidjan -
       </div>
 
       <div class="conteneur bas">
-        <a routerLink="/" class="logo"><span class="pict"><tb-icon name="bus" [size]="16" [stroke]="2.3" /></span><span>Tam<b>Bour</b></span></a>
+        <a routerLink="/" class="logo" aria-label="TamBour, accueil"><img src="assets/marque/tambour-symbole-clair.svg" alt="" width="30" height="42"><span><b>TamBour</b><small>Voyagez au bon rythme</small></span></a>
         <div class="legal">
           <a routerLink="/infos/confidentialite">Confidentialité</a>
           <a routerLink="/infos/droits-passagers">Droits des passagers</a>
@@ -105,9 +105,11 @@ const LIGNES_DEFAUT = ['Abidjan - Bouaké', 'Abidjan - Yamoussoukro', 'Abidjan -
     .reseaux a{width:42px;height:42px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;color:#fff;transition:all .15s;}
     .reseaux a:hover{background:var(--or);border-color:var(--or);color:var(--encre);}
     .bas{display:flex;align-items:center;justify-content:space-between;gap:16px 24px;flex-wrap:wrap;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);font-size:14px;}
-    .logo{display:inline-flex;align-items:center;gap:8px;font-size:19px;font-weight:800;color:#fff;letter-spacing:-.03em;}
-    .logo b{color:var(--or);}
-    .pict{width:30px;height:30px;border-radius:9px;background:var(--vert);display:flex;align-items:center;justify-content:center;}
+    .logo{display:flex;align-items:center;gap:10px;color:#fff;}
+    .logo img{height:42px;width:auto;display:block;}
+    .logo span{display:flex;flex-direction:column;line-height:1.1;}
+    .logo b{font-size:22px;font-weight:700;letter-spacing:-.02em;}
+    .logo small{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--or);font-weight:600;margin-top:3px;}
     .legal{display:flex;gap:6px 20px;flex-wrap:wrap;}
     .legal a:hover{color:#fff;}
     .paiements{display:flex;flex-wrap:wrap;gap:6px;}

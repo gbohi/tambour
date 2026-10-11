@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fond de l'écran de lancement : vert du logo (TamBour Pro) -->
+    <color name="ic_launcher_background">#0F4A3B</color>
+</resources>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -9,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/theme.dart';
 import '../../services/api_client.dart';
 import 'noter_trajet_sheet.dart';
+import '../../widgets/logo_tambour.dart';
 
 // ── Modèle mock passager par billet ──────────────────────────────────────────
 
@@ -597,12 +599,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                   child: Column(children: [
                     // Logo TamBour
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      RichText(text: const TextSpan(children: [
-                        TextSpan(text: 'Tam', style: TextStyle(fontFamily: 'Outfit',
-                          fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
-                        TextSpan(text: 'Bour', style: TextStyle(fontFamily: 'Outfit',
-                          fontSize: 18, fontWeight: FontWeight.w900, color: TamBourColors.gold)),
-                      ])),
+                      const LogoTamBour(taille: 17),
                       if (widget.totalBillets > 1)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -774,6 +771,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
       final qrBytes = imgData!.buffer.asUint8List();
       final qrImg   = pw.MemoryImage(qrBytes);
 
+      final logo = pw.MemoryImage((await rootBundle.load('assets/images/logo_symbole_clair.png')).buffer.asUint8List());
       final doc = pw.Document();
       doc.addPage(pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -789,8 +787,12 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                 borderRadius: pw.BorderRadius.circular(12)),
               child: pw.Column(children: [
                 pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-                  pw.Text('TamBour', style: pw.TextStyle(
-                    fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                  pw.Row(children: [
+                    pw.Image(logo, height: 30),
+                    pw.SizedBox(width: 7),
+                    pw.Text('TamBour', style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                  ]),
                   if (widget.totalBillets > 1)
                     pw.Container(
                       padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -812,7 +814,7 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
                   ]),
                   // Flèche dessinée : la police standard du PDF n'a pas le glyphe « → ».
                   pw.CustomPaint(size: const PdfPoint(24, 14), painter: (canvas, size) {
-                    const or = PdfColor.fromInt(0xFFF5A623);
+                    const or = PdfColor.fromInt(0xFFF2A93B);
                     canvas
                       ..setStrokeColor(or)..setLineWidth(2.4)
                       ..moveTo(2, 7)..lineTo(17, 7)..strokePath()

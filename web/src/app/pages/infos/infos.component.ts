@@ -39,7 +39,7 @@ const PAGES: Record<string, PageInfo> = {
     titre: 'Devenir compagnie partenaire', groupe: 'TamBour',
     intro: 'Vous êtes une compagnie de transport ? Vendez vos billets en ligne et remplissez vos cars.',
     sections: [
-      { titre: 'Les avantages', points: ['Visibilité auprès de milliers de voyageurs', 'Encaissement Mobile Money sans effort', 'Tableau de bord : trajets, réservations, remplissage, revenus', 'Application chauffeur pour contrôler les billets'] },
+      { titre: 'Les avantages', points: ['Visibilité auprès de milliers de voyageurs', 'Encaissement Mobile Money sans effort', 'Tableau de bord : trajets, réservations, remplissage, revenus', 'L\'application TamBour Pro pour contrôler les billets'] },
       { titre: 'Comment faire ?', texte: 'Contactez notre équipe commerciale : nous configurons vos lignes, vos cars et vos tarifs avec vous.' },
     ],
     action: { libelle: 'Nous contacter', lien: '/aide', fragment: 'contact' },
@@ -49,7 +49,7 @@ const PAGES: Record<string, PageInfo> = {
     intro: 'Rejoignez les équipes de nos compagnies partenaires.',
     sections: [
       { titre: 'Le profil recherché', points: ['Permis D en cours de validité', 'Expérience du transport de voyageurs', 'Sens du service et de la sécurité'] },
-      { titre: 'Vos outils', texte: 'Avec l\'application TamBour, vous voyez vos trajets du jour, la liste des passagers, scannez les billets et clôturez le trajet à l\'arrivée.' },
+      { titre: 'Vos outils', texte: 'Avec l\'application TamBour Pro, vous voyez vos trajets du jour, la liste des passagers, scannez les billets et clôturez le trajet à l\'arrivée.' },
     ],
     action: { libelle: 'Envoyer ma candidature', lien: '/aide', fragment: 'contact' },
   },

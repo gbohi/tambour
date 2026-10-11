@@ -7,7 +7,8 @@ Réservation de transport interurbain en Côte d'Ivoire.
 | `backend/` | Python 3.12 · Django 5 · DRF · JWT · PostgreSQL · Celery/Redis | API REST (`/api/v1/`, documentation sur `/api/docs/`) |
 | `web/` | Angular 17 | Site voyageurs (recherche, réservation, billets, compte) |
 | `web_admin/` | Angular 17 | Back-office d'administration |
-| `mobile/` | Flutter | Application voyageurs **et** chauffeurs (selon le rôle du compte) |
+| `mobile/` | Flutter | Deux applications : **TamBour** (voyageurs) et **TamBour Pro** (chauffeurs) |
+| `branding/` | SVG / PNG | Logo, icônes et couleurs (voir `branding/README.md`) |
 
 ## Fonctionnalités récentes
 
@@ -20,8 +21,8 @@ Réservation de transport interurbain en Côte d'Ivoire.
 - **Support** (`/api/v1/support/…`) : centre d'aide (FAQ modifiable dans l'admin Django), contact du support,
   réclamations suivies par référence, note de l'application. Traitement dans le web admin, page « Support client ».
 
-- **Application chauffeur** (même app mobile, compte au rôle `chauffeur`) : trajets du jour et à venir, historique,
-  liste des passagers, scan du QR code des billets (`/api/v1/chauffeur/scanner/`), démarrer / terminer un trajet.
+- **TamBour Pro, l'application chauffeur** (réservée aux comptes au rôle `chauffeur`) : trajets du jour et à venir,
+  historique, liste des passagers, scan du QR code des billets (`/api/v1/chauffeur/scanner/`), démarrer / terminer un trajet.
   L'admin affecte un chauffeur à un trajet depuis la page « Trajets ».
 - **Carte des gares** (mobile et web) : départs de la gare sélectionnée, itinéraire « Y aller » depuis la position
   de l'utilisateur avec distance et durée estimées.
@@ -68,8 +69,22 @@ cd web && npm install && npm start          # http://localhost:4300 (proxy vers 
 cd web_admin && npm install && npm start    # http://localhost:4200 (proxy vers l'API)
 ```
 
-## Mobile
+## Mobile : deux applications, un seul code
+
+| Application | Public | Identifiant Android | Lancer |
+|---|---|---|---|
+| **TamBour** | Voyageurs | `ci.tambour.app` | `flutter run` (saveur `passager` par défaut) |
+| **TamBour Pro** | Chauffeurs | `ci.tambour.pro` | `flutter run --flavor chauffeur -t lib/main_chauffeur.dart` |
 
 ```bash
-cd mobile && flutter pub get && flutter run
+cd mobile && flutter pub get
+flutter build apk --flavor passager                                   # TamBour
+flutter build apk --flavor chauffeur -t lib/main_chauffeur.dart       # TamBour Pro
 ```
+
+- Chaque application refuse les comptes de l'autre, avec un message qui oriente vers la bonne app.
+- TamBour Pro n'a pas d'inscription : les comptes chauffeurs sont créés depuis le back-office.
+- Permissions : caméra uniquement dans TamBour Pro (scan des billets), localisation uniquement dans TamBour (itinéraire vers une gare).
+- Nom, icône et couleur de lancement propres à chaque application (`android/app/src/chauffeur/`).
+- iOS : le dossier `ios/` du dépôt ne contient pas de projet Xcode (`Runner.xcodeproj`). Après `flutter create .`,
+  créer deux schemes (`passager`, `chauffeur`) avec des Bundle ID distincts (`ci.tambour.app`, `ci.tambour.pro`).

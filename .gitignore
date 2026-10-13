@@ -18,15 +18,16 @@ web_admin/dist/
 web_admin/.angular/
 
 # Flutter
-mobile/.dart_tool/
-mobile/.flutter-plugins
-mobile/.flutter-plugins-dependencies
-mobile/build/
-mobile/android/local.properties
-mobile/android/.gradle/
-mobile/ios/Pods/
-mobile/ios/Flutter/Generated.xcconfig
-mobile/ios/Flutter/flutter_export_environment.sh
+mobile_*/.dart_tool/
+mobile_*/.flutter-plugins
+mobile_*/.flutter-plugins-dependencies
+mobile_*/build/
+mobile_*/android/local.properties
+mobile_*/android/.gradle/
+mobile_*/ios/Pods/
+mobile_*/ios/Flutter/Generated.xcconfig
+mobile_*/ios/Flutter/flutter_export_environment.sh
+mobile_commun/pubspec.lock
 
 # Divers
 .DS_Store

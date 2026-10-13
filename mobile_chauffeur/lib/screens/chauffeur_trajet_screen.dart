@@ -90,9 +90,11 @@ class _ChauffeurTrajetScreenState extends State<ChauffeurTrajetScreen> {
         style: const TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w800)),
       content: Text(terminer
         ? 'Confirmez l\'arrivée à ${t.arrivee}. Les voyageurs pourront ensuite noter le trajet.'
-        : restants > 0
-          ? '$restants passager${restants > 1 ? 's' : ''} n\'${restants > 1 ? 'ont' : 'a'} pas encore été scanné${restants > 1 ? 's' : ''}. Démarrer quand même ?'
-          : 'Tous les passagers sont à bord. Bonne route !',
+        : '${restants > 0
+            ? '$restants passager${restants > 1 ? 's' : ''} n\'${restants > 1 ? 'ont' : 'a'} pas encore été scanné${restants > 1 ? 's' : ''}. Démarrer quand même ?'
+            : 'Tous les passagers sont à bord. Bonne route !'}\n\n'
+          'La position du car sera partagée avec les voyageurs jusqu\'à l\'arrivée, même écran éteint. '
+          'Ne fermez pas TamBour Pro pendant le trajet.',
         style: const TextStyle(fontFamily: 'Outfit')),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
@@ -269,6 +271,20 @@ class _SuiviEnDirect extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
           child: EtatPartageLigne(partage: partage)),
+        if (partage.actif) ...[
+          const SizedBox(height: 8),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(Icons.battery_alert_rounded, size: 16, color: Colors.white.withValues(alpha: 0.75)),
+            const SizedBox(width: 6),
+            Expanded(child: Text(
+              'Si le suivi s\'interrompt écran éteint, autorisez TamBour Pro à fonctionner en arrière-plan '
+              '(réglages batterie, fréquent sur Tecno, Infinix, itel…).',
+              style: TextStyle(fontFamily: 'Outfit', fontSize: 11.5, height: 1.35, color: Colors.white.withValues(alpha: 0.75)))),
+            TextButton(onPressed: PartagePosition.ouvrirReglages,
+              style: TextButton.styleFrom(foregroundColor: TamBourColors.gold, visualDensity: VisualDensity.compact),
+              child: const Text('Réglages')),
+          ]),
+        ],
         const SizedBox(height: 10),
         SizedBox(width: double.infinity, child: OutlinedButton.icon(
           onPressed: s == null ? null : onCarte,

@@ -98,7 +98,10 @@ flutter test                                              # dans chaque dossier
   (caméra et localisation pour TamBour Pro, localisation pour TamBour).
 - Chaque application refuse les comptes de l'autre, avec un message qui oriente vers la bonne app.
 - TamBour Pro n'a pas d'inscription : les comptes chauffeurs sont créés depuis le back-office.
-- Le partage de position fonctionne tant que TamBour Pro est ouverte (même hors de l'écran du trajet) ;
-  le partage écran éteint nécessitera un service de premier plan Android.
+- Partage de position en arrière-plan (écran éteint, autre app ouverte) :
+  - Android : service de premier plan avec notification permanente « Trajet en cours » tant que le trajet dure ;
+  - iOS : mode `location` en arrière-plan (barre d'état bleue) ;
+  - le partage s'arrête si le chauffeur ferme l'app depuis les apps récentes ; sur certains téléphones (Tecno,
+    Infinix, itel…), autoriser TamBour Pro dans les réglages de la batterie (bouton « Réglages » dans l'app).
 - iOS : le dossier `ios/` ne contient pas de projet Xcode (`Runner.xcodeproj`) ; le générer avec `flutter create .`
   dans chaque application, puis renseigner les Bundle ID (`ci.tambour.app`, `ci.tambour.pro`).

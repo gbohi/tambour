@@ -7,6 +7,11 @@
     <!-- Partage de la position du car pendant le trajet (suivi en temps réel) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Suivi en arrière-plan : service de premier plan avec notification permanente pendant le trajet -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
         android:label="TamBour Pro"
         android:name="${applicationName}"

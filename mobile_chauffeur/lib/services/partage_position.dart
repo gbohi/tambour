@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Color;
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tambour_commun/services/suivi_service.dart';
 
 enum EtatPartage { inactif, demarrage, actif, refuse, gpsDesactive, erreur }
@@ -14,6 +16,7 @@ class PointGps {
 
 /// Partage la position du car pendant le trajet : lit le GPS du téléphone et l'envoie
 /// au serveur toutes les [intervalle] (15 s), pour le suivi des voyageurs.
+/// Continue écran éteint et app en arrière-plan (service de premier plan Android, mode location iOS).
 ///
 /// Une seule instance pour toute l'application ([instance]) : le partage continue quand le
 /// chauffeur quitte l'écran du trajet, et s'arrête à la fin du trajet ou à la déconnexion.
@@ -113,15 +116,51 @@ class PartagePosition extends ChangeNotifier {
       if (!await Geolocator.isLocationServiceEnabled()) return EtatPartage.gpsDesactive;
       var p = await Geolocator.checkPermission();
       if (p == LocationPermission.denied) p = await Geolocator.requestPermission();
-      return p == LocationPermission.denied || p == LocationPermission.deniedForever
-        ? EtatPartage.refuse : EtatPartage.actif;
+      if (p == LocationPermission.denied || p == LocationPermission.deniedForever) return EtatPartage.refuse;
+      // Android 13+ : la notification permanente du suivi doit être autorisée pour être visible.
+      // Refusée, le partage continue quand même (la notification reste dans le gestionnaire de tâches).
+      if (defaultTargetPlatform == TargetPlatform.android) await Permission.notification.request();
+      return EtatPartage.actif;
     } catch (_) {
       return EtatPartage.erreur;
     }
   }
 
-  static Stream<PointGps> _fluxGps() => Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 25))
+  /// Ouvre les réglages de l'app (batterie, autorisations) pour les téléphones qui ferment les apps en arrière-plan.
+  static Future<void> ouvrirReglages() => Geolocator.openAppSettings();
+
+  /// Réglages GPS selon la plateforme, pour que le partage continue écran éteint ou app en arrière-plan.
+  @visibleForTesting
+  static LocationSettings reglagesPour(TargetPlatform plateforme) {
+    const precision = LocationAccuracy.high;
+    const distance = 25;   // une nouvelle position tous les 25 m parcourus
+    switch (plateforme) {
+      case TargetPlatform.android:
+        // Service de premier plan : notification permanente tant que le trajet est en cours.
+        return AndroidSettings(accuracy: precision, distanceFilter: distance,
+          intervalDuration: const Duration(seconds: 5),
+          foregroundNotificationConfig: const ForegroundNotificationConfig(
+            notificationTitle: 'Trajet en cours',
+            notificationText: 'TamBour Pro partage la position du car avec les voyageurs.',
+            notificationChannelName: 'Suivi du trajet',
+            notificationIcon: AndroidResource(name: 'ic_notification', defType: 'drawable'),
+            color: Color(0xFF0F4A3B),
+            enableWakeLock: true,    // le téléphone ne s'endort pas complètement pendant le trajet
+            enableWifiLock: true,
+            setOngoing: true));      // impossible de balayer la notification pendant le trajet
+      case TargetPlatform.iOS:
+        // Mode « location » en arrière-plan : barre d'état bleue tant que le partage est actif.
+        return AppleSettings(accuracy: precision, distanceFilter: distance,
+          activityType: ActivityType.automotiveNavigation,
+          pauseLocationUpdatesAutomatically: false,
+          allowBackgroundLocationUpdates: true,
+          showBackgroundLocationIndicator: true);
+      default:
+        return const LocationSettings(accuracy: precision, distanceFilter: distance);
+    }
+  }
+
+  static Stream<PointGps> _fluxGps() => Geolocator.getPositionStream(locationSettings: reglagesPour(defaultTargetPlatform))
     .map((p) => PointGps(p.latitude, p.longitude,
       vitesseKmh: p.speed >= 0 ? p.speed * 3.6 : null, cap: p.heading >= 0 ? p.heading : null, precisionM: p.accuracy));
 }

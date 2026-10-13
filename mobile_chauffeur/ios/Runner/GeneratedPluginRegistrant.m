@@ -30,6 +30,12 @@
 @import package_info_plus;
 #endif
 
+#if __has_include(<permission_handler_apple/PermissionHandlerPlugin.h>)
+#import <permission_handler_apple/PermissionHandlerPlugin.h>
+#else
+@import permission_handler_apple;
+#endif
+
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
@@ -37,6 +43,7 @@
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
   [MobileScannerPlugin registerWithRegistrar:[registry registrarForPlugin:@"MobileScannerPlugin"]];
   [FPPPackageInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPPackageInfoPlusPlugin"]];
+  [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];
 }
 
 @end

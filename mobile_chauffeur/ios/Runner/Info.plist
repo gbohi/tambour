@@ -66,5 +66,10 @@
             </array>
         </dict>
     </array>
+    <!-- Partage de la position du car écran verrouillé ou app en arrière-plan -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>location</string>
+    </array>
 </dict>
 </plist>

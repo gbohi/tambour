@@ -8,6 +8,7 @@ import 'package:tambour_chauffeur/models/chauffeur.dart';
 import 'package:tambour_commun/providers/auth_provider.dart';
 import 'package:tambour_chauffeur/services/chauffeur_service.dart';
 import 'package:tambour_chauffeur/screens/chauffeur_trajet_screen.dart';
+import 'package:tambour_chauffeur/services/partage_position.dart';
 
 /// Espace chauffeur : trajets à venir et historique.
 class ChauffeurAccueilScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,7 @@ class _ChauffeurAccueilScreenState extends ConsumerState<ChauffeurAccueilScreen>
   }
 
   Future<void> _deconnecter() async {
+    await PartagePosition.instance.arreter();
     await ref.read(authProvider.notifier).deconnecter();
     if (mounted) context.go('/auth');
   }
@@ -92,6 +94,31 @@ class _ChauffeurAccueilScreenState extends ConsumerState<ChauffeurAccueilScreen>
               tabs: const [Tab(text: 'Mes trajets'), Tab(text: 'Historique')]),
           ])),
         ),
+        // Rappel visible partout : la position du car est partagée pendant le trajet en cours
+        ListenableBuilder(listenable: PartagePosition.instance, builder: (context, _) {
+          final p = PartagePosition.instance;
+          if (p.trajetId == null) return const SizedBox.shrink();
+          return Material(
+            color: p.actif ? TamBourColors.primaryLight : TamBourColors.goldLight,
+            child: InkWell(
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => ChauffeurTrajetScreen(trajetId: p.trajetId!, service: _service))),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(children: [
+                  Icon(p.actif ? Icons.my_location_rounded : Icons.location_disabled_rounded, size: 18,
+                    color: p.actif ? TamBourColors.primary : const Color(0xFF8A5A00)),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(
+                    p.actif ? 'Position du car partagée avec les voyageurs' : 'Partage de position interrompu',
+                    style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600,
+                      color: TamBourColors.textPrimary))),
+                  const Icon(Icons.chevron_right_rounded, color: TamBourColors.textSecondary),
+                ]),
+              ),
+            ),
+          );
+        }),
         Expanded(child: TabBarView(controller: _tab, children: [
           _ListeTrajets(future: _aVenir, historique: false, onOuvrir: _ouvrir, onActualiser: _charger),
           _ListeTrajets(future: _historique, historique: true, onOuvrir: _ouvrir, onActualiser: _charger),

@@ -6,7 +6,9 @@ import 'package:tambour_chauffeur/screens/chauffeur_accueil_screen.dart';
 import 'package:tambour_chauffeur/screens/chauffeur_trajet_screen.dart';
 import 'package:tambour_chauffeur/services/chauffeur_service.dart';
 import 'package:tambour_chauffeur/screens/connexion_chauffeur_screen.dart';
+import 'package:tambour_chauffeur/services/partage_position.dart';
 import 'package:tambour_commun/testing/debordements.dart';
+import 'package:tambour_commun/testing/faux_suivi.dart';
 
 TrajetChauffeur trajetChauffeur(String statut) => TrajetChauffeur(
   id: 't1', depart: 'Yamoussoukro', arrivee: 'San-Pédro', gareDepart: 'Gare Routière de Yamoussoukro Centre',
@@ -29,6 +31,13 @@ class FauxChauffeurService extends ChauffeurService {
   Future<TrajetChauffeur> trajet(String id) async => trajetChauffeur('en_cours');
 }
 
+final partages = <PartagePosition>[];
+PartagePosition gpsActif() => PartagePosition(service: FauxSuiviService(),
+  autoriser: () async => EtatPartage.actif,
+  flux: () => Stream.value(const PointGps(6.62, -4.62, vitesseKmh: 72)))..also(partages.add);
+
+extension on PartagePosition { PartagePosition also(void Function(PartagePosition) f) { f(this); return this; } }
+
 void main() {
   testerDebordements({
     'Connexion': (() => const ConnexionChauffeurScreen(), null),
@@ -36,6 +45,14 @@ void main() {
     'Mes trajets › historique': (() => ChauffeurAccueilScreen(service: FauxChauffeurService()), (WidgetTester t) async {
       await t.tap(find.text('Historique'));
     }),
-    'Trajet': (() => ChauffeurTrajetScreen(trajetId: 't1', service: FauxChauffeurService()), null),
-  });
+    'Trajet en route (GPS partagé)': (() => ChauffeurTrajetScreen(trajetId: 't1', service: FauxChauffeurService(),
+      suiviService: FauxSuiviService(), partage: gpsActif()), null),
+    'Trajet en route (GPS refusé)': (() => ChauffeurTrajetScreen(trajetId: 't1', service: FauxChauffeurService(),
+      suiviService: FauxSuiviService(), partage: PartagePosition(service: FauxSuiviService(),
+        autoriser: () async => EtatPartage.refuse)), null),
+    'Trajet en route › carte': (() => ChauffeurTrajetScreen(trajetId: 't1', service: FauxChauffeurService(),
+      suiviService: FauxSuiviService(), partage: gpsActif()), (WidgetTester t) async {
+      await t.tap(find.text('Voir la carte'));
+    }),
+  }, nettoyer: () async { for (final p in partages) { await p.arreter(); } partages.clear(); });
 }

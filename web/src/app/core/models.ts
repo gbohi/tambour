@@ -55,3 +55,17 @@ export interface InfosContact { telephone: string; whatsapp: string; email: stri
 
 export interface PassagerSaisie { prenom: string; nom: string; telephone: string; email: string; }
 export type MethodePaiement = 'orange_money' | 'mtn_momo' | 'moov_money' | 'wave' | 'carte';
+
+/** GET /trajets/<id>/suivi/ — suivi du car en temps réel. */
+export interface PointSuivi { nom: string; ville: string; latitude: number; longitude: number; }
+export interface Suivi {
+  phase: 'a_venir' | 'en_route' | 'arrivee_imminente' | 'arrive' | 'annule';
+  source: 'gps' | 'horaire' | 'chauffeur';
+  position: { latitude: number; longitude: number; vitesse_kmh: number | null; cap: number | null; enregistre_le: string; il_y_a_secondes: number } | null;
+  distance_totale_km: number | null; distance_restante_km: number | null;
+  minutes_restantes: number | null; arrivee_estimee: string | null; progression: number; depart_dans_minutes: number | null;
+  trajet: { id: string; statut: string; statut_label: string; depart: string; arrivee: string; heure_depart: string;
+    heure_arrivee_prevue: string; retard_minutes: number; compagnie: string; bus_immatriculation: string; };
+  point_depart: PointSuivi | null; point_arrivee: PointSuivi | null;
+  trace?: [number, number][]; rafraichir_dans_secondes: number;
+}

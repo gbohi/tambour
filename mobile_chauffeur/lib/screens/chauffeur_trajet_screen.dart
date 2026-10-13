@@ -7,18 +7,27 @@ import 'package:tambour_commun/widgets/app_snackbar.dart';
 import 'package:tambour_commun/widgets/page_header.dart';
 import 'package:tambour_chauffeur/screens/chauffeur_accueil_screen.dart';
 import 'package:tambour_chauffeur/screens/scanner_billet_screen.dart';
+import 'package:tambour_chauffeur/services/partage_position.dart';
+import 'package:tambour_commun/models/suivi.dart';
+import 'package:tambour_commun/services/suivi_service.dart';
+import 'package:tambour_commun/widgets/suivi/ecran_suivi.dart';
+import 'package:tambour_commun/widgets/suivi/suivi_controleur.dart';
 
 /// Détail d'un trajet côté chauffeur : embarquement, passagers, démarrer / terminer.
 class ChauffeurTrajetScreen extends StatefulWidget {
   final String trajetId;
   final ChauffeurService? service;
-  const ChauffeurTrajetScreen({super.key, required this.trajetId, this.service});
+  final PartagePosition? partage;
+  final SuiviService? suiviService;
+  const ChauffeurTrajetScreen({super.key, required this.trajetId, this.service, this.partage, this.suiviService});
   @override
   State<ChauffeurTrajetScreen> createState() => _ChauffeurTrajetScreenState();
 }
 
 class _ChauffeurTrajetScreenState extends State<ChauffeurTrajetScreen> {
   late final ChauffeurService _service = widget.service ?? ChauffeurService();
+  late final PartagePosition _partage = (widget.partage ?? PartagePosition.instance)..addListener(_maj);
+  SuiviControleur? _suivi;
   TrajetChauffeur? _trajet;
   String? _erreur;
   bool _action = false;
@@ -27,13 +36,44 @@ class _ChauffeurTrajetScreenState extends State<ChauffeurTrajetScreen> {
   @override
   void initState() { super.initState(); _charger(); }
 
+  @override
+  void dispose() {
+    _partage.removeListener(_maj);   // le partage continue hors de cet écran, jusqu'à la fin du trajet
+    _suivi?.dispose();
+    super.dispose();
+  }
+
+  void _maj() { if (mounted) setState(() {}); }
+
   Future<void> _charger() async {
     try {
       final t = await _service.trajet(widget.trajetId);
-      if (mounted) setState(() { _trajet = t; _erreur = null; });
+      if (!mounted) return;
+      setState(() { _trajet = t; _erreur = null; });
+      _synchroniserSuivi(t);
     } on ChauffeurException catch (e) {
       if (mounted) setState(() => _erreur = e.message);
     }
+  }
+
+  /// Trajet en cours : la position du car est partagée et le temps restant affiché.
+  void _synchroniserSuivi(TrajetChauffeur t) {
+    if (t.estEnCours) {
+      _partage.demarrer(t.id);
+      _suivi ??= (SuiviControleur(t.id, service: widget.suiviService)..addListener(_maj))..rafraichir();
+    } else {
+      if (_partage.trajetId == t.id) _partage.arreter();
+      _suivi?.dispose();
+      _suivi = null;
+    }
+  }
+
+  void _ouvrirCarte() {
+    final c = _suivi;
+    if (c == null) return;
+    Navigator.push(context, MaterialPageRoute(builder: (_) => EcranSuivi(
+      controleur: c, libelleArrivee: 'Arrivée', userAgent: 'ci.tambour.pro',
+      complement: ListenableBuilder(listenable: _partage, builder: (_, __) => EtatPartageLigne(partage: _partage)))));
   }
 
   Future<void> _scanner() async {
@@ -117,6 +157,10 @@ class _ChauffeurTrajetScreenState extends State<ChauffeurTrajetScreen> {
                 physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                 children: [
+                  if (t.estEnCours) ...[
+                    _SuiviEnDirect(trajet: t, suivi: _suivi?.suivi, partage: _partage, onCarte: _ouvrirCarte),
+                    const SizedBox(height: 16),
+                  ],
                   _Embarquement(trajet: t),
                   const SizedBox(height: 20),
                   Row(children: [
@@ -175,6 +219,94 @@ class _ChauffeurTrajetScreenState extends State<ChauffeurTrajetScreen> {
         ),
       ),
     );
+  }
+}
+
+/// Carte « En route » : temps restant jusqu'à destination et état du partage de position.
+class _SuiviEnDirect extends StatelessWidget {
+  final TrajetChauffeur trajet;
+  final SuiviTrajet? suivi;
+  final PartagePosition partage;
+  final VoidCallback onCarte;
+  const _SuiviEnDirect({required this.trajet, required this.suivi, required this.partage, required this.onCarte});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = suivi;
+    final restant = s?.minutesRestantes ?? partage.minutesRestantes;
+    final titre = s?.phase == 'arrivee_imminente' ? 'Arrivée imminente'
+      : restant == null ? 'Calcul du temps restant…' : 'Arrivée dans ${SuiviTrajet.duree(restant)}';
+    final details = [
+      if (s?.arriveeEstimee != null) 'vers ${DateFormat('HH:mm').format(s!.arriveeEstimee!)}',
+      if (s?.distanceRestanteKm != null) '${s!.distanceRestanteKm!.round()} km restants',
+    ].join(' · ');
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [TamBourColors.marque, Color(0xFF1A6450)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: BorderRadius.circular(20)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF4ADE80), shape: BoxShape.circle)),
+          const SizedBox(width: 8),
+          Expanded(child: Text('En route vers ${trajet.arrivee}', maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.85)))),
+        ]),
+        const SizedBox(height: 8),
+        Text(titre, style: const TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
+        if (details.isNotEmpty)
+          Text(details, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: Colors.white.withValues(alpha: 0.8))),
+        if (s != null) ...[
+          const SizedBox(height: 12),
+          ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(
+            value: s.progression / 100, minHeight: 6, color: TamBourColors.gold,
+            backgroundColor: Colors.white.withValues(alpha: 0.2))),
+        ],
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+          child: EtatPartageLigne(partage: partage)),
+        const SizedBox(height: 10),
+        SizedBox(width: double.infinity, child: OutlinedButton.icon(
+          onPressed: s == null ? null : onCarte,
+          icon: const Icon(Icons.map_rounded, size: 18),
+          label: const Text('Voir la carte'),
+          style: OutlinedButton.styleFrom(foregroundColor: Colors.white,
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.6)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle: const TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w700)))),
+      ]),
+    );
+  }
+}
+
+/// « Position partagée avec les voyageurs · il y a 12 s », ou la raison pour laquelle elle ne l'est pas.
+class EtatPartageLigne extends StatelessWidget {
+  final PartagePosition partage;
+  const EtatPartageLigne({super.key, required this.partage});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = partage;
+    final (couleur, texte) = switch (p.etat) {
+      EtatPartage.actif when p.dernierEnvoi != null && p.message == null => (const Color(0xFF16A34A),
+        'Position partagée avec les voyageurs · ${SuiviTrajet.ilYa(DateTime.now().difference(p.dernierEnvoi!).inSeconds)}'),
+      EtatPartage.actif when p.message != null => (TamBourColors.gold, p.message!),
+      EtatPartage.actif || EtatPartage.demarrage => (TamBourColors.gold, 'Recherche du signal GPS…'),
+      EtatPartage.inactif => (TamBourColors.textHint, 'Partage de position arrêté'),
+      _ => (TamBourColors.error, p.message ?? 'Position indisponible'),
+    };
+    final relancer = p.etat == EtatPartage.refuse || p.etat == EtatPartage.gpsDesactive || p.etat == EtatPartage.erreur;
+    return Row(children: [
+      Icon(relancer ? Icons.location_disabled_rounded : Icons.my_location_rounded, size: 18, color: couleur),
+      const SizedBox(width: 8),
+      Expanded(child: Text(texte, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12.5, color: TamBourColors.textPrimary))),
+      if (relancer && p.trajetId != null)
+        TextButton(onPressed: () => p.demarrer(p.trajetId!), child: const Text('Réessayer')),
+    ]);
   }
 }
 

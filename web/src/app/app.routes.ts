@@ -8,6 +8,7 @@ export const routes: Routes = [
   { path: 'billets/:id', canActivate: [connecteGuard], loadComponent: () => import('./pages/confirmation/confirmation.component').then(m => m.ConfirmationComponent), title: 'Vos billets — TamBour' },
   { path: 'connexion', loadComponent: () => import('./pages/connexion/connexion.component').then(m => m.ConnexionComponent), title: 'Connexion — TamBour' },
   { path: 'compte', canActivate: [connecteGuard], loadComponent: () => import('./pages/compte/compte.component').then(m => m.CompteComponent), title: 'Mon compte — TamBour' },
+  { path: 'suivi/:trajetId', canActivate: [connecteGuard], loadComponent: () => import('./pages/suivi/suivi.component').then(m => m.SuiviComponent), title: 'Suivi du car — TamBour' },
   { path: 'gares', loadComponent: () => import('./pages/gares/gares.component').then(m => m.GaresComponent), title: 'Gares — TamBour' },
   { path: 'destinations', loadComponent: () => import('./pages/destinations/destinations.component').then(m => m.DestinationsComponent), title: 'Destinations — TamBour' },
   { path: 'infos/:page', loadComponent: () => import('./pages/infos/infos.component').then(m => m.InfosComponent), title: 'Informations — TamBour' },

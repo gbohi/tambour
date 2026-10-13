@@ -8,6 +8,7 @@ import { ToastService } from '../../core/toast.service';
 import { Fidelite, Reservation } from '../../core/models';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
+import { suiviDisponible } from '../../core/suivi';
 
 type Onglet = 'billets' | 'fidelite' | 'profil';
 
@@ -59,6 +60,7 @@ type Onglet = 'billets' | 'fidelite' | 'profil';
               <div class="actions">
                 <span class="montant">{{ r.montant_total | nb:'F' }}</span>
                 <div class="boutons">
+                  @if (suiviDisponible(r)) { <a class="btn btn-or btn-sm" [routerLink]="['/suivi', r.trajet_info.id]"><tb-icon name="navigation" [size]="16" /> Suivre le car</a> }
                   @if (r.statut === 'confirmee') { <a class="btn btn-primaire btn-sm" [routerLink]="['/billets', r.id]"><tb-icon name="qr" [size]="16" /> Billets</a>
                     <button class="btn btn-contour btn-sm" (click)="pdf(r)" aria-label="Télécharger les billets en PDF"><tb-icon name="download" [size]="16" /> PDF</button> }
                   @if (r.peut_etre_notee) { <button class="btn btn-or btn-sm" (click)="ouvrirNote(r)"><tb-icon name="star" [size]="16" /> Noter</button> }
@@ -266,11 +268,16 @@ export class CompteComponent implements OnInit {
   readonly criteres = [{ code: 'note_ponctualite', label: 'Ponctualité' }, { code: 'note_confort', label: 'Confort' }, { code: 'note_proprete', label: 'Propreté' }];
 
   private maintenant = Date.now();
+  readonly suiviDisponible = (r: Reservation) => suiviDisponible(r, this.maintenant);
+  /** Un trajet en route reste « à venir » jusqu'à l'arrivée. */
+  private estAVenir(r: Reservation): boolean {
+    return r.statut === 'confirmee' && (new Date(r.trajet_info.heure_depart).getTime() > this.maintenant || r.trajet_info.statut === 'en_cours');
+  }
   aVenir = computed(() => this.reservations()
-    .filter(r => r.statut === 'confirmee' && new Date(r.trajet_info.heure_depart).getTime() > this.maintenant)
+    .filter(r => this.estAVenir(r))
     .sort((a, b) => a.trajet_info.heure_depart.localeCompare(b.trajet_info.heure_depart)));
   passes = computed(() => this.reservations()
-    .filter(r => !(r.statut === 'confirmee' && new Date(r.trajet_info.heure_depart).getTime() > this.maintenant) && r.statut !== 'en_attente' && r.statut !== 'expiree')
+    .filter(r => !this.estAVenir(r) && r.statut !== 'en_attente' && r.statut !== 'expiree')
     .sort((a, b) => b.trajet_info.heure_depart.localeCompare(a.trajet_info.heure_depart)));
 
   ngOnInit(): void {

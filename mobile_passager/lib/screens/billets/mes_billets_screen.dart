@@ -11,6 +11,7 @@ import 'package:tambour_commun/core/theme.dart';
 import 'package:tambour_commun/services/api_client.dart';
 import 'package:tambour_passager/screens/billets/noter_trajet_sheet.dart';
 import 'package:tambour_commun/widgets/logo_tambour.dart';
+import 'package:tambour_passager/screens/suivi/suivi_trajet_screen.dart';
 
 // ── Modèle mock passager par billet ──────────────────────────────────────────
 
@@ -39,6 +40,8 @@ class _ReservationMock {
   final String statut;
   final List<_PassagerMock> passagers;
   final String? id;            // null pour les données de démonstration
+  final String? trajetId;
+  final String trajetStatut;   // planifie, en_cours, termine…
   final bool peutEtreNotee;
   final int? avisNote;
 
@@ -46,7 +49,8 @@ class _ReservationMock {
     required this.ref, required this.depart, required this.arrivee,
     required this.date, required this.compagnie,
     required this.prixParPassager, required this.statut,
-    required this.passagers, this.id, this.peutEtreNotee = false, this.avisNote,
+    required this.passagers, this.id, this.trajetId, this.trajetStatut = 'planifie',
+    this.peutEtreNotee = false, this.avisNote,
   });
 
   factory _ReservationMock.fromJson(Map<String, dynamic> j) {
@@ -56,6 +60,7 @@ class _ReservationMock {
     final nb = (j['nb_passagers'] as int?) ?? passagers.length;
     return _ReservationMock(
       id: j['id'] as String, ref: j['reference'] as String,
+      trajetId: (t['id'] ?? j['trajet']) as String?, trajetStatut: t['statut'] as String? ?? 'planifie',
       depart: t['depart'] as String, arrivee: t['arrivee'] as String,
       date: DateTime.parse(t['heure_depart'] as String).toLocal(),
       compagnie: t['compagnie'] as String,
@@ -66,7 +71,12 @@ class _ReservationMock {
       avisNote: j['avis_note'] as int?);
   }
 
-  bool get estAVenir => date.isAfter(DateTime.now()) && statut == 'confirmee';
+  // Un trajet en route reste dans « À venir » jusqu'à l'arrivée
+  bool get estAVenir => statut == 'confirmee' && (date.isAfter(DateTime.now()) || trajetStatut == 'en_cours');
+
+  /// Suivi en direct : car en route, ou départ dans les 3 prochaines heures.
+  bool get suiviDisponible => id != null && trajetId != null && statut == 'confirmee'
+    && (trajetStatut == 'en_cours' || date.difference(DateTime.now()) < const Duration(hours: 3));
 
   int get montantTotal => prixParPassager * passagers.length;
   int get nbPassagers => passagers.length;
@@ -430,6 +440,21 @@ class _BilletIndividuelCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700)))),
+            ],
+
+            // ── Suivi du car en temps réel ─────────────────────────────────
+            if (reservation.suiviDisponible) ...[
+              const SizedBox(height: 12),
+              SizedBox(width: double.infinity, child: FilledButton.icon(
+                onPressed: () => SuiviTrajetScreen.ouvrir(context, reservation.trajetId!),
+                icon: Icon(reservation.trajetStatut == 'en_cours' ? Icons.my_location_rounded : Icons.near_me_rounded, size: 18),
+                label: Text(reservation.trajetStatut == 'en_cours' ? 'Suivre le car en direct' : 'Suivre le car'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: reservation.trajetStatut == 'en_cours' ? TamBourColors.marque : TamBourColors.gold,
+                  foregroundColor: reservation.trajetStatut == 'en_cours' ? Colors.white : TamBourColors.marque,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  textStyle: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700)))),
             ],
 
             // ── Boutons Voir / Partager ───────────────────────────────────

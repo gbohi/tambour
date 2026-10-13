@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tambour_commun/testing/debordements.dart';
+import 'package:tambour_commun/testing/faux_suivi.dart';
+import 'package:tambour_passager/screens/suivi/suivi_trajet_screen.dart';
 
 import 'package:tambour_passager/models/fidelite.dart';
 import 'package:tambour_passager/models/paiement.dart';
@@ -76,6 +78,8 @@ final ecrans = <String, Widget Function()>{
   "Centre d'aide": () => const CentreAideScreen(),
   'Contact support': () => const ContactSupportScreen(),
   'Noter l\'app': () => const NoterAppScreen(),
+  'Suivi du car (en route)': () => SuiviTrajetScreen(trajetId: 't1', service: FauxSuiviService()),
+  'Suivi du car (avant le départ)': () => SuiviTrajetScreen(trajetId: 't1', service: FauxSuiviService(phase: 'a_venir')),
   'Réclamations': () => const ReclamationsScreen(),
   'Nouvelle réclamation': () => const NouvelleReclamationScreen(),
 };

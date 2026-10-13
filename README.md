@@ -7,7 +7,9 @@ Réservation de transport interurbain en Côte d'Ivoire.
 | `backend/` | Python 3.12 · Django 5 · DRF · JWT · PostgreSQL · Celery/Redis | API REST (`/api/v1/`, documentation sur `/api/docs/`) |
 | `web/` | Angular 17 | Site voyageurs (recherche, réservation, billets, compte) |
 | `web_admin/` | Angular 17 | Back-office d'administration |
-| `mobile/` | Flutter | Deux applications : **TamBour** (voyageurs) et **TamBour Pro** (chauffeurs) |
+| `mobile_passager/` | Flutter | Application **TamBour** (voyageurs) |
+| `mobile_chauffeur/` | Flutter | Application **TamBour Pro** (chauffeurs) |
+| `mobile_commun/` | Dart (package) | Code partagé par les deux applications |
 | `branding/` | SVG / PNG | Logo, icônes et couleurs (voir `branding/README.md`) |
 
 ## Fonctionnalités récentes
@@ -27,6 +29,14 @@ Réservation de transport interurbain en Côte d'Ivoire.
 - **Carte des gares** (mobile et web) : départs de la gare sélectionnée, itinéraire « Y aller » depuis la position
   de l'utilisateur avec distance et durée estimées.
 - **Noter un trajet** : une fois le voyage effectué, depuis « Mes billets » (mobile et web).
+- **Suivi du car en temps réel** :
+  - TamBour Pro partage automatiquement la position GPS du car pendant le trajet (toutes les 15 s) et affiche
+    au chauffeur le temps restant jusqu'à destination ;
+  - le voyageur suit son car sur une carte (app TamBour et site web, bouton « Suivre le car ») :
+    « Arrivée dans 1 h 25 », heure d'arrivée estimée, progression, distance restante ;
+  - API : `POST /api/v1/chauffeur/trajets/<id>/position/` et `GET /api/v1/trajets/<id>/suivi/` (voyageurs ayant
+    une réservation confirmée, chauffeur, compagnie, admin) ; sans GPS récent, estimation selon l'horaire ;
+  - démonstration sans téléphone : `python manage.py simuler_suivi` fait rouler un car réservé.
 
 ## Comptes de démonstration
 
@@ -70,22 +80,25 @@ cd web && npm install && npm start          # http://localhost:4300 (proxy vers 
 cd web_admin && npm install && npm start    # http://localhost:4200 (proxy vers l'API)
 ```
 
-## Mobile : deux applications, un seul code
+## Mobile : deux applications et un package commun
 
-| Application | Public | Identifiant Android | Lancer |
+| Dossier | Application | Identifiant Android | Contenu |
 |---|---|---|---|
-| **TamBour** | Voyageurs | `ci.tambour.app` | `flutter run` (saveur `passager` par défaut) |
-| **TamBour Pro** | Chauffeurs | `ci.tambour.pro` | `flutter run --flavor chauffeur -t lib/main_chauffeur.dart` |
+| `mobile_passager/` | **TamBour** | `ci.tambour.app` | Recherche, réservation, paiement, billets, fidélité, gares, suivi du car |
+| `mobile_chauffeur/` | **TamBour Pro** | `ci.tambour.pro` | Trajets, passagers, scan des billets, partage de la position, fin de trajet |
+| `mobile_commun/` | package `tambour_commun` | — | Thème, police, logo, connexion, client API, widgets, carte de suivi, banc de test |
 
 ```bash
-cd mobile && flutter pub get
-flutter build apk --flavor passager                                   # TamBour
-flutter build apk --flavor chauffeur -t lib/main_chauffeur.dart       # TamBour Pro
+cd mobile_passager  && flutter pub get && flutter run    # TamBour
+cd mobile_chauffeur && flutter pub get && flutter run    # TamBour Pro
+flutter test                                              # dans chaque dossier
 ```
 
+- Chaque application a son propre projet Android/iOS, son nom, son icône et ses autorisations
+  (caméra et localisation pour TamBour Pro, localisation pour TamBour).
 - Chaque application refuse les comptes de l'autre, avec un message qui oriente vers la bonne app.
 - TamBour Pro n'a pas d'inscription : les comptes chauffeurs sont créés depuis le back-office.
-- Permissions : caméra uniquement dans TamBour Pro (scan des billets), localisation uniquement dans TamBour (itinéraire vers une gare).
-- Nom, icône et couleur de lancement propres à chaque application (`android/app/src/chauffeur/`).
-- iOS : le dossier `ios/` du dépôt ne contient pas de projet Xcode (`Runner.xcodeproj`). Après `flutter create .`,
-  créer deux schemes (`passager`, `chauffeur`) avec des Bundle ID distincts (`ci.tambour.app`, `ci.tambour.pro`).
+- Le partage de position fonctionne tant que TamBour Pro est ouverte (même hors de l'écran du trajet) ;
+  le partage écran éteint nécessitera un service de premier plan Android.
+- iOS : le dossier `ios/` ne contient pas de projet Xcode (`Runner.xcodeproj`) ; le générer avec `flutter create .`
+  dans chaque application, puis renseigner les Bundle ID (`ci.tambour.app`, `ci.tambour.pro`).

@@ -30,6 +30,6 @@ Aux petites tailles, composer **symbole + « TamBour » + devise en texte** (pol
 | Crème | `#FAF7EF` | Fond de l'icône TamBour, écran de lancement |
 
 Ces valeurs sont appliquées au site (`web/src/styles.scss`), à l'admin (`web_admin/src/styles.scss`),
-à l'app mobile (`mobile/lib/core/theme.dart`), aux billets PDF et aux emails.
+aux apps mobiles (`mobile_commun/lib/core/theme.dart`), aux billets PDF et aux emails.
 
-Police : **Outfit** (SIL Open Font License), embarquée dans l'application mobile (`mobile/assets/fonts`).
+Police : **Outfit** (SIL Open Font License), embarquée dans les applications mobiles (`mobile_commun/lib/fonts`).

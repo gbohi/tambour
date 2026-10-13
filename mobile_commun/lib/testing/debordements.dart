@@ -41,7 +41,7 @@ Future<void> chargerPolices() async {
 }
 
 /// Déclare un test par écran et par taille.
-void testerDebordements(Map<String, CasEcran> cas, {List<Override> overrides = const []}) {
+void testerDebordements(Map<String, CasEcran> cas, {List<Override> overrides = const [], Future<void> Function()? nettoyer}) {
   setUpAll(() async {
     await initializeDateFormatting('fr_FR', null);
     await chargerPolices();
@@ -88,6 +88,7 @@ void testerDebordements(Map<String, CasEcran> cas, {List<Override> overrides = c
           }
         }
         await tester.pumpWidget(const SizedBox());
+        if (nettoyer != null) await nettoyer();
         await tester.pump(const Duration(seconds: 5));
         FlutterError.onError = ancien;
         expect(debordements, isEmpty, reason: debordements.toSet().join('\n'));

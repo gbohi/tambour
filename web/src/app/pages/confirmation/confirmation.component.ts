@@ -6,6 +6,7 @@ import { ApiService } from '../../core/api.service';
 import { Reservation } from '../../core/models';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
+import { suiviDisponible } from '../../core/suivi';
 
 @Component({
   selector: 'tb-confirmation',
@@ -33,6 +34,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
             <span><tb-icon name="wallet" [size]="16" /> {{ r.montant_total | nb:'F' }}</span>
           </div>
           <div class="actions">
+            @if (suiviDisponible(r)) { <a class="btn btn-or btn-sm" [routerLink]="['/suivi', r.trajet_info.id]"><tb-icon name="navigation" [size]="16" /> Suivre le car en direct</a> }
             <button class="btn btn-primaire btn-sm" (click)="pdf(r)" [disabled]="generation()">
               <tb-icon name="download" [size]="16" /> {{ r.passagers.length > 1 ? 'Télécharger les billets (PDF)' : 'Télécharger le billet (PDF)' }}</button>
             <button class="btn btn-blanc btn-sm" (click)="imprimer()">Imprimer</button>
@@ -130,6 +132,7 @@ export class ConfirmationComponent implements OnInit {
   erreur = signal(false);
   nouveau = false;
   generation = signal(false);
+  readonly suiviDisponible = (r: Reservation) => suiviDisponible(r);
 
   ngOnInit(): void {
     this.nouveau = this.route.snapshot.queryParamMap.get('nouveau') === '1';

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
-  ApiResponse, Page, Ville, Trajet, LignePopulaire, Gare, Reservation, Fidelite, CategorieFAQ,
+  ApiResponse, Page, Ville, Trajet, Suivi, LignePopulaire, Gare, Reservation, Fidelite, CategorieFAQ,
   InfosContact, PassagerSaisie, MethodePaiement, User,
 } from './models';
 
@@ -42,6 +42,7 @@ export class ApiService {
   }
   mesReservations(): Observable<Reservation[]> { return this.get<Reservation[]>('/reservations/'); }
   reservation(id: string): Observable<Reservation> { return this.get<Reservation>(`/reservations/${id}/`); }
+  suivi(trajetId: string): Observable<Suivi> { return this.get<Suivi>(`/trajets/${trajetId}/suivi/`); }
   annulerReservation(id: string, motif: string): Observable<ApiResponse<unknown>> { return this.post(`/reservations/${id}/annuler/`, { motif }); }
   noterTrajet(reservationId: string, note: number, commentaire: string, criteres: Record<string, number>): Observable<ApiResponse<unknown>> {
     return this.post('/avis/', { reservation_id: reservationId, note, commentaire, ...criteres });

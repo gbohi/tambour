@@ -24,6 +24,7 @@ LOCAL_APPS = [
     'rapports',    # Exports CSV admin
     'support',     # Centre d'aide, contact, réclamations, avis sur l'app
     'chauffeur',   # Espace chauffeur : trajets, scan des billets
+    'suivi',       # Suivi des cars en temps réel (positions GPS, heure d'arrivée)
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

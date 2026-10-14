@@ -2,16 +2,44 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
 
 from .models import Reservation, Passager, Billet, Avis
 from .serializers import (
     CreerReservationSerializer, ReservationListSerializer,
     ReservationDetailSerializer, CreerAvisSerializer, AvisSerializer,
 )
-from transport.models import Siege
+from plateforme.models import ParametresPlateforme
+from transport.models import Siege, Trajet, places_disponibles
 from authentication.views import StandardPagination
 from tambour_backend.utils import success_response, error_response
+
+
+def calculer_devis(trajet, nb_passagers):
+    """Prix TTC d'une réservation : billets + frais de service paramétrés par l'administrateur."""
+    parametres = ParametresPlateforme.actuels()
+    billets = trajet.prix_actuel * nb_passagers
+    frais = parametres.calculer_frais(billets, nb_passagers)
+    return {'prix_unitaire': trajet.prix_actuel, 'nb_passagers': nb_passagers, 'montant_billets': billets,
+            'frais_service': frais, 'montant_total': billets + frais,
+            'libelle_frais': parametres.libelle_frais, 'frais_remboursables': parametres.frais_remboursables}
+
+
+class DevisView(APIView):
+    """GET /api/v1/reservations/devis/?trajet_id=…&passagers=2 — prix TTC avant de réserver (public)."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            trajet = Trajet.objects.get(pk=request.query_params.get('trajet_id'))
+            nb = int(request.query_params.get('passagers', 1))
+        except (Trajet.DoesNotExist, ValueError, ValidationError):
+            return error_response('Trajet introuvable.', status_code=status.HTTP_404_NOT_FOUND)
+        if not 1 <= nb <= 9:
+            return error_response('Entre 1 et 9 passagers.')
+        return success_response(data={**calculer_devis(trajet, nb), 'places_disponibles': places_disponibles(trajet)})
 
 
 class ReservationViewSet(viewsets.GenericViewSet):
@@ -57,37 +85,30 @@ class ReservationViewSet(viewsets.GenericViewSet):
         if not email_payeur and passagers_data:
             email_payeur = passagers_data[0].get('email', '')
 
+        nb = len(passagers_data)
         with transaction.atomic():
-            sieges = Siege.attribuer(trajet, len(passagers_data))
-            if sieges is None:
+            # Les places sont retenues pendant le paiement (15 min) ; les sièges, eux, ne sont
+            # attribués qu'une fois le paiement validé (Reservation.confirmer).
+            Trajet.objects.select_for_update().get(pk=trajet.pk)
+            if places_disponibles(trajet) < nb:
                 return error_response('Plus assez de places disponibles sur ce trajet.',
                                       status_code=status.HTTP_409_CONFLICT)
-            montant = trajet.prix_actuel * len(passagers_data)
+            devis = calculer_devis(trajet, nb)
             reservation = Reservation.objects.create(
                 user=request.user, trajet=trajet,
-                montant_total=montant,
-                nb_passagers=len(passagers_data),
+                montant_billets=devis['montant_billets'],
+                frais_service=devis['frais_service'],
+                montant_total=devis['montant_total'],
+                nb_passagers=nb,
                 email_payeur=email_payeur)
-
-            Siege.objects.filter(id__in=[s.id for s in sieges]).update(
-                statut=Siege.Statut.RESERVE, reserve_jusqu=reservation.expire_at)
-
-            for ordre, (p_data, siege) in enumerate(zip(passagers_data, sieges), start=1):
-                # Créer le passager (sans pièce d'identité)
-                passager = Passager.objects.create(
+            for ordre, p_data in enumerate(passagers_data, start=1):
+                Passager.objects.create(
                     reservation=reservation,
-                    siege=siege,
                     prenom=p_data['prenom'],
                     nom=p_data['nom'],
                     telephone=p_data['telephone'],
                     email=p_data.get('email', ''),
                     ordre=ordre)
-
-                # Créer immédiatement le billet individuel avec QR unique
-                Billet.objects.create(
-                    passager=passager,
-                    reservation=reservation,
-                    numero=ordre)
 
         return success_response(
             data=ReservationDetailSerializer(

@@ -16,7 +16,7 @@ from django.utils import timezone
 
 from paiements.models import Paiement
 from reservations.models import Reservation, Passager, Billet
-from transport.models import Bus, Gare, Ligne, Siege, Trajet, Transporteur, Ville
+from transport.models import places_disponibles, Bus, Gare, Ligne, Siege, Trajet, Transporteur, Ville
 
 User = get_user_model()
 
@@ -57,6 +57,7 @@ class Command(BaseCommand):
         self._lignes_retour()
         trajets = self._trajets(bus)
         self._exemples(comptes, trajets)
+        call_command('seed_bannieres')
         self.stdout.write(self.style.SUCCESS('\nDonnées de démonstration prêtes :'))
         for email, mdp, *_ in COMPTES:
             self.stdout.write(f'  {email:<24} {mdp}')
@@ -170,17 +171,22 @@ class Command(BaseCommand):
 
     @staticmethod
     def _reserver(user, trajet, nb):
-        sieges = list(Siege.disponibles(trajet)[:nb])
-        if len(sieges) < nb:
+        from reservations.models import PlacesEpuisees
+        from reservations.views import calculer_devis
+        if places_disponibles(trajet) < nb:
             return None
-        res = Reservation.objects.create(user=user, trajet=trajet, nb_passagers=nb,
-                                         montant_total=trajet.prix_actuel * nb, email_payeur=user.email)
-        for i, siege in enumerate(sieges, start=1):
-            p = Passager.objects.create(reservation=res, siege=siege, prenom=user.prenom if i == 1 else f'Accompagnant {i}',
-                                        nom=user.nom, telephone=user.telephone or '0700000000', ordre=i)
-            Billet.objects.create(passager=p, reservation=res, numero=i)
-        Siege.objects.filter(id__in=[s.id for s in sieges]).update(statut=Siege.Statut.OCCUPE)
-        res.confirmer()
+        devis = calculer_devis(trajet, nb)
+        res = Reservation.objects.create(user=user, trajet=trajet, nb_passagers=nb, email_payeur=user.email,
+                                         montant_billets=devis['montant_billets'], frais_service=devis['frais_service'],
+                                         montant_total=devis['montant_total'])
+        for i in range(1, nb + 1):
+            Passager.objects.create(reservation=res, prenom=user.prenom if i == 1 else f'Accompagnant {i}',
+                                    nom=user.nom, telephone=user.telephone or '0700000000', ordre=i)
+        try:
+            res.confirmer()   # attribue les sièges et émet les billets, comme après un paiement
+        except PlacesEpuisees:
+            res.delete()
+            return None
         Paiement.objects.create(
             reservation=res, user=user, montant=res.montant_total, statut=Paiement.Statut.SUCCES,
             methode=random.choice(['orange_money', 'mtn_momo', 'moov_money', 'wave', 'wave', 'carte']),

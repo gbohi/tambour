@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ville, Gare, Transporteur, Bus, Ligne, Trajet, Siege, Horaire
+from .models import Ville, Gare, Transporteur, Bus, Ligne, Trajet, Siege, Horaire, places_disponibles
 
 
 class VilleSerializer(serializers.ModelSerializer):
@@ -70,7 +70,9 @@ class TrajetListSerializer(serializers.ModelSerializer):
         return {'id': str(g.id), 'nom': g.nom} if g else None
 
     def get_places_disponibles(self, obj):
-        return obj.sieges.filter(statut=Siege.Statut.LIBRE).count()
+        if hasattr(obj, 'sieges_libres'):   # recherche : sièges déjà chargés
+            return max(0, len(obj.sieges_libres) - (getattr(obj, 'places_retenues', 0) or 0))
+        return places_disponibles(obj)
 
     def get_places_total(self, obj):
         return obj.sieges.count() or (obj.bus.capacite if obj.bus else 0)

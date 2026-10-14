@@ -147,7 +147,7 @@ class ScannerBilletView(APIView):
             return error_response('QR code non reconnu : ce n\'est pas un billet TamBour.')
 
         with transaction.atomic():
-            billet = (Billet.objects.select_for_update()
+            billet = (Billet.objects.select_for_update(of=('self',))
                       .select_related('reservation__trajet__ligne__depart', 'reservation__trajet__ligne__arrivee',
                                       'passager__siege')
                       .filter(reservation__reference=reference, numero=numero).first())

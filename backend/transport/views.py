@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.db.models import Q, Prefetch, Min, Count
+from django.db.models import Sum, Q, Prefetch, Min, Count
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -172,9 +172,11 @@ class RechercheTrajetView(APIView):
             'ligne__depart', 'ligne__arrivee', 'bus', 'transporteur'
         ).prefetch_related(
             Prefetch('sieges', queryset=Siege.objects.filter(statut=Siege.Statut.LIBRE),
-                     to_attr='sieges_libres'))
+                     to_attr='sieges_libres')
+        ).annotate(places_retenues=Sum('reservations__nb_passagers', filter=Q(
+            reservations__statut='en_attente', reservations__expire_at__gt=timezone.now())))
         nb = params['passagers']
-        trajets = [t for t in trajets if len(t.sieges_libres) >= nb]
+        trajets = [t for t in trajets if len(t.sieges_libres) - (t.places_retenues or 0) >= nb]
         if params.get('classe'):
             trajets = [t for t in trajets if t.bus and t.bus.classe == params['classe']]
         if params.get('prix_max'):

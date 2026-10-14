@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 from .models import Reservation, Passager, Billet, Avis
-from transport.models import Trajet, Siege
+from transport.models import Trajet, places_disponibles
 
 
 # ── Input passager — sans pièce d'identité, email facultatif ─────────────────
@@ -37,7 +37,7 @@ class CreerReservationSerializer(serializers.Serializer):
     def validate(self, attrs):
         # Les sièges sont attribués automatiquement : on vérifie seulement qu'il reste assez de places.
         trajet = attrs['trajet_id']
-        nb_libres = Siege.disponibles(trajet).count()
+        nb_libres = places_disponibles(trajet)
         if nb_libres < len(attrs['passagers']):
             raise serializers.ValidationError(
                 {'passagers': f'Plus assez de places sur ce trajet ({nb_libres} disponible(s)).'})
@@ -56,13 +56,16 @@ class BilletSerializer(serializers.ModelSerializer):
 
 
 class PassagerSerializer(serializers.ModelSerializer):
-    siege_numero     = serializers.ReadOnlyField(source='siege.numero')
+    siege_numero     = serializers.SerializerMethodField()   # null tant que le paiement n'est pas validé
     billet           = BilletSerializer(read_only=True)
 
     class Meta:
         model  = Passager
         fields = ['id', 'prenom', 'nom', 'telephone', 'email',
                   'siege_numero', 'ordre', 'billet']
+
+    def get_siege_numero(self, obj):
+        return obj.siege.numero if obj.siege_id else None
 
 
 class ReservationListSerializer(serializers.ModelSerializer):
@@ -77,7 +80,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
         model  = Reservation
         fields = [
             'id', 'reference', 'trajet', 'trajet_info', 'user_info',
-            'statut', 'montant_total', 'montant_rembourse',
+            'statut', 'montant_billets', 'frais_service', 'montant_total', 'montant_rembourse',
             'nb_passagers', 'email_payeur',
             'peut_etre_annulee', 'montant_remboursable', 'peut_etre_notee', 'avis_note',
             'created_at', 'updated_at',

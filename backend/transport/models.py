@@ -227,6 +227,18 @@ class Trajet(models.Model):
         return f'{h}h{str(m).zfill(2)}' if m else f'{h}h'
 
 
+def places_retenues(trajet):
+    """Places promises aux réservations qui attendent leur paiement (moins de 15 min) : pas encore de siège."""
+    from reservations.models import Reservation
+    return (Reservation.objects.filter(trajet=trajet, statut=Reservation.Statut.EN_ATTENTE,
+                                       expire_at__gt=timezone.now())
+            .aggregate(n=models.Sum('nb_passagers'))['n'] or 0)
+
+
+def places_disponibles(trajet):
+    return max(0, Siege.disponibles(trajet).count() - places_retenues(trajet))
+
+
 class Siege(models.Model):
     class Statut(models.TextChoices):
         LIBRE = 'libre', 'Libre'

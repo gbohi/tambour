@@ -14,7 +14,7 @@ from .serializers import (
     WebhookCinetPaySerializer, VersementSerializer,
 )
 from .services import CinetPayService, CinetPayException
-from reservations.models import Reservation
+from reservations.models import Reservation, PlacesEpuisees
 from transport.models import Siege
 from authentication.permissions import EstAdmin
 from authentication.views import StandardPagination
@@ -29,10 +29,17 @@ def _confirmer_paiement(paiement):
         paiement.confirme_le = timezone.now()
         paiement.save()
         reservation = paiement.reservation
-        reservation.confirmer()
-        Siege.objects.filter(passager__reservation=reservation).update(
-            statut=Siege.Statut.OCCUPE, reserve_jusqu=None)
-        points = reservation.montant_total // 1000
+        try:
+            reservation.confirmer()   # attribue les sièges et émet les billets
+        except PlacesEpuisees:
+            # Paiement arrivé après l'expiration, places reprises entre-temps : remboursement intégral.
+            reservation.statut = Reservation.Statut.ANNULEE
+            reservation.montant_rembourse = reservation.montant_total
+            reservation.notes = 'Plus de place au moment du paiement : remboursement intégral.'
+            reservation.save(update_fields=['statut', 'montant_rembourse', 'notes', 'updated_at'])
+            logger.warning(f'Paiement {paiement.reference} : plus de place, réservation {reservation.reference} à rembourser')
+            return
+        points = (reservation.montant_billets or reservation.montant_total) // 1000
         paiement.user.ajouter_points(
             points, motif='voyage', description=f'Voyage {reservation.trajet.ligne} ({reservation.reference})')
         paiement.user.incrementer_voyages()

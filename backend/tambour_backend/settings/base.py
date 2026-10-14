@@ -25,6 +25,7 @@ LOCAL_APPS = [
     'support',     # Centre d'aide, contact, réclamations, avis sur l'app
     'chauffeur',   # Espace chauffeur : trajets, scan des billets
     'suivi',       # Suivi des cars en temps réel (positions GPS, heure d'arrivée)
+    'plateforme',  # Paramètres de l'administrateur (frais de service) et bannières d'accueil
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

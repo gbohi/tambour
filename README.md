@@ -88,6 +88,8 @@ cd web_admin && npm install && npm start    # http://localhost:4200 (proxy vers 
 | `mobile_chauffeur/` | **TamBour Pro** | `ci.tambour.pro` | Trajets, passagers, scan des billets, partage de la position, fin de trajet |
 | `mobile_commun/` | package `tambour_commun` | — | Thème, police, logo, connexion, client API, widgets, carte de suivi, banc de test |
 
+Prérequis : **Flutter 3.44 ou plus récent** (`flutter --version` ; sinon `flutter upgrade`).
+
 ```bash
 cd mobile_passager  && flutter pub get && flutter run    # TamBour
 cd mobile_chauffeur && flutter pub get && flutter run    # TamBour Pro

@@ -4,8 +4,9 @@ publish_to: none
 version: 1.0.0
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
-  flutter: '>=3.22.0'
+  # Flutter 3.44 minimum (Dart 3.13), requis par les dépendances (url_launcher, share_plus, geolocator…)
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: '>=3.44.0'
 
 dependencies:
   flutter:

@@ -6,7 +6,9 @@ import 'package:tambour_commun/testing/debordements.dart';
 import 'package:tambour_commun/testing/faux_suivi.dart';
 import 'package:tambour_passager/screens/suivi/suivi_trajet_screen.dart';
 
+import 'package:tambour_passager/models/banniere.dart';
 import 'package:tambour_passager/models/fidelite.dart';
+import 'package:tambour_passager/providers/banniere_provider.dart';
 import 'package:tambour_passager/models/paiement.dart';
 import 'package:tambour_passager/models/support.dart';
 import 'package:tambour_passager/models/trajet.dart';
@@ -58,6 +60,13 @@ final reclamationsDemo = [
 
 
 
+// Sans image (pas de réseau en test) : seul le texte superposé est rendu
+const bannieresDemo = [
+  Banniere(id: 1, titre: 'Abidjan → Yamoussoukro, départs toute la journée', sousTitre: 'Dès 2 600 F, réservez en deux minutes depuis votre téléphone',
+    texteBouton: 'Voir les départs', action: 'recherche', departId: 'abj', departNom: 'Abidjan', arriveeId: 'yam', arriveeNom: 'Yamoussoukro'),
+  Banniere(id: 2, titre: 'Parrainez vos amis', sousTitre: '500 points pour vous', texteBouton: 'Inviter', action: 'page', page: 'fidelite'),
+];
+
 final ecrans = <String, Widget Function()>{
   'Accueil': () => const HomeScreen(),
   'Connexion / inscription': () => const AuthScreen(),
@@ -86,6 +95,9 @@ final ecrans = <String, Widget Function()>{
 
 /// Écrans avec une action (ouverture d'une fenêtre, d'un onglet…) avant la vérification.
 final interactions = <String, CasEcran>{
+  'Accueil › calendrier': (() => const HomeScreen(), (t) async {
+    await t.tap(find.text("Aujourd'hui"));
+  }),
   'Accueil › choix de la ville': (() => const HomeScreen(), (t) async {
     await t.tap(find.text('Choisir une ville').first);
   }),
@@ -116,7 +128,8 @@ void main() {
     for (final e in ecrans.entries) e.key: (e.value, null),
     ...interactions,
   }, overrides: [
-    passagerProvider.overrideWith((ref) => PassagerNotifier()..initialiser(['1A', '1B'])),
+    passagerProvider.overrideWith((ref) => PassagerNotifier()..initialiser(2)..attribuerSieges(['1A', '1B'])),
+    bannieresProvider.overrideWith((ref) async => bannieresDemo),
     fideliteProvider.overrideWith((ref) async => fideliteDemo),
     reclamationsProvider.overrideWith((ref) async => reclamationsDemo),
     faqProvider.overrideWith((ref) async => CategorieFAQ.parDefaut),

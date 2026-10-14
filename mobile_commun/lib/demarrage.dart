@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -27,6 +28,10 @@ class TamBourApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: TamBourTheme.light,
       routerConfig: router,
+      // Interface en français : calendriers, sélecteurs d'heure, boutons des boîtes de dialogue…
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [Locale('fr', 'FR')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
     );
   }
 }

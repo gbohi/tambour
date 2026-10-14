@@ -8,7 +8,6 @@ import 'package:tambour_passager/models/passager.dart';
 import 'package:tambour_passager/models/trajet.dart';
 import 'package:tambour_passager/providers/passager_provider.dart';
 import 'package:tambour_passager/providers/recherche_provider.dart';
-import 'package:tambour_passager/models/siege.dart';
 import 'package:tambour_passager/screens/paiement/paiement_screen.dart';
 
 class PassagersScreen extends ConsumerStatefulWidget {
@@ -21,19 +20,19 @@ class PassagersScreen extends ConsumerStatefulWidget {
 
 class _PassagersScreenState extends ConsumerState<PassagersScreen> {
   late final List<PassagerForm> _forms;
-  late final List<String> _sieges;
+  late final int _nb;
   late final PageController _pageController;
   int _pageActuelle = 0;
 
   @override
   void initState() {
     super.initState();
-    // Sièges attribués automatiquement parmi les places disponibles
-    _sieges = Siege.attribuerAuto(widget.params.nbPassagers, siegesOccupes: Siege.mockOccupes());
-    _forms = List.generate(_sieges.length, (_) => PassagerForm());
+    // Les sièges sont attribués automatiquement une fois le paiement validé
+    _nb = widget.params.nbPassagers;
+    _forms = List.generate(_nb, (_) => PassagerForm());
     _pageController = PageController();
     Future.microtask(
-      () => ref.read(passagerProvider.notifier).initialiser(_sieges));
+      () => ref.read(passagerProvider.notifier).initialiser(_nb));
   }
 
   @override
@@ -60,13 +59,12 @@ class _PassagersScreenState extends ConsumerState<PassagersScreen> {
 
   void _sauvegarder(int index) {
     final f = _forms[index];
-    final sieges = _sieges;
     ref.read(passagerProvider.notifier).mettreAJour(index, Passager(
       prenom:    f.prenomCtrl.text.trim(),
       nom:       f.nomCtrl.text.trim(),
       telephone: f.telephoneCtrl.text.trim(),
       email:     f.emailCtrl.text.trim(),
-      siegeId:   sieges[index],
+      siegeId:   '',
     ));
     // Le premier passager (index 0) = le payeur
     if (index == 0 && f.emailCtrl.text.trim().isNotEmpty) {
@@ -76,12 +74,11 @@ class _PassagersScreenState extends ConsumerState<PassagersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sieges = _sieges;
     return Scaffold(
       backgroundColor: TamBourColors.background,
       body: Column(children: [
         _Header(
-          nbPassagers: sieges.length,
+          nbPassagers: _nb,
           page: _pageActuelle,
           onBack: () {
             if (_pageActuelle > 0) {
@@ -92,19 +89,19 @@ class _PassagersScreenState extends ConsumerState<PassagersScreen> {
               Navigator.pop(context);
             }
           }),
-        if (sieges.length > 1) _StepBar(total: sieges.length, actif: _pageActuelle),
+        if (_nb > 1) _StepBar(total: _nb, actif: _pageActuelle),
         _RecapTrajet(trajet: widget.trajet),
         Expanded(child: PageView.builder(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: sieges.length,
+          itemCount: _nb,
           itemBuilder: (_, i) => _FormPage(
             index: i,
-            form: _forms[i], nbTotal: sieges.length,
+            form: _forms[i], nbTotal: _nb,
             estPremier: i == 0,
           ))),
         _Bottom(
-          page: _pageActuelle, nbTotal: sieges.length, onSuivant: _pageSuivante),
+          page: _pageActuelle, nbTotal: _nb, onSuivant: _pageSuivante),
       ]),
     );
   }
@@ -264,7 +261,7 @@ class _FormPageState extends State<_FormPage> {
                 style: const TextStyle(fontFamily: 'Outfit', fontSize: 15,
                   fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
               const SizedBox(height: 3),
-              const Text('Siège attribué automatiquement', style: TextStyle(
+              const Text('Siège attribué après le paiement', style: TextStyle(
                 fontFamily: 'Outfit', fontSize: 12,
                 color: TamBourColors.primary, fontWeight: FontWeight.w500)),
             ])),

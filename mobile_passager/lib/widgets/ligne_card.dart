@@ -9,7 +9,7 @@ import 'package:tambour_passager/providers/recherche_provider.dart';
 void rechercherLigne(BuildContext context, LignePopulaire l) {
   context.push('/resultats', extra: RechercheParams(
     villeDepart: l.villeDepart, villeArrivee: l.villeArrivee,
-    date: DateTime.now().add(const Duration(days: 1)), nbPassagers: 1));
+    date: DateTime.now(), nbPassagers: 1));
 }
 
 /// Carte compacte d'une ligne (carrousel de l'accueil).

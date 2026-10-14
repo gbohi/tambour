@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:tambour_commun/core/theme.dart';
 import 'package:tambour_passager/providers/recherche_provider.dart';
 import 'package:tambour_passager/screens/resultats/widgets/trajet_card.dart';
+import 'package:tambour_passager/widgets/avis_frais_service.dart';
 import 'package:tambour_passager/screens/resultats/widgets/filtre_bar.dart';
 
 class ResultatsScreen extends ConsumerStatefulWidget {
@@ -50,8 +51,12 @@ class _ResultatsScreenState extends ConsumerState<ResultatsScreen> {
       itemCount: state.resultatsFiltres.length + 1,
       itemBuilder: (context, i) {
         if (i == 0) return Padding(padding: const EdgeInsets.only(bottom: 12),
-          child: Text('${state.resultatsFiltres.length} trajet${state.resultatsFiltres.length > 1 ? 's' : ''} disponible${state.resultatsFiltres.length > 1 ? 's' : ''}',
-            style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary, fontWeight: FontWeight.w500)));
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text('${state.resultatsFiltres.length} trajet${state.resultatsFiltres.length > 1 ? 's' : ''} disponible${state.resultatsFiltres.length > 1 ? 's' : ''}',
+              style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, color: TamBourColors.textSecondary, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 10),
+            const AvisFraisService(),
+          ]));
         final trajet = state.resultatsFiltres[i - 1];
         return Padding(padding: const EdgeInsets.only(bottom: 12),
           child: TrajetCard(trajet: trajet, nbPassagers: widget.params.nbPassagers, index: i - 1, params: widget.params));

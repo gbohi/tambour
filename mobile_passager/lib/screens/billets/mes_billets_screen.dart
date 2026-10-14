@@ -13,6 +13,8 @@ import 'package:tambour_passager/screens/billets/noter_trajet_sheet.dart';
 import 'package:tambour_commun/widgets/logo_tambour.dart';
 import 'package:tambour_passager/screens/suivi/suivi_trajet_screen.dart';
 
+int _entier(Object? v) => v is num ? v.round() : (num.tryParse('${v ?? ''}') ?? 0).round();
+
 // ── Modèle mock passager par billet ──────────────────────────────────────────
 
 class _PassagerMock {
@@ -64,7 +66,8 @@ class _ReservationMock {
       depart: t['depart'] as String, arrivee: t['arrivee'] as String,
       date: DateTime.parse(t['heure_depart'] as String).toLocal(),
       compagnie: t['compagnie'] as String,
-      prixParPassager: nb > 0 ? (j['montant_total'] as int) ~/ nb : 0,
+      // Prix du billet hors frais de service (montant_billets ; montant_total pour les anciennes réservations)
+      prixParPassager: nb > 0 ? _entier(j['montant_billets'] ?? j['montant_total']) ~/ nb : 0,
       statut: t['statut'] == 'termine' && j['statut'] == 'confirmee' ? 'termine' : j['statut'] as String,
       passagers: passagers,
       peutEtreNotee: j['peut_etre_notee'] as bool? ?? false,
@@ -474,7 +477,7 @@ class _BilletIndividuelCard extends StatelessWidget {
                       fontSize: 13, fontWeight: FontWeight.w700)))),
                 const SizedBox(width: 10),
                 Expanded(child: ElevatedButton.icon(
-                  onPressed: () => _partager(),
+                  onPressed: () => _partager(context),
                   icon: const Icon(Icons.share_rounded, size: 16),
                   label: const Text('Partager'),
                   style: ElevatedButton.styleFrom(
@@ -508,20 +511,28 @@ class _BilletIndividuelCard extends StatelessWidget {
         refBillet: _refBillet, qrData: _qrData));
   }
 
-  // ── Partager ce billet ───────────────────────────────────────────────────
-  Future<void> _partager() async {
-    final fmt     = NumberFormat('#,###', 'fr_FR');
-    final dateFmt = DateFormat('EEEE d MMMM yyyy à HH:mm', 'fr_FR');
-    await Share.share(
-      '🎫 Billet TamBour — $_refBillet\n\n'
-      '👤 ${passager.nomComplet}\n'
-      '📍 ${reservation.depart} → ${reservation.arrivee}\n'
-      '📅 ${dateFmt.format(reservation.date)}\n'
-      '💺 Siège ${passager.siege}\n'
-      '🏢 ${reservation.compagnie}\n'
-      '💰 ${fmt.format(reservation.prixParPassager)} FCFA\n\n'
-      'Réservé avec TamBour 🥁 — Votre voyage, notre priorité.',
-      subject: 'Mon billet TamBour — ${reservation.depart} → ${reservation.arrivee}');
+  // ── Partager ce billet : le fichier PDF (le même que « Télécharger ») ──────
+  Future<void> _partager(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final boite = context.findRenderObject() as RenderBox?;
+    try {
+      final octets = await _genererBilletPdf(
+        reservation: reservation, passager: passager,
+        numeroBillet: numeroBillet, totalBillets: totalBillets,
+        refBillet: _refBillet, qrData: _qrData);
+      final nom = 'TamBour-$_refBillet.pdf';
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(octets, name: nom, mimeType: 'application/pdf')],
+        fileNameOverrides: [nom],
+        subject: 'Mon billet TamBour — ${reservation.depart} → ${reservation.arrivee}',
+        // Requis sur iPad : ancre de la feuille de partage
+        sharePositionOrigin: boite == null ? null : boite.localToGlobal(Offset.zero) & boite.size,
+      ));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(
+        content: Text('Partage impossible : $e'),
+        backgroundColor: TamBourColors.error, behavior: SnackBarBehavior.floating));
+    }
   }
 }
 
@@ -778,125 +789,11 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
   Future<void> _telechargerPdf() async {
     setState(() => _generatingPdf = true);
     try {
-      final r = widget.reservation;
-      final p = widget.passager;
-      final fmt      = NumberFormat('#,###', 'fr_FR');
-      final dateFmt  = DateFormat('dd/MM/yyyy HH:mm');
-
-      // Générer QR en image
-      final qrValidation = QrValidator.validate(
-        data: widget.qrData, version: QrVersions.auto,
-        errorCorrectionLevel: QrErrorCorrectLevel.L);
-      final qrCode = qrValidation.qrCode!;
-      final painter = QrPainter.withQr(qr: qrCode,
-        eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F4A3B)),
-        dataModuleStyle: const QrDataModuleStyle(
-          dataModuleShape: QrDataModuleShape.square, color: Color(0xFF1A1A1A)));
-      final imgData = await painter.toImageData(300);
-      final qrBytes = imgData!.buffer.asUint8List();
-      final qrImg   = pw.MemoryImage(qrBytes);
-
-      final logo = pw.MemoryImage((await rootBundle.load('packages/tambour_commun/assets/images/logo_symbole_clair.png')).buffer.asUint8List());
-      final doc = pw.Document();
-      doc.addPage(pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(40),
-        build: (ctx) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-          children: [
-            // En-tête
-            pw.Container(
-              padding: const pw.EdgeInsets.all(20),
-              decoration: pw.BoxDecoration(
-                color: const PdfColor.fromInt(0xFF0F4A3B),
-                borderRadius: pw.BorderRadius.circular(12)),
-              child: pw.Column(children: [
-                pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-                  pw.Row(children: [
-                    pw.Image(logo, height: 30),
-                    pw.SizedBox(width: 7),
-                    pw.Text('TamBour', style: pw.TextStyle(
-                      fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
-                  ]),
-                  if (widget.totalBillets > 1)
-                    pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.white,
-                        borderRadius: pw.BorderRadius.circular(20)),
-                      child: pw.Text(
-                        'Billet ${widget.numeroBillet}/${widget.totalBillets}',
-                        style: pw.TextStyle(
-                          fontSize: 11, fontWeight: pw.FontWeight.bold,
-                          color: const PdfColor.fromInt(0xFF0F4A3B)))),
-                ]),
-                pw.SizedBox(height: 16),
-                pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-                  pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                    pw.Text(r.depart, style: pw.TextStyle(
-                      fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
-                    pw.Text('DÉPART', style: const pw.TextStyle(fontSize: 9, color: PdfColors.white)),
-                  ]),
-                  // Flèche dessinée : la police standard du PDF n'a pas le glyphe « → ».
-                  pw.CustomPaint(size: const PdfPoint(24, 14), painter: (canvas, size) {
-                    const or = PdfColor.fromInt(0xFFF2A93B);
-                    canvas
-                      ..setStrokeColor(or)..setLineWidth(2.4)
-                      ..moveTo(2, 7)..lineTo(17, 7)..strokePath()
-                      ..setFillColor(or)
-                      ..moveTo(23, 7)..lineTo(15, 13)..lineTo(15, 1)..closePath()..fillPath();
-                  }),
-                  pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-                    pw.Text(r.arrivee, style: pw.TextStyle(
-                      fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
-                    pw.Text('ARRIVÉE', style: const pw.TextStyle(fontSize: 9, color: PdfColors.white)),
-                  ]),
-                ]),
-              ])),
-
-            pw.SizedBox(height: 24),
-
-            pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-              // Infos passager
-              pw.Expanded(child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  _pdfInfo('Référence',    widget.refBillet),
-                  _pdfInfo('Passager',     p.nomComplet),
-                  _pdfInfo('Téléphone',    p.telephone),
-                  if (p.email.isNotEmpty)
-                    _pdfInfo('Email',      p.email),
-                  _pdfInfo('Siège',        p.siege),
-                  _pdfInfo('Date/Heure',   dateFmt.format(r.date)),
-                  _pdfInfo('Compagnie',    r.compagnie),
-                  _pdfInfo('Montant',      '${fmt.format(r.prixParPassager)} FCFA'),
-                  _pdfInfo('Statut',       'Confirmé', coche: true),
-                ])),
-              pw.SizedBox(width: 20),
-              // QR
-              pw.Column(children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(8),
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColors.grey300),
-                    borderRadius: pw.BorderRadius.circular(8)),
-                  child: pw.Image(qrImg, width: 140, height: 140)),
-                pw.SizedBox(height: 6),
-                pw.Text("QR d'embarquement",
-                  style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey)),
-              ]),
-            ]),
-
-            pw.SizedBox(height: 20),
-            pw.Divider(color: PdfColors.grey300),
-            pw.SizedBox(height: 8),
-            pw.Text('Ce billet est nominatif et non transférable.',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
-            pw.Text('Support : support@tambour.ci',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
-          ])));
-
-      await Printing.layoutPdf(onLayout: (_) async => doc.save());
+      final octets = await _genererBilletPdf(
+        reservation: widget.reservation, passager: widget.passager,
+        numeroBillet: widget.numeroBillet, totalBillets: widget.totalBillets,
+        refBillet: widget.refBillet, qrData: widget.qrData);
+      await Printing.layoutPdf(name: 'TamBour-${widget.refBillet}.pdf', onLayout: (_) async => octets);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Erreur PDF : $e'),
@@ -905,26 +802,153 @@ class _BilletDetailSheetState extends State<_BilletDetailSheet> {
       if (mounted) setState(() => _generatingPdf = false);
     }
   }
-
-  pw.Widget _pdfInfo(String label, String value, {bool coche = false}) => pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: 8),
-    child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-      pw.Text(label, style: pw.TextStyle(fontSize: 9,
-        fontWeight: pw.FontWeight.bold, color: PdfColors.grey600)),
-      pw.SizedBox(height: 2),
-      pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
-        pw.Text(value, style: pw.TextStyle(fontSize: 12,
-          fontWeight: pw.FontWeight.bold)),
-        // Coche dessinée (pas de glyphe « ✓ » dans la police standard).
-        if (coche) pw.Padding(padding: const pw.EdgeInsets.only(left: 6),
-          child: pw.CustomPaint(size: const PdfPoint(10, 9), painter: (canvas, size) {
-            canvas
-              ..setStrokeColor(const PdfColor.fromInt(0xFF0F4A3B))..setLineWidth(1.6)
-              ..moveTo(0.5, 4.5)..lineTo(3.5, 1.5)..lineTo(9.5, 8.5)..strokePath();
-          })),
-      ]),
-    ]));
 }
+
+
+// ── Billet PDF (un passager) : téléchargé depuis la fiche, partagé depuis la carte ──
+Future<Uint8List> _genererBilletPdf({
+  required _ReservationMock reservation, required _PassagerMock passager,
+  required int numeroBillet, required int totalBillets,
+  required String refBillet, required String qrData,
+}) async {
+  final r = reservation;
+  final p = passager;
+  final fmt      = NumberFormat('#,###', 'fr_FR');
+  final dateFmt  = DateFormat('dd/MM/yyyy HH:mm');
+
+  // Générer QR en image
+  final qrValidation = QrValidator.validate(
+    data: qrData, version: QrVersions.auto,
+    errorCorrectionLevel: QrErrorCorrectLevel.L);
+  final qrCode = qrValidation.qrCode!;
+  final painter = QrPainter.withQr(qr: qrCode,
+    eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F4A3B)),
+    dataModuleStyle: const QrDataModuleStyle(
+      dataModuleShape: QrDataModuleShape.square, color: Color(0xFF1A1A1A)));
+  final imgData = await painter.toImageData(300);
+  final qrBytes = imgData!.buffer.asUint8List();
+  final qrImg   = pw.MemoryImage(qrBytes);
+
+  final logo = pw.MemoryImage((await rootBundle.load('packages/tambour_commun/assets/images/logo_symbole_clair.png')).buffer.asUint8List());
+  final doc = pw.Document();
+  doc.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.all(40),
+    build: (ctx) => pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+      children: [
+        // En-tête
+        pw.Container(
+          padding: const pw.EdgeInsets.all(20),
+          decoration: pw.BoxDecoration(
+            color: const PdfColor.fromInt(0xFF0F4A3B),
+            borderRadius: pw.BorderRadius.circular(12)),
+          child: pw.Column(children: [
+            pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+              pw.Row(children: [
+                pw.Image(logo, height: 30),
+                pw.SizedBox(width: 7),
+                pw.Text('TamBour', style: pw.TextStyle(
+                  fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+              ]),
+              if (totalBillets > 1)
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.white,
+                    borderRadius: pw.BorderRadius.circular(20)),
+                  child: pw.Text(
+                    'Billet ${numeroBillet}/${totalBillets}',
+                    style: pw.TextStyle(
+                      fontSize: 11, fontWeight: pw.FontWeight.bold,
+                      color: const PdfColor.fromInt(0xFF0F4A3B)))),
+            ]),
+            pw.SizedBox(height: 16),
+            pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+              pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                pw.Text(r.depart, style: pw.TextStyle(
+                  fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                pw.Text('DÉPART', style: const pw.TextStyle(fontSize: 9, color: PdfColors.white)),
+              ]),
+              // Flèche dessinée : la police standard du PDF n'a pas le glyphe « → ».
+              pw.CustomPaint(size: const PdfPoint(24, 14), painter: (canvas, size) {
+                const or = PdfColor.fromInt(0xFFF2A93B);
+                canvas
+                  ..setStrokeColor(or)..setLineWidth(2.4)
+                  ..moveTo(2, 7)..lineTo(17, 7)..strokePath()
+                  ..setFillColor(or)
+                  ..moveTo(23, 7)..lineTo(15, 13)..lineTo(15, 1)..closePath()..fillPath();
+              }),
+              pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+                pw.Text(r.arrivee, style: pw.TextStyle(
+                  fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                pw.Text('ARRIVÉE', style: const pw.TextStyle(fontSize: 9, color: PdfColors.white)),
+              ]),
+            ]),
+          ])),
+
+        pw.SizedBox(height: 24),
+
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          // Infos passager
+          pw.Expanded(child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              _pdfInfo('Référence',    refBillet),
+              _pdfInfo('Passager',     p.nomComplet),
+              _pdfInfo('Téléphone',    p.telephone),
+              if (p.email.isNotEmpty)
+                _pdfInfo('Email',      p.email),
+              _pdfInfo('Siège',        p.siege),
+              _pdfInfo('Date/Heure',   dateFmt.format(r.date)),
+              _pdfInfo('Compagnie',    r.compagnie),
+              _pdfInfo('Montant',      '${fmt.format(r.prixParPassager)} FCFA'),
+              _pdfInfo('Statut',       'Confirmé', coche: true),
+            ])),
+          pw.SizedBox(width: 20),
+          // QR
+          pw.Column(children: [
+            pw.Container(
+              padding: const pw.EdgeInsets.all(8),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey300),
+                borderRadius: pw.BorderRadius.circular(8)),
+              child: pw.Image(qrImg, width: 140, height: 140)),
+            pw.SizedBox(height: 6),
+            pw.Text("QR d'embarquement",
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey)),
+          ]),
+        ]),
+
+        pw.SizedBox(height: 20),
+        pw.Divider(color: PdfColors.grey300),
+        pw.SizedBox(height: 8),
+        pw.Text('Ce billet est nominatif et non transférable.',
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
+        pw.Text('Support : support@tambour.ci',
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
+      ])));
+  return doc.save();
+}
+
+pw.Widget _pdfInfo(String label, String value, {bool coche = false}) => pw.Padding(
+  padding: const pw.EdgeInsets.only(bottom: 8),
+  child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+    pw.Text(label, style: pw.TextStyle(fontSize: 9,
+      fontWeight: pw.FontWeight.bold, color: PdfColors.grey600)),
+    pw.SizedBox(height: 2),
+    pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
+      pw.Text(value, style: pw.TextStyle(fontSize: 12,
+        fontWeight: pw.FontWeight.bold)),
+      // Coche dessinée (pas de glyphe « ✓ » dans la police standard).
+      if (coche) pw.Padding(padding: const pw.EdgeInsets.only(left: 6),
+        child: pw.CustomPaint(size: const PdfPoint(10, 9), painter: (canvas, size) {
+          canvas
+            ..setStrokeColor(const PdfColor.fromInt(0xFF0F4A3B))..setLineWidth(1.6)
+            ..moveTo(0.5, 4.5)..lineTo(3.5, 1.5)..lineTo(9.5, 8.5)..strokePath();
+        })),
+    ]),
+  ]));
 
 // ── Widgets helpers ───────────────────────────────────────────────────────────
 

@@ -8,6 +8,7 @@ import 'package:tambour_passager/models/ligne_populaire.dart';
 import 'package:tambour_passager/models/ville.dart';
 import 'package:tambour_passager/providers/ligne_provider.dart';
 import 'package:tambour_passager/providers/recherche_provider.dart';
+import 'package:tambour_passager/widgets/carrousel_bannieres.dart';
 import 'package:tambour_passager/widgets/ligne_card.dart';
 import 'package:tambour_commun/widgets/section_header.dart';
 import 'package:tambour_commun/widgets/logo_tambour.dart';
@@ -46,6 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const _PromoBanner(),
                         const SizedBox(height: 28),
                         const _LignesPopulaires(),
+                        const CarrouselBannieres(),
                         const SizedBox(height: 100),
                       ],
                     ),
@@ -148,7 +150,7 @@ class _HeroHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bonjour 👋', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: Colors.white.withOpacity(0.8))).animate().fadeIn(delay: 100.ms),
+          Text('Salut 👋', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: Colors.white.withOpacity(0.8))).animate().fadeIn(delay: 100.ms),
           const SizedBox(height: 4),
           const Text("Où allez-vous\naujourd'hui ?", style: TextStyle(fontFamily: 'Outfit', fontSize: 30, fontWeight: FontWeight.w800, color: Colors.white, height: 1.2)).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
           const SizedBox(height: 20),
@@ -167,7 +169,7 @@ class _SearchCard extends ConsumerStatefulWidget {
 class _SearchCardState extends ConsumerState<_SearchCard> {
   Ville? _villeDepart;
   Ville? _villeArrivee;
-  DateTime _date = DateTime.now().add(const Duration(days: 1));
+  DateTime _date = DateTime.now();
   int _passagers = 1;
   final List<Ville> _villes = Ville.mockVilles;
 
@@ -183,8 +185,9 @@ class _SearchCardState extends ConsumerState<_SearchCard> {
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
-      context: context, initialDate: _date,
-      firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)),
+      context: context, initialDate: _date, locale: const Locale('fr', 'FR'),
+      helpText: 'Date du voyage', cancelText: 'Annuler', confirmText: 'Valider',
+      firstDate: DateUtils.dateOnly(DateTime.now()), lastDate: DateTime.now().add(const Duration(days: 90)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: TamBourColors.primary, onPrimary: Colors.white)),
         child: child!));

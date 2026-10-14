@@ -6,10 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tambour_commun/core/theme.dart';
 import 'package:tambour_passager/models/paiement.dart';
+import 'package:tambour_passager/models/siege.dart';
+import 'package:tambour_passager/models/tarifs.dart';
 import 'package:tambour_passager/models/trajet.dart';
 import 'package:tambour_passager/providers/paiement_provider.dart';
 import 'package:tambour_passager/providers/passager_provider.dart';
 import 'package:tambour_passager/providers/recherche_provider.dart';
+import 'package:tambour_passager/providers/tarifs_provider.dart';
 import 'package:tambour_passager/screens/billet/billet_screen.dart';
 
 class PaiementScreen extends ConsumerStatefulWidget {
@@ -41,14 +44,20 @@ class _PaiementScreenState extends ConsumerState<PaiementScreen> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => ref.read(paiementProvider.notifier).tickTimer());
     await ref.read(paiementProvider.notifier).initierPaiement(PaiementRequest(
       trajetId: widget.trajet.id,
-      montantFcfa: widget.trajet.prixFcfa * widget.params.nbPassagers,
+      montantFcfa: _devis.montantTotal,
       methode: state.methodeSelectionnee!, telephone: state.telephone));
     _timer?.cancel();
     final ns = ref.read(paiementProvider);
     if (ns.statut == StatutPaiement.succes && mounted) {
+      // Paiement validé : les sièges sont attribués maintenant (côte à côte), jamais avant
+      ref.read(passagerProvider.notifier).attribuerSieges(
+        Siege.attribuerAuto(widget.params.nbPassagers, siegesOccupes: Siege.mockOccupes()));
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => BilletScreen(trajet: widget.trajet, params: widget.params, result: ns.result!)));
     }
   }
+
+  /// TTC = prix des billets + frais de service (paramétrés par l'administrateur).
+  Devis get _devis => ref.read(tarifsActuelsProvider).devis(widget.trajet.prixFcfa, widget.params.nbPassagers);
 
   void _snack(String msg, bool isErr) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(msg, style: const TextStyle(fontFamily: 'Outfit')),
@@ -58,7 +67,8 @@ class _PaiementScreenState extends ConsumerState<PaiementScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(paiementProvider);
-    final total = widget.trajet.prixFcfa * widget.params.nbPassagers;
+    final devis = ref.watch(tarifsActuelsProvider).devis(widget.trajet.prixFcfa, widget.params.nbPassagers);
+    final total = devis.montantTotal;
     final fmt = NumberFormat('#,###', 'fr_FR');
     if (state.statut == StatutPaiement.expire) {
       WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) { Navigator.pop(context); _snack('Session expirée. Recommencez.', true); } });
@@ -70,7 +80,7 @@ class _PaiementScreenState extends ConsumerState<PaiementScreen> {
         Expanded(child: state.statut == StatutPaiement.enCours
           ? _EnCours(methode: state.methodeSelectionnee!, telephone: state.telephone, montant: total, secondes: state.secondesRestantes)
           : SingleChildScrollView(physics: const BouncingScrollPhysics(), padding: const EdgeInsets.fromLTRB(16, 20, 16, 24), child: Form(key: _formKey, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _RecapCard(trajet: widget.trajet, params: widget.params, total: total).animate().fadeIn(duration: 300.ms),
+              _RecapCard(trajet: widget.trajet, params: widget.params, devis: devis).animate().fadeIn(duration: 300.ms),
               const SizedBox(height: 24),
               const Text('Choisissez votre moyen de paiement', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
               const SizedBox(height: 14),
@@ -122,13 +132,12 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _RecapCard extends ConsumerWidget {
-  final Trajet trajet; final RechercheParams params; final int total;
-  const _RecapCard({required this.trajet, required this.params, required this.total});
+class _RecapCard extends StatelessWidget {
+  final Trajet trajet; final RechercheParams params; final Devis devis;
+  const _RecapCard({required this.trajet, required this.params, required this.devis});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final fmt = NumberFormat('#,###', 'fr_FR');
-    final sieges = ref.watch(passagerProvider).passagers.map((p) => p.siegeId).toList();
     return Container(decoration: BoxDecoration(color: TamBourColors.surface, borderRadius: BorderRadius.circular(18), border: Border.all(color: TamBourColors.border, width: 0.5)), child: Column(children: [
       Container(padding: const EdgeInsets.all(14), decoration: const BoxDecoration(color: TamBourColors.primaryLight, borderRadius: BorderRadius.only(topLeft: Radius.circular(18), topRight: Radius.circular(18))), child: Row(children: [
         Container(width: 40, height: 40, decoration: BoxDecoration(color: TamBourColors.primary, borderRadius: BorderRadius.circular(11)), child: const Icon(Icons.directions_bus_rounded, color: Colors.white, size: 22)),
@@ -143,11 +152,15 @@ class _RecapCard extends ConsumerWidget {
         const SizedBox(height: 6),
         _Ligne('Passagers', '${params.nbPassagers} passager${params.nbPassagers > 1 ? 's' : ''}'),
         const SizedBox(height: 6),
-        _Ligne('Sièges attribués', sieges.join(', ')),
+        _Ligne('Sièges', 'Attribués après le paiement'),
+        const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(height: 1)),
+        _Ligne('Billets', '${fmt.format(devis.montantBillets)} FCFA'),
+        const SizedBox(height: 6),
+        _Ligne('Frais de service', '${fmt.format(devis.fraisService)} FCFA'),
         const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(height: 1)),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Text('Total à payer', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
-          Text('${fmt.format(total)} FCFA', style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: TamBourColors.primary)),
+          const Text('Total TTC à payer', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: TamBourColors.textPrimary)),
+          Text('${fmt.format(devis.montantTotal)} FCFA', style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: TamBourColors.primary)),
         ]),
       ])),
     ]));

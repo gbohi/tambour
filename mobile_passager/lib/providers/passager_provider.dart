@@ -23,11 +23,20 @@ class PassagerState {
 class PassagerNotifier extends StateNotifier<PassagerState> {
   PassagerNotifier() : super(const PassagerState());
 
-  void initialiser(List<String> siegeIds) {
+  /// Prépare [nb] passagers. Le siège reste vide : il n'est attribué qu'une fois le paiement validé.
+  void initialiser(int nb) {
     state = PassagerState(
-      passagers: siegeIds.map((id) => Passager(
-        prenom: '', nom: '', telephone: '', email: '', siegeId: id,
-      )).toList());
+      passagers: List.generate(nb, (_) => const Passager(
+        prenom: '', nom: '', telephone: '', email: '', siegeId: '',
+      )));
+  }
+
+  /// Sièges attribués après le paiement (dans l'ordre des passagers).
+  void attribuerSieges(List<String> siegeIds) {
+    state = state.copyWith(passagers: [
+      for (var i = 0; i < state.passagers.length; i++)
+        state.passagers[i].copyWith(siegeId: i < siegeIds.length ? siegeIds[i] : ''),
+    ]);
   }
 
   void mettreAJour(int index, Passager passager) {

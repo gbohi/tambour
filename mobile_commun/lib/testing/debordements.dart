@@ -2,6 +2,7 @@
 // de téléphone et échoue si un widget déborde (« A RenderFlex overflowed by N pixels »).
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,6 +73,10 @@ void testerDebordements(Map<String, CasEcran> cas, {List<Override> overrides = c
           child: MaterialApp(
             theme: ThemeData(fontFamily: 'Outfit', useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F4A3B))),
+            // Comme l'application : interface en français (calendrier…)
+            locale: const Locale('fr', 'FR'),
+            supportedLocales: const [Locale('fr', 'FR')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
             builder: (context, child) => MediaQuery(
               data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(c.texte)),
               child: child!),

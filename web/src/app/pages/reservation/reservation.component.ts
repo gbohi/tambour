@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs';
 import { ApiService, messageErreur } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
-import { MethodePaiement, PassagerSaisie, Trajet } from '../../core/models';
+import { Devis, MethodePaiement, PassagerSaisie, Trajet } from '../../core/models';
 import { METHODES_PAIEMENT } from '../../core/paiements';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
@@ -110,10 +110,11 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
                 <div class="cie"><span class="logo-cie">{{ t.compagnie[0] }}</span><div><b>{{ t.compagnie }}</b><small>{{ classeLabel(t.bus_classe) }} · {{ t.bus_immatriculation }}</small></div></div>
                 <div class="lignes">
                   <div><span>{{ nbPassagers() }} × billet</span><span>{{ t.prix_actuel | nb:'F' }}</span></div>
-                  <div><span>Frais de service</span><span class="vert">Offerts</span></div>
-                  <div class="total"><span>Total</span><span>{{ total() | nb:'F' }}</span></div>
+                  <div><span>Frais de service</span><span>@if (devis(); as d) { {{ d.frais_service | nb:'F' }} } @else { … }</span></div>
+                  <div class="total"><span>Total TTC</span><span>{{ total() | nb:'F' }}</span></div>
                 </div>
-                <p class="siege"><tb-icon name="seat" [size]="16" /> Sièges attribués automatiquement, côte à côte.</p>
+                <div class="alerte or frais"><tb-icon name="info" [size]="16" /> <span>Des frais de service s'appliquent à chaque réservation.</span></div>
+                <p class="siege"><tb-icon name="seat" [size]="16" /> Sièges attribués automatiquement, côte à côte, dès que le paiement est validé.</p>
               </div>
             } @else { <div class="squelette" style="height:380px;border-radius:20px"></div> }
           </aside>
@@ -172,6 +173,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     .lignes{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bord);padding-top:16px;}
     .lignes div{display:flex;justify-content:space-between;color:var(--texte-2);}
     .lignes .vert{color:var(--vert);font-weight:700;}
+    .frais{margin-top:14px;font-size:13px;padding:10px 12px;align-items:center;}
     .lignes .total{color:var(--texte);font-size:20px;font-weight:900;border-top:1px solid var(--bord);padding-top:12px;}
     .siege{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texte-2);}
   `],
@@ -195,7 +197,9 @@ export class ReservationComponent implements OnInit {
   telephonePaiement = '';
   private trajetId = '';
 
-  total = computed(() => (this.trajet()?.prix_actuel ?? 0) * this.nbPassagers());
+  /** Prix calculé par le serveur : billets + frais de service (paramétrés dans l'admin). */
+  devis = signal<Devis | null>(null);
+  total = computed(() => this.devis()?.montant_total ?? (this.trajet()?.prix_actuel ?? 0) * this.nbPassagers());
   methodeLabel = computed(() => METHODES_PAIEMENT.find(m => m.code === this.methode())?.label ?? '');
 
   ngOnInit(): void {
@@ -211,7 +215,10 @@ export class ReservationComponent implements OnInit {
     this.telephonePaiement = brouillon?.telephone || this.voyageurs[0].telephone || u?.telephone || '';
     if (brouillon?.etape === 2 && this.valides()) this.etape.set(2);
     this.api.trajet(this.trajetId).subscribe({
-      next: t => this.trajet.set(t),
+      next: t => {
+        this.trajet.set(t);
+        this.api.devis(this.trajetId, this.nbPassagers()).subscribe({ next: d => this.devis.set(d), error: () => {} });
+      },
       error: () => this.erreurChargement.set('Il a peut-être déjà eu lieu ou il est complet. Lancez une nouvelle recherche.'),
     });
   }

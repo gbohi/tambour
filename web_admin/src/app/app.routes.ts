@@ -33,6 +33,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/gares/gares.component').then(m => m.GaresComponent) },
       { path: 'rapports',      canActivate: [roleGuard], data: { roles: ['admin'] },
         loadComponent: () => import('./features/rapports/rapports.component').then(m => m.RapportsComponent) },
+      { path: 'bannieres',     canActivate: [roleGuard], data: { roles: ['admin'] },
+        loadComponent: () => import('./features/bannieres/bannieres.component').then(m => m.BannieresComponent) },
+      { path: 'parametres',    canActivate: [roleGuard], data: { roles: ['admin'] },
+        loadComponent: () => import('./features/parametres/parametres.component').then(m => m.ParametresComponent) },
       { path: 'profil', loadComponent: () => import('./features/profil/profil.component').then(m => m.ProfilComponent) },
     ]
   },

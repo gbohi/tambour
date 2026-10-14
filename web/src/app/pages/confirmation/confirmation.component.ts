@@ -31,7 +31,7 @@ import { suiviDisponible } from '../../core/suivi';
             <span><tb-icon name="calendar" [size]="16" /> {{ r.trajet_info.heure_depart | date:'EEEE d MMMM, HH:mm' }}</span>
             <span><tb-icon name="bus" [size]="16" /> {{ r.trajet_info.compagnie }}</span>
             <span><tb-icon name="ticket" [size]="16" /> Réf. <b class="mono">{{ r.reference }}</b></span>
-            <span><tb-icon name="wallet" [size]="16" /> {{ r.montant_total | nb:'F' }}</span>
+            <span><tb-icon name="wallet" [size]="16" /> {{ r.montant_total | nb:'F' }}@if (r.frais_service) { <small class="dont-frais">dont {{ r.frais_service | nb:'F' }} de frais de service</small> }</span>
           </div>
           <div class="actions">
             @if (suiviDisponible(r)) { <a class="btn btn-or btn-sm" [routerLink]="['/suivi', r.trajet_info.id]"><tb-icon name="navigation" [size]="16" /> Suivre le car en direct</a> }
@@ -81,6 +81,7 @@ import { suiviDisponible } from '../../core/suivi';
     </div>
   `,
   styles: [`
+    .dont-frais{color:var(--texte-3);font-weight:500;margin-left:6px;}
     .page{padding-top:32px;padding-bottom:40px;}
     .bravo{display:flex;gap:20px;align-items:center;padding:28px;border-radius:var(--r-xl);background:linear-gradient(150deg,var(--vert-900),var(--vert));color:#fff;margin-bottom:24px;}
     .ok{width:68px;height:68px;border-radius:50%;background:var(--or);color:var(--encre);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:monte .4s;}

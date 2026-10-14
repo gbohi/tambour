@@ -5,6 +5,7 @@ import { environment } from '@env/environment';
 import { ApiResponse, PaginatedResponse, PageParams } from '../models/api.model';
 import { User } from '../models/user.model';
 import { Ville, Gare, Transporteur, Trajet, DashboardStats } from '../models/transport.model';
+import { Banniere, ParametresPlateforme } from '../models/plateforme.model';
 import { Reservation, Paiement, NotifResponse, Versement } from '../models/reservation.model';
 import {
   Reclamation, ReclamationsResponse, MessageSupport, MessagesResponse, AvisResponse,
@@ -145,5 +146,28 @@ export class ApiService {
   }
   affecterChauffeur(trajetId: string, chauffeurId: string | null): Observable<ApiResponse<Trajet>> {
     return this.http.patch<ApiResponse<Trajet>>(`${this.API}/trajets/${trajetId}/`, { chauffeur: chauffeurId });
+  }
+
+  // ── Plateforme : frais de service et bannières d'accueil ──────────────────
+  getParametres(): Observable<ApiResponse<ParametresPlateforme>> {
+    return this.http.get<ApiResponse<ParametresPlateforme>>(`${this.API}/admin/parametres/`);
+  }
+  updateParametres(data: Partial<ParametresPlateforme>): Observable<ApiResponse<ParametresPlateforme>> {
+    return this.http.patch<ApiResponse<ParametresPlateforme>>(`${this.API}/admin/parametres/`, data);
+  }
+  getBannieres(): Observable<ApiResponse<PaginatedResponse<Banniere>>> {
+    return this.http.get<ApiResponse<PaginatedResponse<Banniere>>>(`${this.API}/admin/bannieres/`, { params: { page_size: '100' } });
+  }
+  /** Envoi en multipart pour pouvoir joindre l'image. */
+  enregistrerBanniere(id: number | null, data: FormData): Observable<ApiResponse<Banniere>> {
+    return id
+      ? this.http.patch<ApiResponse<Banniere>>(`${this.API}/admin/bannieres/${id}/`, data)
+      : this.http.post<ApiResponse<Banniere>>(`${this.API}/admin/bannieres/`, data);
+  }
+  updateBanniere(id: number, data: Partial<Banniere>): Observable<ApiResponse<Banniere>> {
+    return this.http.patch<ApiResponse<Banniere>>(`${this.API}/admin/bannieres/${id}/`, data);
+  }
+  deleteBanniere(id: number): Observable<unknown> {
+    return this.http.delete(`${this.API}/admin/bannieres/${id}/`);
   }
 }

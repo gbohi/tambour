@@ -11,6 +11,7 @@ const TITRES: Record<string, string> = {
   '/trajets': 'Trajets', '/reservations': 'Réservations', '/paiements': 'Paiements',
   '/notifications': 'Notifications', '/gares': 'Gares', '/rapports': 'Rapports',
   '/profil': 'Mon profil', '/support': 'Support client', '/chauffeurs': 'Chauffeurs',
+  '/bannieres': 'Bannières', '/parametres': 'Paramètres',
 };
 
 @Component({

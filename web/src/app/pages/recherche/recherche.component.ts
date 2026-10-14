@@ -47,6 +47,7 @@ const EQUIPEMENTS: Record<string, { label: string; icone: string }> = {
         <h1>{{ villeNom(departId()) }} <tb-icon name="arrow-right" [size]="24" /> {{ villeNom(arriveeId()) }}</h1>
         <p class="muted">{{ libelle(date()) }} · {{ passagers() }} passager{{ passagers() > 1 ? 's' : '' }}
           @if (!chargement()) { · <b>{{ affiches().length }} départ{{ affiches().length > 1 ? 's' : '' }}</b> }</p>
+        <div class="alerte or avis-frais"><tb-icon name="info" [size]="16" /> <span>Des frais de service s'appliquent à chaque réservation.</span></div>
       </div>
 
       <div class="disposition">
@@ -143,6 +144,7 @@ const EQUIPEMENTS: Record<string, { label: string; icone: string }> = {
     </div>
   `,
   styles: [`
+    .avis-frais{margin-top:12px;font-size:13px;padding:10px 12px;align-items:center;display:inline-flex;}
     .bandeau{background:linear-gradient(165deg,#072A21,#0F4A3B);padding:28px 0;}
     .dates{display:flex;gap:8px;align-items:center;margin:28px 0 8px;overflow-x:auto;padding-bottom:4px;}
     .jour{flex:1;min-width:110px;height:50px;border-radius:14px;border:1px solid var(--bord);background:#fff;font-weight:600;cursor:pointer;color:var(--texte-2);white-space:nowrap;}

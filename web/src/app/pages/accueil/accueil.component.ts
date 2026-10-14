@@ -4,15 +4,16 @@ import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { LignePopulaire, CategorieFAQ } from '../../core/models';
 import { MOBILE_MONEY } from '../../core/paiements';
-import { demain } from '../../core/recherche';
+import { aujourdhui } from '../../core/recherche';
 import { FormulaireRechercheComponent } from '../../shared/components/formulaire-recherche.component';
+import { CarrouselBannieresComponent } from '../../shared/components/carrousel-bannieres.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 
 @Component({
   selector: 'tb-accueil',
   standalone: true,
-  imports: [RouterLink, FormulaireRechercheComponent, IconComponent, NombrePipe],
+  imports: [RouterLink, FormulaireRechercheComponent, CarrouselBannieresComponent, IconComponent, NombrePipe],
   template: `
     <!-- ── Hero ─────────────────────────────────────────────────────────── -->
     <section class="hero">
@@ -73,6 +74,11 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
       </div>
     </section>
 
+    <!-- ── Bannières (gérées dans l'admin) ─────────────────────────────── -->
+    <section class="section section-bannieres">
+      <div class="conteneur"><tb-carrousel-bannieres /></div>
+    </section>
+
     <!-- ── Comment ça marche ────────────────────────────────────────────── -->
     <section class="section etapes-section">
       <div class="conteneur">
@@ -124,6 +130,7 @@ import { NombrePipe } from '../../shared/pipes/nombre.pipe';
     }
   `,
   styles: [`
+    .section-bannieres{padding-top:0;}
     .hero{position:relative;overflow:hidden;color:#fff;padding:150px 0 110px;
       background:radial-gradient(900px 500px at 85% 10%,rgba(46,132,102,.45),transparent 60%),
                  radial-gradient(700px 400px at 0% 100%,rgba(245,166,35,.28),transparent 60%),
@@ -220,7 +227,7 @@ export class AccueilComponent implements OnInit {
   readonly atouts = [
     { icone: 'wallet', titre: 'Mobile Money', texte: 'Orange, Wave, MTN, Moov ou carte' },
     { icone: 'qr', titre: 'Billet sur mobile', texte: 'QR code, pas d\'impression' },
-    { icone: 'seat', titre: 'Siège garanti', texte: 'Attribué dès le paiement' },
+    { icone: 'seat', titre: 'Siège garanti', texte: 'Attribué dès le paiement validé' },
     { icone: 'headset', titre: 'Support 7j/7', texte: 'Par téléphone et WhatsApp' },
   ];
   readonly etapes = [
@@ -237,6 +244,6 @@ export class AccueilComponent implements OnInit {
   }
 
   chercher(l: LignePopulaire): void {
-    this.router.navigate(['/recherche'], { queryParams: { depart: l.depart_id, arrivee: l.arrivee_id, date: demain(), passagers: 1 } });
+    this.router.navigate(['/recherche'], { queryParams: { depart: l.depart_id, arrivee: l.arrivee_id, date: aujourdhui(), passagers: 1 } });
   }
 }

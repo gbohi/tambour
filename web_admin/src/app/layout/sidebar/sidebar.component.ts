@@ -27,6 +27,10 @@ const SECTIONS: NavSection[] = [
   { titre: 'Finances', items: [
     { label: 'Paiements', icon: 'wallet', path: '/paiements', roles: ['admin'] },
   ]},
+  { titre: 'Plateforme', items: [
+    { label: 'Bannières',  icon: 'image',   path: '/bannieres',  roles: ['admin'] },
+    { label: 'Paramètres', icon: 'sliders', path: '/parametres', roles: ['admin'] },
+  ]},
 ];
 
 @Component({

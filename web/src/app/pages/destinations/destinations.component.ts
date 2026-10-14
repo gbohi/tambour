@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { LignePopulaire } from '../../core/models';
-import { demain } from '../../core/recherche';
+import { aujourdhui } from '../../core/recherche';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { NombrePipe } from '../../shared/pipes/nombre.pipe';
 
@@ -81,6 +81,6 @@ export class DestinationsComponent implements OnInit {
   }
   toutes(): void { this.router.navigate(['/destinations']); }
   voir(l: LignePopulaire): void {
-    this.router.navigate(['/recherche'], { queryParams: { depart: l.depart_id, arrivee: l.arrivee_id, date: demain(), passagers: 1 } });
+    this.router.navigate(['/recherche'], { queryParams: { depart: l.depart_id, arrivee: l.arrivee_id, date: aujourdhui(), passagers: 1 } });
   }
 }

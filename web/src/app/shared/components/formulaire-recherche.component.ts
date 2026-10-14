@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { VillesService } from '../../core/villes.service';
 import { Ville } from '../../core/models';
-import { demain, isoJour } from '../../core/recherche';
+import { isoJour } from '../../core/recherche';
 import { IconComponent } from './icon/icon.component';
 
 type Champ = 'depart' | 'arrivee' | 'passagers' | null;
@@ -147,7 +147,7 @@ export class FormulaireRechercheComponent implements OnInit {
   ouvert = signal<Champ>(null);
   erreur = signal('');
   filtre = signal('');
-  date = demain();
+  date = isoJour(new Date());
   passagers = 1;
   aujourdhui = isoJour(new Date());
 
@@ -208,7 +208,7 @@ export class FormulaireRechercheComponent implements OnInit {
   rechercher(): void {
     this.ouvert.set(null);
     if (!this.depart() || !this.arrivee()) { this.erreur.set('Choisissez votre ville de départ et d\'arrivée.'); return; }
-    if (!this.date) this.date = demain();
+    if (!this.date) this.date = this.aujourdhui;
     this.router.navigate(['/recherche'], { queryParams: {
       depart: this.depart()!.id, arrivee: this.arrivee()!.id, date: this.date, passagers: this.passagers } });
   }

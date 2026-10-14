@@ -84,7 +84,9 @@ import { Reservation, Passager, Billet } from '../../core/models/reservation.mod
         <div class="drawer-body">
           <div class="resume">
             <div><span>Statut</span><span class="badge" [ngClass]="statutBadge(r.statut)">{{ statutLabel(r.statut) }}</span></div>
-            <div><span>Montant</span><b>{{ r.montant_total | nb:'FCFA' }}</b></div>
+            <div><span>Billets</span><b>{{ (r.montant_billets || r.montant_total) | nb:'FCFA' }}</b></div>
+            <div><span>Frais de service</span><b>{{ r.frais_service | nb:'FCFA' }}</b></div>
+            <div><span>Total TTC</span><b>{{ r.montant_total | nb:'FCFA' }}</b></div>
             <div><span>Réservée le</span><b>{{ r.created_at | date:'d MMM yyyy, HH:mm' }}</b></div>
             @if (r.montant_rembourse) { <div><span>Remboursé</span><b>{{ r.montant_rembourse | nb:'FCFA' }}</b></div> }
           </div>
@@ -230,10 +232,10 @@ export class ReservationsComponent implements OnInit {
   }
 
   exportCsv(): void {
-    const csv = ['Référence,Départ,Arrivée,Passagers,Montant,Email payeur,Statut,Date',
+    const csv = ['Référence,Départ,Arrivée,Passagers,Billets,Frais de service,Total TTC,Email payeur,Statut,Date',
       ...this.reservations().map(r =>
         [r.reference, r.trajet_info.depart, r.trajet_info.arrivee,
-         r.nb_passagers, r.montant_total, r.email_payeur, r.statut, r.created_at].join(',')
+         r.nb_passagers, r.montant_billets || r.montant_total, r.frais_service, r.montant_total, r.email_payeur, r.statut, r.created_at].join(',')
       )].join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     Object.assign(document.createElement('a'), { href: url, download: 'reservations.csv' }).click();

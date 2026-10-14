@@ -88,7 +88,9 @@ function pageBillet(doc: jsPDF, r: Reservation, p: Passager, numero: number, tot
 
   // ── Infos passager ─────────────────────────────────────────────────────────
   const yCorps = MARGE + hTete + 24;
-  const prixParPassager = r.passagers.length ? r.montant_total / r.passagers.length : r.montant_total;
+  // Prix du billet, hors frais de service (montant_total pour les réservations antérieures aux frais)
+  const billets = r.montant_billets || r.montant_total;
+  const prixParPassager = r.passagers.length ? billets / r.passagers.length : billets;
   const infos: [string, string][] = [
     ['Référence', p.billet?.reference_billet ?? `${r.reference}-P${numero}`],
     ['Passager', `${p.prenom} ${p.nom}`],

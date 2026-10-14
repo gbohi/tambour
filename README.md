@@ -14,8 +14,17 @@ Réservation de transport interurbain en Côte d'Ivoire.
 
 ## Fonctionnalités récentes
 
-- **Sièges attribués automatiquement** : plus de choix de siège ; à la réservation, l'API attribue les premières
-  places libres du car (passagers côte à côte), avec verrouillage pour éviter les doubles attributions.
+- **Sièges attribués au paiement** : plus de choix de siège. Pendant les 15 min du paiement, les places sont
+  seulement *retenues* (personne d'autre ne peut les prendre) ; les sièges (côte à côte) sont attribués quand le
+  paiement est validé, avec verrouillage du trajet. Si le paiement arrive après l'expiration et que le car est
+  complet entre-temps, la réservation est annulée et remboursée intégralement.
+- **Frais de service** (web admin › Plateforme › Paramètres) : montant fixe par réservation (500 FCFA par défaut),
+  par passager, ou pourcentage avec minimum ; remboursables ou non. Total TTC = billets + frais.
+  API : `GET /api/v1/plateforme/tarifs/`, `GET /api/v1/reservations/devis/?trajet_id=…&passagers=2`,
+  `GET|PATCH /api/v1/admin/parametres/`.
+- **Bannières d'accueil** (web admin › Plateforme › Bannières) : carrousel d'images après « Lignes populaires »
+  (application et site) : image, titre, bouton, action (recherche, page, lien), ordre, dates de diffusion.
+  API : `GET /api/v1/bannieres/`, `/api/v1/admin/bannieres/` ; démo : `python manage.py seed_bannieres`.
 - **Lignes populaires** : `GET /api/v1/lignes/populaires/` et page « Voir tout » dans l'application.
 - **Fidélité & parrainage** : chaque utilisateur a un code (ex. `TB7K2QX9`). À l'inscription avec ce code, le parrain
   et le filleul gagnent des points (`POINTS_PARRAIN`, `POINTS_FILLEUL` dans `.env`). Historique des points

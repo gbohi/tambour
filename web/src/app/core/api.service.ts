@@ -4,7 +4,7 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   ApiResponse, Page, Ville, Trajet, Suivi, LignePopulaire, Gare, Reservation, Fidelite, CategorieFAQ,
-  InfosContact, PassagerSaisie, MethodePaiement, User,
+  InfosContact, PassagerSaisie, MethodePaiement, User, Devis, Banniere,
 } from './models';
 
 /** Accès à l'API TamBour (toutes les réponses sont enveloppées dans { success, data }). */
@@ -28,6 +28,8 @@ export class ApiService {
   gares(): Observable<Gare[]> { return this.get<Page<Gare>>('/gares/', { page_size: 200 }).pipe(map(p => p.results)); }
   departsGare(id: string): Observable<Trajet[]> { return this.get<{ results: Trajet[] }>(`/gares/${id}/departs/`).pipe(map(r => r.results)); }
   trajet(id: string): Observable<Trajet> { return this.get<Trajet>(`/trajets/${id}/`); }
+  devis(trajetId: string, passagers: number): Observable<Devis> { return this.get<Devis>('/reservations/devis/', { trajet_id: trajetId, passagers }); }
+  bannieres(): Observable<Banniere[]> { return this.get<{ results: Banniere[] }>('/bannieres/').pipe(map(r => r.results)); }
   rechercher(c: { depart: string; arrivee: string; date: string; passagers: number; tri?: string; classe?: string }): Observable<Trajet[]> {
     return this.post<{ results: Trajet[] }>('/trajets/recherche/', c).pipe(map(r => r.data.results));
   }

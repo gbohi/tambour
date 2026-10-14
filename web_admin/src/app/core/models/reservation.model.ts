@@ -30,7 +30,9 @@ export interface Reservation {
   user?: string;
   user_info?: { nom_complet: string; email: string; telephone: string };
   statut: 'en_attente' | 'confirmee' | 'annulee' | 'expiree' | 'remboursee';
-  montant_total: number;
+  montant_billets: number;   // prix des billets
+  frais_service: number;     // frais de service (paramétrés dans l'admin)
+  montant_total: number;     // TTC = billets + frais
   montant_rembourse: number;
   nb_passagers: number;
   email_payeur: string;

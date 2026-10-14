@@ -38,7 +38,8 @@ export interface Reservation {
   id: string; reference: string; trajet: string;
   trajet_info: { id: string; depart: string; arrivee: string; heure_depart: string; heure_arrivee_estimee: string; compagnie: string; prix_fcfa: number; statut: string; };
   statut: 'en_attente' | 'confirmee' | 'annulee' | 'expiree' | 'remboursee';
-  montant_total: number; montant_rembourse: number; nb_passagers: number; email_payeur: string;
+  montant_total: number; montant_billets: number; frais_service: number;
+  montant_rembourse: number; nb_passagers: number; email_payeur: string;
   peut_etre_annulee: boolean; montant_remboursable: number; peut_etre_notee: boolean; avis_note: number | null;
   passagers: Passager[]; expire_at: string | null; created_at: string;
 }
@@ -68,4 +69,17 @@ export interface Suivi {
     heure_arrivee_prevue: string; retard_minutes: number; compagnie: string; bus_immatriculation: string; };
   point_depart: PointSuivi | null; point_arrivee: PointSuivi | null;
   trace?: [number, number][]; rafraichir_dans_secondes: number;
+}
+
+/** Prix d'une réservation : TTC = billets + frais de service (paramétrés dans l'admin). */
+export interface Devis {
+  prix_unitaire: number; nb_passagers: number; montant_billets: number; frais_service: number;
+  montant_total: number; libelle_frais: string; frais_remboursables: boolean;
+}
+
+/** Bannière du carrousel d'accueil (Plateforme › Bannières dans l'admin). */
+export interface Banniere {
+  id: number; titre: string; sous_titre: string; image_url: string | null; couleur_fond: string; texte_bouton: string;
+  action: 'aucune' | 'recherche' | 'page' | 'lien'; depart: string | null; arrivee: string | null;
+  depart_nom?: string; arrivee_nom?: string; page: '' | 'fidelite' | 'gares' | 'lignes' | 'aide'; lien: string;
 }

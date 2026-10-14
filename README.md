@@ -88,7 +88,11 @@ cd web_admin && npm install && npm start    # http://localhost:4200 (proxy vers 
 | `mobile_chauffeur/` | **TamBour Pro** | `ci.tambour.pro` | Trajets, passagers, scan des billets, partage de la position, fin de trajet |
 | `mobile_commun/` | package `tambour_commun` | — | Thème, police, logo, connexion, client API, widgets, carte de suivi, banc de test |
 
-Prérequis : **Flutter 3.44 ou plus récent** (`flutter --version` ; sinon `flutter upgrade`).
+Prérequis :
+- **Flutter stable récent** (3.44 minimum, testé avec 3.47) : `flutter upgrade` ;
+- **Java 17 ou plus** (JDK 17 ou 21 ; celui fourni avec Android Studio convient : `flutter config --jdk-dir <chemin>`
+  si plusieurs Java sont installés) ;
+- configuration Android générée par Flutter 3.47 : Gradle 9.3, Android Gradle Plugin 9.1, Kotlin 2.4, fichiers `.gradle.kts`.
 
 ```bash
 cd mobile_passager  && flutter pub get && flutter run    # TamBour

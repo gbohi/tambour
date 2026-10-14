@@ -16,7 +16,7 @@ class Passager {
     required this.siegeId,
   });
 
-  String get nomComplet => '\$prenom \$nom';
+  String get nomComplet => '$prenom $nom';
   bool get aEmail => email.trim().isNotEmpty;
 
   Map<String, dynamic> toJson() => {

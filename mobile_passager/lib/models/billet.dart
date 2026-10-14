@@ -38,12 +38,12 @@ class Billet {
     return passagers.asMap().entries.map((e) {
       final i = e.key;
       final p = e.value;
-      final id  = '\$referenceReservation-P\${i + 1}';
-      final ref = '\$referenceReservation-P\${i + 1}';
-      final qr  = 'TAMBOUR|\$referenceReservation|\${i + 1}'
-          '|\${trajet.id}|\${trajet.depart.id}|\${trajet.arrivee.id}'
-          '|\${trajet.heureDepart.toIso8601String()}'
-          '|\${p.siegeId}|\${p.nomComplet}';
+      final id  = '$referenceReservation-P${i + 1}';
+      final ref = '$referenceReservation-P${i + 1}';
+      final qr  = 'TAMBOUR|$referenceReservation|${i + 1}'
+          '|${trajet.id}|${trajet.depart.id}|${trajet.arrivee.id}'
+          '|${trajet.heureDepart.toIso8601String()}'
+          '|${p.siegeId}|${p.nomComplet}';
       return Billet(
         id: id, referenceReservation: referenceReservation,
         referenceBillet: ref, trajet: trajet, passager: p, paiement: paiement,
